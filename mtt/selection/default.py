@@ -228,15 +228,59 @@ def muon_selection(
         },
     )
 
+@selector(
+    uses={
+        "nFatJet", "FatJet.pt", "FatJet.deepTagMD_TvsQCD",
+    },
+)
+def top_selection(
+        self: Selector,
+        events: ak.Array,
+        stats: defaultdict,
+        **kwargs,
+) -> Tuple[ak.Array, SelectionResult]:
+    """Top selection."""
+
+    fatjet_mask_toptag = (
+        events.FatJet.deepTagMD_TvsQCD > 0.0  # TODO
+    )
+    fatjet_indices_toptag = masked_sorted_indices(
+        fatjet_mask_toptag,
+        events.FatJet.pt
+    )
+
+    fatjet_mask_msoftdrop = (
+        events.FatJet.msoftdrop > 105 &
+        events.FatJet.msoftdrop < 210
+    )
+    fatjet_indices_msoftdrop = masked_sorted_indices(
+        fatjet_mask_msoftdrop,
+        events.FatJet.pt
+    )
+
+    # build and return selection results plus new columns
+    return events, SelectionResult(
+        steps={
+            "TopTag": fatjet_mask_toptag,
+            "MSoftDrop": fatjet_mask_msoftdrop,
+        },
+        objects={
+            "FatJet": {
+                "TopTag": fatjet_indices_toptag,
+                "MSoftDrop": fatjet_indices_msoftdrop,
+            }
+        },
+    )
+
 
 @selector(
     uses={
-        jet_selection, muon_selection, cutflow_features,
+        jet_selection, muon_selection, top_selection, cutflow_features,
         category_ids, process_ids, increment_stats, attach_coffea_behavior,
         "mc_weight",  # not opened per default but always required in Cutflow tasks
     },
     produces={
-        jet_selection, muon_selection, cutflow_features,
+        jet_selection, muon_selection, top_selection, cutflow_features,
         category_ids, process_ids, increment_stats, attach_coffea_behavior,
         "mc_weight",  # not opened per default but always required in Cutflow tasks
     },
@@ -265,6 +309,10 @@ def default(
     events, muon_results = self[muon_selection](events, stats, **kwargs)
     results += muon_results
 
+    # top selection
+    events, top_results = self[top_selection](events, stats, **kwargs)
+    results += top_results
+
     # combined event selection after all steps
     event_sel = (
         # jet selection
@@ -273,7 +321,10 @@ def default(
         jet_results.steps.Bjet &
         # muon selection
         muon_results.steps.Muon &
-        muon_results.steps.MuonTrigger
+        muon_results.steps.MuonTrigger &
+        # top selection
+        top_results.steps.TopTag &
+        top_results.steps.MSoftDrop
     )
     results.main["event"] = event_sel
 
