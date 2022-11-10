@@ -43,9 +43,9 @@ config_2017.add_process(procs.n.st)
 config_2017.add_process(procs.n.w_lnu)
 config_2017.add_process(procs.n.dy_lep)
 config_2017.add_process(procs.n.qcd)
-config_2017.add_process(procs.n.ewk.vv)
+config_2017.add_process(procs.n.vv)
 # TODO: add all signals
-config_2017.add_process(procs.n.zprime_tt_m_400_w_40)
+config_2017.add_process(procs.n.zprime_tt_m400_w40)
 
 # set color of some processes
 colors = {
