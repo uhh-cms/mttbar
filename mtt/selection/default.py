@@ -52,21 +52,21 @@ def jet_selection(
 
     # jets
     jet_mask_50 = (events.Jet.pt > 50) & (abs(events.Jet.eta) < 2.5)
-    sel_jet_50 = ak.sum(jet_mask_50, axis=1) >= 1
+    sel_jet_50 = ak.sum(jet_mask_50, axis=-1) >= 1
     jet_indices_50 = masked_sorted_indices(jet_mask_50, events.Jet.pt)
 
     # jets (pt>30), not including jets matched previously
     jet_mask_30 = (events.Jet.pt > 30) & (abs(events.Jet.eta) < 2.5) & (~jet_mask_50)
-    sel_jet_30 = ak.sum(jet_mask_30, axis=1) >= 1
+    sel_jet_30 = ak.sum(jet_mask_30, axis=-1) >= 1
     jet_indices_30 = masked_sorted_indices(jet_mask_30, events.Jet.pt)
 
-    # TODO: match AK4 PUPPI jetsto AK4 CHS jets for b-tagging
+    # MISSING: match AK4 PUPPI jets to AK4 CHS jets for b-tagging
 
     # b-tagged jets, DeepCSV medium working point
     # TODO: update to DeepJet
     wp_med = self.config_inst.x.btag_working_points.deepcsv.medium
     bjet_mask = (jet_mask_50) & (events.Jet.btagDeepFlavB >= wp_med)
-    sel_bjet = ak.sum(bjet_mask, axis=1) >= 1
+    sel_bjet = ak.sum(bjet_mask, axis=-1) >= 1
 
     # sort jets after b-score and define b-jets as the two b-score leading jets
     bjet_indices = masked_sorted_indices(jet_mask_50, events.Jet.btagDeepFlavB)[:, :2]
@@ -100,6 +100,7 @@ def jet_selection(
     produces={
         "mtt_muon_is_high_pt",
     },
+    exposed=True,
 )
 def muon_selection(
         self: Selector,
@@ -124,13 +125,13 @@ def muon_selection(
         # CutBasedIdTight
         (events.Muon.tightId) &
         # PFIsoTight
-        events.Muon.pfIsoId == 4
+        (events.Muon.pfIsoId == 4)
     )
     mu_mask_highpt = (
         mu_mask_eta &
         (events.Muon.pt > 55) &
         # CutBasedIdGlobalHighPt
-        (events.Muons.highPtId == 2)
+        (events.Muon.highPtId == 2)
     )
 
     # muon multiplicity
@@ -170,12 +171,13 @@ def muon_selection(
     # precompute trigger masks
     mu_trigger_masks = {}
     for pt_regime, trigger_names in triggers.items():
-        mask = mu_trigger_masks[pt_regime] = ak.zeros_like(events.event)
+        mu_trigger_masks[pt_regime] = ak.zeros_like(events.event, dtype=bool)
         for trigger_name in trigger_names:
-            mask |= getattr(events.HLT, trigger_name)
+            # mu_trigger_masks[pt_regime] |= ... throws error. Numpy bug?
+            mu_trigger_masks[pt_regime] = mu_trigger_masks[pt_regime] | events.HLT[trigger_name]
 
     # determine if in early run period (or MC equivalent)
-    if self.config_inst.is_mc:
+    if self.dataset_inst.is_mc:
         # in MC, by predefined event fraction using uniformly distributed random numbers
 
         # use event numbers in chunk to seed random number generator
@@ -186,7 +188,7 @@ def muon_selection(
         random_percent = ak_random(
             ak.zeros_like(events.event),
             ak.ones_like(events.event) * 100,
-            rand_gen.uniform,
+            rand_func=rand_gen.uniform,
         )
 
         condition_early = (
@@ -230,19 +232,23 @@ def muon_selection(
 
 @selector(
     uses={
-        "nFatJet", "FatJet.pt", "FatJet.deepTagMD_TvsQCD",
+        "nFatJet", "FatJet.pt", "FatJet.eta",
+        "FatJet.deepTagMD_TvsQCD", "FatJet.msoftdrop",
     },
+    exposed=True,
 )
-def top_selection(
+def all_had_veto(
         self: Selector,
         events: ak.Array,
         stats: defaultdict,
         **kwargs,
 ) -> Tuple[ak.Array, SelectionResult]:
-    """Top selection."""
+    """Veto events with more than one AK8 jet with pT>400 GeV and |eta|<2.5
+    passing the top-tagging requirements."""
 
     fatjet_mask_toptag = (
-        events.FatJet.deepTagMD_TvsQCD > 0.0  # TODO
+        #events.FatJet.deepTagMD_TvsQCD > 0.0  # TODO
+        ak.zeros_like(events.FatJet.deepTagMD_TvsQCD, dtype=bool)
     )
     fatjet_indices_toptag = masked_sorted_indices(
         fatjet_mask_toptag,
@@ -250,19 +256,26 @@ def top_selection(
     )
 
     fatjet_mask_msoftdrop = (
-        events.FatJet.msoftdrop > 105 &
-        events.FatJet.msoftdrop < 210
+        (events.FatJet.msoftdrop > 105) &
+        (events.FatJet.msoftdrop < 210)
     )
     fatjet_indices_msoftdrop = masked_sorted_indices(
         fatjet_mask_msoftdrop,
         events.FatJet.pt
     )
 
+    fatjet_mask_vetoregion = (
+        (events.FatJet.pt > 400) &
+        (abs(events.FatJet.eta) < 2.5)
+    )
+
+    fatjet_mask = (fatjet_mask_vetoregion & fatjet_mask_msoftdrop & fatjet_mask_toptag)
+    sel_all_had_veto = (ak.sum(fatjet_mask, axis=-1) < 2)
+
     # build and return selection results plus new columns
     return events, SelectionResult(
         steps={
-            "TopTag": fatjet_mask_toptag,
-            "MSoftDrop": fatjet_mask_msoftdrop,
+            "AllHadronicVeto": sel_all_had_veto,
         },
         objects={
             "FatJet": {
@@ -275,12 +288,39 @@ def top_selection(
 
 @selector(
     uses={
-        jet_selection, muon_selection, top_selection, cutflow_features,
+        "MET.pt",
+    },
+    exposed=True,
+)
+def met_selection(
+        self: Selector,
+        events: ak.Array,
+        stats: defaultdict,
+        **kwargs,
+) -> Tuple[ak.Array, SelectionResult]:
+    """Missing transverse momentum (MET) selection."""
+
+    # TODO
+    sel_met = ak.ones_like(events.event, dtype=bool)
+
+    # build and return selection results plus new columns
+    return events, SelectionResult(
+        steps={
+            "MET": sel_met,
+        },
+        objects={
+        },
+    )
+
+
+@selector(
+    uses={
+        jet_selection, muon_selection, met_selection, all_had_veto, cutflow_features,
         category_ids, process_ids, increment_stats, attach_coffea_behavior,
         "mc_weight",  # not opened per default but always required in Cutflow tasks
     },
     produces={
-        jet_selection, muon_selection, top_selection, cutflow_features,
+        jet_selection, muon_selection, met_selection, all_had_veto, cutflow_features,
         category_ids, process_ids, increment_stats, attach_coffea_behavior,
         "mc_weight",  # not opened per default but always required in Cutflow tasks
     },
@@ -309,9 +349,13 @@ def default(
     events, muon_results = self[muon_selection](events, stats, **kwargs)
     results += muon_results
 
-    # top selection
-    events, top_results = self[top_selection](events, stats, **kwargs)
-    results += top_results
+    # met selection
+    events, met_results = self[met_selection](events, stats, **kwargs)
+    results += met_results
+
+    # all-hadronic veto
+    events, all_had_veto_results = self[all_had_veto](events, stats, **kwargs)
+    results += all_had_veto_results
 
     # combined event selection after all steps
     event_sel = (
@@ -322,11 +366,24 @@ def default(
         # muon selection
         muon_results.steps.Muon &
         muon_results.steps.MuonTrigger &
-        # top selection
-        top_results.steps.TopTag &
-        top_results.steps.MSoftDrop
+        # met selection
+        met_results.steps.MET &
+        # all-hadronic veto
+        all_had_veto_results.steps.AllHadronicVeto
     )
     results.main["event"] = event_sel
+
+    for k, v in [
+        ("Jet50", jet_results.steps.Jet50),
+        ("Jet30", jet_results.steps.Jet30),
+        ("Bjet", jet_results.steps.Bjet),
+        ("Muon", muon_results.steps.Muon),
+        ("MuonTrigger", muon_results.steps.MuonTrigger),
+        ("MET", met_results.steps.MET),
+        ("AllHadronicVeto", all_had_veto_results.steps.AllHadronicVeto),
+    ]:
+        n_sel = ak.sum(v, axis=-1)
+        print(f"{k}: {n_sel}")
 
     # build categories
     events = self[category_ids](events, results=results, **kwargs)

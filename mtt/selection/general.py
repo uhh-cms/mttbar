@@ -43,6 +43,9 @@ def increment_stats(
     Unexposed selector that does not actually select objects but instead increments selection
     *stats* in-place based on all input *events* and the final selection *mask*.
     """
+    # ensure mask passed is boolean
+    mask = ak.values_astype(mask, bool)
+
     # apply the mask to obtain selected events
     events_sel = events[mask]
 
