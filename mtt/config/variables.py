@@ -198,38 +198,44 @@ def add_variables(config: od.Config) -> None:
 
     # cutflow variables
     config.add_variable(
-        name="cf_jet1_pt",
-        expression="cutflow.jet1_pt",
+        name="cf_jet_ak4_1_pt",
+        expression="cutflow.jet_ak4_1_pt",
         binning=(40, 0., 400.),
         unit="GeV",
         x_title=r"Jet 1 $p_{T}$",
     )
     config.add_variable(
-        name="cf_jet2_pt",
-        expression="cutflow.jet2_pt",
+        name="cf_jet_ak4_2_pt",
+        expression="cutflow.jet_ak4_2_pt",
         binning=(40, 0., 400.),
         unit="GeV",
-        x_title=r"Jet 2$p_{T}$",
+        x_title=r"Jet 2 $p_{T}$",
     )
     config.add_variable(
-        name="cf_jet3_pt",
-        expression="cutflow.jet3_pt",
+        name="cf_jet_ak4_3_pt",
+        expression="cutflow.jet_ak4_3_pt",
         binning=(40, 0., 400.),
         unit="GeV",
         x_title=r"Jet 3 $p_{T}$",
     )
     config.add_variable(
-        name="cf_jet4_pt",
-        expression="cutflow.jet4_pt",
+        name="cf_jet_ak4_4_pt",
+        expression="cutflow.jet_ak4_4_pt",
         binning=(40, 0., 400.),
         unit="GeV",
         x_title=r"Jet 4 $p_{T}$",
     )
     config.add_variable(
-        name="cf_n_jet",
-        expression="cutflow.n_jet",
+        name="cf_n_jet_30",
+        expression="cutflow.n_jet_30",
         binning=(11, -0.5, 10.5),
-        x_title=r"Number of jets",
+        x_title=r"Number of jets ($p_{T}$ > 30 GeV)",
+    )
+    config.add_variable(
+        name="cf_n_jet_50",
+        expression="cutflow.n_jet_50",
+        binning=(11, -0.5, 10.5),
+        x_title=r"Number of jets ($p_{T}$ > 50 GeV)",
     )
     config.add_variable(
         name="cf_n_electron",
@@ -243,33 +249,3 @@ def add_variables(config: od.Config) -> None:
         binning=(11, -0.5, 10.5),
         x_title=r"Number of muons",
     )
-
-    for gp in ["h1", "h2", "b1", "b2", "wlep", "whad", "l", "nu", "q1", "q2", "sec1", "sec2"]:
-        config.add_variable(
-            name=f"gen_{gp}_pt",
-            expression=f"cutflow.{gp}_pt",
-            binning=(40, 0., 400.),
-            unit="GeV",
-            x_title=r"$p_{T, %s}^{gen}$" % (gp),
-        )
-        config.add_variable(
-            name=f"gen_{gp}_mass",
-            expression=f"cutflow.{gp}_mass",
-            binning=(40, 0., 400.),
-            unit="GeV",
-            x_title=r"$m_{%s}^{gen}$" % (gp),
-        )
-        config.add_variable(
-            name=f"gen_{gp}_eta",
-            expression=f"cutflow.{gp}_eta",
-            binning=(12, -6., 6.),
-            unit="GeV",
-            x_title=r"$\eta_{%s}^{gen}$" % (gp),
-        )
-        config.add_variable(
-            name=f"gen_{gp}_phi",
-            expression=f"cutflow.{gp}_phi",
-            binning=(8, -4, 4),
-            unit="GeV",
-            x_title=r"$\phi_{%s}^{gen}$" % (gp),
-        )
