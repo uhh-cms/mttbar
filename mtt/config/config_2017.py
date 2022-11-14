@@ -56,15 +56,16 @@ colors = {
     "higgs": "#984ea3",  # purple
     "st": "#3E00FB",  # dark purple
     "dy_lep": "#FBFF36",  # yellow
-    "VV": "#B900FC",  # pink
+    "vv": "#B900FC",  # pink
     "other": "#999999",  # grey
     "zprime_m_500_w_???": "#000000",  # black
     "zprime_m_1000_w_???": "#CCCCCC",  # light gray
     "zprime_m_3000_w_???": "#666666",  # dark gray
 }
-for proc, color in colors.items():
-    if proc in config_2017.processes:
-        config_2017.get_process(proc).color1 = color
+
+for proc in config_2017.processes:
+    config_2017.get_process(proc).color1 = colors.get(proc, "#aaaaaa")
+    config_2017.get_process(proc).color2 = colors.get(proc, "#000000")
 
 # add datasets we need to study
 dataset_names = [
