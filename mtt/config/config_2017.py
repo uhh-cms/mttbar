@@ -65,7 +65,7 @@ colors = {
 
 for proc in config_2017.processes:
     config_2017.get_process(proc).color1 = colors.get(proc, "#aaaaaa")
-    config_2017.get_process(proc).color2 = colors.get(proc, "#000000")
+    # config_2017.get_process(proc).color2 = colors.get(proc, "#000000")
 
 # add datasets we need to study
 dataset_names = [
@@ -304,7 +304,6 @@ for dataset_name in dataset_names:
         dataset.x.has_top = True
     if dataset.name.startswith("tt"):
         dataset.x.is_ttbar = True
-        dataset.x.event_weights = ["top_pt_weight"]
 
     # mark mttbar signal samples
     if any(
@@ -697,7 +696,11 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
 }))
 
 # event weight columns
-config_2017.set_aux("event_weights", ["normalization_weight", "pu_weight"])
+get_shifts = lambda *names: sum(([config_2017.get_shift(f"{name}_up"), config_2017.get_shift(f"{name}_down")] for name in names), [])
+config_2017.x.event_weights = DotDict()
+config_2017.x.event_weights["normalization_weight"] = []
+config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")
+# config_2017.set_aux("event_weights", ["normalization_weight", "pu_weight"])
 # TODO: enable different cases for number of pdf/scale weights
 # config_2017.set_aux("event_weights", ["normalization_weight", "pu_weight", "scale_weight", "pdf_weight"])
 
