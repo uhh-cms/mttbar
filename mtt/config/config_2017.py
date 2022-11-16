@@ -370,11 +370,13 @@ config_2017.x.triggers.highpt.late.mc_trigger_percent = (
 # default calibrator, selector, producer, ml model and inference model
 config_2017.set_aux("default_calibrator", "skip_jecunc")
 config_2017.set_aux("default_selector", "default")
-config_2017.set_aux("default_producer", "features")
+config_2017.set_aux("default_producer", "default")
 config_2017.set_aux("default_ml_model", None)
-config_2017.set_aux("default_inference_model", "default")
+config_2017.set_aux("default_inference_model", None)
 config_2017.set_aux("default_categories", ["incl"])
-config_2017.set_aux("default_process_settings", [["zprime_tt_m400_w40", "scale=2000", "unstack"]])
+config_2017.set_aux("default_process_settings", [
+    ["zprime_tt_m400_w40", "scale=2000", "unstack"],
+])
 
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
@@ -405,16 +407,20 @@ config_2017.set_aux("dataset_groups", {
 # category groups for conveniently looping over certain categories
 # (used during plotting)
 config_2017.set_aux("category_groups", {
-    "default": ["incl", "1e", "1mu"],
-    "test": ["incl", "1e"],
+    "default": ["incl", "1mu"],
 })
 
 # variable groups for conveniently looping over certain variables
 # (used during plotting)
 config_2017.set_aux("variable_groups", {
-    "default": ["n_jet", "n_muon", "n_electron", "ht", "m_bb", "deltaR_bb", "jet1_pt"],  # n_deepjet, ....
-    "test": ["n_jet", "n_electron", "jet1_pt"],
-    "cutflow": ["cf_jet1_pt", "cf_jet4_pt", "cf_n_jet", "cf_n_electron", "cf_n_muon"],  # cf_n_deepjet
+    "default": [
+        "n_jet", "n_muon", "ht", "jet_ak4_1_pt", "jet_ak8_1_pt",
+    ],
+    "cutflow": [
+        "cf_jet_ak4_1_pt", "cf_jet_ak4_2_pt", "cf_jet_ak4_3_pt", "cf_jet_ak4_4_pt",
+        "cf_jet_ak8_1_pt", "cf_jet_ak8_2_pt", "cf_jet_ak8_3_pt", "cf_jet_ak8_4_pt",
+        "cf_n_jet_30", "cf_n_jet_50", "cf_n_muon",
+    ],
 })
 
 # shift groups for conveniently looping over certain shifts
@@ -426,21 +432,26 @@ config_2017.set_aux("shift_groups", {
 # selector step groups for conveniently looping over certain steps
 # (used in cutflow tasks)
 config_2017.set_aux("selector_step_groups", {
-    "default": ["Lepton", "VetoLepton", "Jet", "Bjet", "Trigger"],
-    "test": ["Lepton", "Jet", "Bjet"],
+    "default": ["Jet50", "Jet30", "Muon", "MuonTrigger", "AllHadronicVeto"],
 })
 
 config_2017.set_aux("selector_step_labels", {
-    "Jet": r"$N_{Jets} \geq 3$",
-    "Lepton": r"$N_{Lepton} = 1$",
-    "Bjet": r"$N_{Jets}^{BTag} \geq 1$",
+    "AllHadronicVeto": r"all-hadr. veto",
+    "Jet30": r"$N_{Jets}^{30} \geq 1$",
+    "Jet50": r"$N_{Jets}^{50} \geq 1$",
+    "Muon": r"$N_{\mu} = 1$",
+    "MuonTrigger": r"muon trigger",
 })
 
 
 # process settings groups to quickly define settings for ProcessPlots
 config_2017.set_aux("process_settings_groups", {
-    "default": [["zprime_tt_m400_w40", "scale=2000", "unstack"]],
-    "unstack_all": [[proc, "unstack"] for proc in config_2017.processes],
+    "default": [
+        ["zprime_tt_m400_w40", "scale=2000", "unstack"],
+    ],
+    "unstack_all": [
+        [proc, "unstack"] for proc in config_2017.processes
+    ],
 })
 
 # 2017 luminosity with values in inverse pb and uncertainties taken from
@@ -700,9 +711,9 @@ get_shifts = lambda *names: sum(([config_2017.get_shift(f"{name}_up"), config_20
 config_2017.x.event_weights = DotDict()
 config_2017.x.event_weights["normalization_weight"] = []
 config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")
-# config_2017.set_aux("event_weights", ["normalization_weight", "pu_weight"])
 # TODO: enable different cases for number of pdf/scale weights
-# config_2017.set_aux("event_weights", ["normalization_weight", "pu_weight", "scale_weight", "pdf_weight"])
+# config_2017.x.event_weights["scale_weight"])
+# config_2017.x.event_weights["pdf_weight"])
 
 # versions per task family and optionally also dataset and shift
 # None can be used as a key to define a default value
