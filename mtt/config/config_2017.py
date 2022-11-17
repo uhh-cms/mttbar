@@ -64,8 +64,10 @@ colors = {
 }
 
 for proc in config_2017.processes:
-    config_2017.get_process(proc).color1 = colors.get(proc, "#aaaaaa")
-    # config_2017.get_process(proc).color2 = colors.get(proc, "#000000")
+    #config_2017.get_process(proc).color1 = colors.get(proc, "#aaaaaa")
+    #config_2017.get_process(proc).color2 = colors.get(proc, "#000000")
+    config_2017.get_process(proc).color1 = "#000000"
+    config_2017.get_process(proc).color2 = "#000000"
 
 # add datasets we need to study
 dataset_names = [
@@ -373,7 +375,7 @@ config_2017.set_aux("default_selector", "default")
 config_2017.set_aux("default_producer", "default")
 config_2017.set_aux("default_ml_model", None)
 config_2017.set_aux("default_inference_model", None)
-config_2017.set_aux("default_categories", ["incl"])
+config_2017.set_aux("default_categories", ["incl", "1e", "1m"])
 config_2017.set_aux("default_process_settings", [
     ["zprime_tt_m400_w40", "scale=2000", "unstack"],
 ])
@@ -407,19 +409,25 @@ config_2017.set_aux("dataset_groups", {
 # category groups for conveniently looping over certain categories
 # (used during plotting)
 config_2017.set_aux("category_groups", {
-    "default": ["incl", "1mu"],
+    "default": ["incl", "1e", "1m"],
 })
 
 # variable groups for conveniently looping over certain variables
 # (used during plotting)
 config_2017.set_aux("variable_groups", {
     "default": [
-        "n_jet", "n_muon", "ht", "jet_ak4_1_pt", "jet_ak8_1_pt",
+        "n_jet", "n_muon", "n_electron",
+        "jet1_pt", "jet2_pt", "jet3_pt", "jet4_pt",
+        "fatjet1_pt", "fatjet2_pt", "fatjet3_pt", "fatjet4_pt",
+        "muon_pt", "muon_eta",
+        "electron_pt", "electron_eta",
     ],
     "cutflow": [
-        "cf_jet_ak4_1_pt", "cf_jet_ak4_2_pt", "cf_jet_ak4_3_pt", "cf_jet_ak4_4_pt",
-        "cf_jet_ak8_1_pt", "cf_jet_ak8_2_pt", "cf_jet_ak8_3_pt", "cf_jet_ak8_4_pt",
-        "cf_n_jet_30", "cf_n_jet_50", "cf_n_muon",
+        "cf_n_jet", "cf_n_muon", "cf_n_electron",
+        "cf_jet1_pt", "cf_jet2_pt", "cf_jet3_pt", "cf_jet4_pt",
+        "cf_fatjet1_pt", "cf_fatjet2_pt", "cf_fatjet3_pt", "cf_fatjet4_pt",
+        "cf_muon_pt", "cf_muon_eta",
+        "cf_electron_pt", "cf_electron_eta",
     ],
 })
 
@@ -432,15 +440,12 @@ config_2017.set_aux("shift_groups", {
 # selector step groups for conveniently looping over certain steps
 # (used in cutflow tasks)
 config_2017.set_aux("selector_step_groups", {
-    "default": ["Jet50", "Jet30", "Muon", "MuonTrigger", "AllHadronicVeto"],
+    "default": ["Lepton", "LeptonIso", "LeptonTrigger", "Jet", "DileptonVeto", "AllHadronicVeto"],
 })
 
 config_2017.set_aux("selector_step_labels", {
     "AllHadronicVeto": r"all-hadr. veto",
-    "Jet30": r"$N_{Jets}^{30} \geq 1$",
-    "Jet50": r"$N_{Jets}^{50} \geq 1$",
-    "Muon": r"$N_{\mu} = 1$",
-    "MuonTrigger": r"muon trigger",
+    "DileptonVetp": r"dilep. veto",
 })
 
 
@@ -571,6 +576,11 @@ config_2017.set_aux("jer", DotDict.wrap({
 }))
 
 
+# -- electron scale factor names
+config_2017.set_aux("electron_sf_names",
+    ("UL-Electron-ID-SF", "2017", "wp80iso"),
+)
+
 # helper to add column aliases for both shifts of a source
 def add_aliases(shift_source: str, aliases: Set[str], selection_dependent: bool):
     for direction in ["up", "down"]:
@@ -644,6 +654,9 @@ def make_jme_filename(jme_aux, sample_type, name, era=None):
 # external files
 config_2017.x.external_files = DotDict.wrap({
     # files from TODO
+    "electron_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
+
+    # files from TODO
     "lumi": {
         "golden": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
         "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
@@ -697,25 +710,28 @@ config_2017.x.external_files = DotDict.wrap({
 
 # columns to keep after certain steps
 config_2017.set_aux("keep_columns", DotDict.wrap({
-    "cf.SelectEvents": {"mc_weight"},
+    "cf.MergeSelectionMasks": {
+        "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*",
+    },
     "cf.ReduceEvents": {
         # general event information
         "run", "luminosityBlock", "event",
         # weights
+        "genWeight",
         "LHEWeight.*",
         "LHEPdfWeight", "LHEScaleWeight",
         # object properties
-        "nJet", "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB",
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",  #TODO
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.deltaEtaSC",
+        "Electron.pfRelIso03_all", # TODO
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB",
+        "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass", "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
         "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB",
-        # "Muon.*", "Electron.*", "MET.*",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
-        "MET.pt", "MET.phi",
+        "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
+        "PV.npvs",
         # columns added during selection, required in general
-        "mc_weight", "PV.npvs", "category_ids", "deterministic_seed",
-    },
-    "cf.MergeSelectionMasks": {
-        "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*",
+        "mc_weight", "channel_id", "category_ids", "deterministic_seed", "process_id",
+        "pu_weight*", "cutflow.*",
     },
 }))
 
@@ -732,6 +748,9 @@ config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")
 # None can be used as a key to define a default value
 config_2017.set_aux("versions", {
 })
+
+config_2017.add_channel("e", id=1)
+config_2017.add_channel("mu", id=2)
 
 # add categories
 add_categories(config_2017)

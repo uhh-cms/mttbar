@@ -44,15 +44,15 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Jet"] = ak.with_name(events.Jet, "PtEtaPhiMLorentzVector")
 
-    if ak.any(ak.num(events.Jet, axis=-1) <= 2):
-        print("In features.py: there should be at least 2 jets in each event")
-        from IPython import embed; embed()
-        raise Exception("In features.py: there should be at least 2 jets in each event")
+    # ensure at least 2 jets (pad with None if nonexistent)
+    jets = ak.pad_none(events.Jet, 2)
 
-    m_jj = (events.Jet[:, 0] + events.Jet[:, 1]).mass
+    # calculate and save invariant mass
+    m_jj = (jets[:, 0] + jets[:, 1]).mass
     events = set_ak_column(events, "m_jj", m_jj)
 
-    deltaR_jj = events.Jet[:, 0].delta_r(events.Jet[:, 1])
+    # calculate and save delta-R
+    deltaR_jj = jets[:, 0].delta_r(jets[:, 1])
     events = set_ak_column(events, "deltaR_jj", deltaR_jj)
 
     return events
@@ -80,7 +80,6 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """All high-level featues, e.g. scalar jet pt sum (ht), number of jets, electrons, muons, etc."""
 
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=-1))
-    events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=-1))
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=-1))
 
     events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=-1))

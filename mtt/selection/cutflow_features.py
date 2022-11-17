@@ -12,29 +12,49 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "FatJet.pt"},
+    uses={"Jet.pt", "Jet.eta", "FatJet.pt", "FatJet.eta"},
     produces={
-        "cutflow.jet_ak4_1_pt", "cutflow.jet_ak4_2_pt", "cutflow.jet_ak4_3_pt", "cutflow.jet_ak4_4_pt",
-        "cutflow.jet_ak8_1_pt", "cutflow.jet_ak8_2_pt", "cutflow.jet_ak8_3_pt", "cutflow.jet_ak8_4_pt",
-        "cutflow.n_jet_30", "cutflow.n_jet_50", "cutflow.n_muon",
+        "cutflow.jet1_pt", "cutflow.jet2_pt", "cutflow.jet3_pt", "cutflow.jet4_pt",
+        "cutflow.jet1_eta", "cutflow.jet2_eta", "cutflow.jet3_eta", "cutflow.jet4_eta",
+        "cutflow.fatjet1_pt", "cutflow.fatjet2_pt", "cutflow.fatjet3_pt", "cutflow.fatjet4_pt",
+        "cutflow.fatjet1_eta", "cutflow.fatjet2_eta", "cutflow.fatjet3_eta", "cutflow.fatjet4_eta",
+        "cutflow.muon_pt", "cutflow.muon_eta",
+        "cutflow.electron_pt", "cutflow.electron_eta",
+        "cutflow.n_jet", "cutflow.n_bjet", "cutflow.n_lightjet",
+        "cutflow.n_muon", "cutflow.n_electron"
     },
 )
 def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult, **kwargs) -> ak.Array:
 
-    # determine jet pt before applying jet pt cut (and ideally after applying eta cut?)i
-    for jet_name, jet_cutflow_name in [('Jet', 'jet_ak4'), ('FatJet', 'jet_ak8')]:
+    # jet properties
+    for jet_name in ["Jet", "FatJet"]:
         jet_indices = ak.argsort(events[jet_name].pt, ascending=False)
         jets = events[jet_name][jet_indices]
         for i in range(4):
+            for var in ("pt", "eta"):
+                events = set_ak_column(
+                    events,
+                    f"cutflow.{jet_name.lower()}{i+1}_{var}",
+                    Route(f"{var}[:, {i}]").apply(jets, EMPTY_FLOAT),
+                )
+
+    # muon properties
+    for lepton_name in ["Muon", "Electron"]:
+        lepton_indices = results.objects[lepton_name].Lepton
+        leptons = events[lepton_name][lepton_indices]
+        for var in ("pt", "eta"):
             events = set_ak_column(
                 events,
-                f"cutflow.{jet_cutflow_name}_{i+1}_pt",
-                Route(f"pt[:, {i}]").apply(jets, EMPTY_FLOAT),
+                f"cutflow.{lepton_name.lower()}_{var}",
+                Route(f"{var}[:, 0]").apply(leptons, EMPTY_FLOAT),
             )
 
-    # Number of objects should be counted after appyling
-    events = set_ak_column(events, "cutflow.n_jet_50", ak.num(results.objects.Jet.Jet50, axis=1))
-    events = set_ak_column(events, "cutflow.n_jet_30", ak.num(results.objects.Jet.Jet30, axis=1))
-    events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=1))
+    # count number of objects after appyling selection
+    events = set_ak_column(events, "cutflow.n_jet", ak.num(results.objects.Jet.Jet, axis=-1))
+    events = set_ak_column(events, "cutflow.n_bjet", ak.num(results.objects.Jet.Bjet, axis=-1))
+    events = set_ak_column(events, "cutflow.n_lightjet", ak.num(results.objects.Jet.Lightjet, axis=-1))
+
+    events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Lepton, axis=-1))
+    events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Lepton, axis=-1))
 
     return events
