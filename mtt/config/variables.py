@@ -27,11 +27,6 @@ def add_variables(config: od.Config) -> None:
         x_title="Number of jets",
     )
     config.add_variable(
-        name="n_deepjet",
-        binning=(11, -0.5, 10.5),
-        x_title="Number of deepjets",
-    )
-    config.add_variable(
         name="n_electron",
         binning=(11, -0.5, 10.5),
         x_title="Number of electrons",
@@ -44,81 +39,51 @@ def add_variables(config: od.Config) -> None:
     config.add_variable(
         name="ht",
         binning=(40, 0, 1500),
-        x_title="HT",
+        unit="GeV",
+        x_title="$H_{T}$",
     )
     config.add_variable(
         name="ht_rebin",
         expression="ht",
         binning=[0, 80, 120, 160, 200, 240, 280, 320, 400, 500, 600, 800, 1200],
         unit="GeV",
-        x_title="HT",
+        x_title="$H_{T}$",
     )
 
     # Object properties
 
     # Jets (4 pt-leading jets)
     for i in range(4):
-        config.add_variable(
-            name=f"jet{i+1}_pt",
-            expression=f"Jet.pt[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, 0., 400.),
-            unit="GeV",
-            x_title=r"Jet %i $p_{T}$" % (i + 1),
-        )
-        config.add_variable(
-            name=f"jet{i+1}_eta",
-            expression=f"Jet.eta[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(50, 0., 5),
-            x_title=r"Jet %i $\eta$" % (i + 1),
-        )
-        config.add_variable(
-            name=f"jet{i+1}_phi",
-            expression=f"Jet.phi[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, -3.2, 3.2),
-            x_title=r"Jet %i $\phi$" % (i + 1),
-        )
-        config.add_variable(
-            name=f"jet{i+1}_mass",
-            expression=f"Jet.mass[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, -3.2, 3.2),
-            x_title=r"Jet %i mass" % (i + 1),
-        )
-
-    # Bjets (2 b-score leading jets)
-    for i in range(2):
-        config.add_variable(
-            name=f"bjet{i+1}_pt",
-            expression=f"Bjet.pt[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, 0., 400.),
-            unit="GeV",
-            x_title=r"Bjet %i $p_{T}$" % (i + 1),
-        )
-        config.add_variable(
-            name=f"bjet{i+1}_eta",
-            expression=f"Bjet.eta[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(50, 0., 5),
-            x_title=r"Bjet %i $\eta$" % (i + 1),
-        )
-        config.add_variable(
-            name=f"bjet{i+1}_phi",
-            expression=f"Jet.phi[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, -3.2, 3.2),
-            x_title=r"Bjet %i $\phi$" % (i + 1),
-        )
-        config.add_variable(
-            name=f"bjet{i+1}_mass",
-            expression=f"Bjet.mass[:,{i}]",
-            null_value=EMPTY_FLOAT,
-            binning=(40, -3.2, 3.2),
-            x_title=r"Bjet %i mass" % (i + 1),
-        )
+        for obj in ("Jet", "FatJet"):
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_pt",
+                expression=f"{obj}.pt[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=(40, 0., 400.),
+                unit="GeV",
+                x_title=rf"{obj} {i+1} $p_{{T}}$",
+            )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_eta",
+                expression=f"{obj}.eta[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=(50, -5., 5),
+                x_title=rf"{obj} {i+1} $\eta$",
+            )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_phi",
+                expression=f"{obj}.phi[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=(40, -3.2, 3.2),
+                x_title=rf"{obj} {i+1} $\phi$",
+            )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_mass",
+                expression=f"{obj}.mass[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=(40, -3.2, 3.2),
+                x_title=rf"{obj} {i+1} mass",
+            )
 
     # Leptons
     for obj in ["Electron", "Muon"]:
@@ -141,7 +106,7 @@ def add_variables(config: od.Config) -> None:
             name=f"{obj.lower()}_eta",
             expression=f"{obj}.eta[:,0]",
             null_value=EMPTY_FLOAT,
-            binning=(50, 0., 5),
+            binning=(50, -5., 5),
             x_title=obj + r" $\eta$",
         )
         config.add_variable(
@@ -169,18 +134,6 @@ def add_variables(config: od.Config) -> None:
         x_title=r"MET $\phi$",
     )
 
-    # bb features
-    config.add_variable(
-        name="m_bb",
-        binning=(40, 0., 400.),
-        unit="GeV",
-        x_title=r"$m_{bb}$",
-    )
-    config.add_variable(
-        name="deltaR_bb",
-        binning=(40, 0, 5),
-        x_title=r"$\Delta R(b,b)$",
-    )
     # jj features
     config.add_variable(
         name="m_jj",
@@ -194,37 +147,26 @@ def add_variables(config: od.Config) -> None:
         x_title=r"$\Delta R(j_{1},j_{2})$",
     )
 
-    # Gen particles
-
     # cutflow variables
-    config.add_variable(
-        name="cf_jet_ak4_1_pt",
-        expression="cutflow.jet_ak4_1_pt",
-        binning=(40, 0., 400.),
-        unit="GeV",
-        x_title=r"Jet 1 $p_{T}$",
-    )
-    config.add_variable(
-        name="cf_jet_ak4_2_pt",
-        expression="cutflow.jet_ak4_2_pt",
-        binning=(40, 0., 400.),
-        unit="GeV",
-        x_title=r"Jet 2 $p_{T}$",
-    )
-    config.add_variable(
-        name="cf_jet_ak4_3_pt",
-        expression="cutflow.jet_ak4_3_pt",
-        binning=(40, 0., 400.),
-        unit="GeV",
-        x_title=r"Jet 3 $p_{T}$",
-    )
-    config.add_variable(
-        name="cf_jet_ak4_4_pt",
-        expression="cutflow.jet_ak4_4_pt",
-        binning=(40, 0., 400.),
-        unit="GeV",
-        x_title=r"Jet 4 $p_{T}$",
-    )
+
+    # Jet properties
+    for i in range(4):
+       config.add_variable(
+           name=f"cf_jet_ak4_{i+1}_pt",
+           expression=f"cutflow.jet_{i+1}_pt",
+           binning=(40, 0., 400.),
+           unit="GeV",
+           x_title=rf"Jet {i+1} $p_{{T}}$",
+       )
+       config.add_variable(
+           name=f"cf_jet_ak8_{i+1}_pt",
+           expression="cutflow.jet_ak8_{i+1}_pt",
+           binning=(40, 0., 400.),
+           unit="GeV",
+           x_title=rf"FatJet {i+1} $p_{{T}}$",
+       )
+
+    # Jet multiplicity
     config.add_variable(
         name="cf_n_jet_30",
         expression="cutflow.n_jet_30",
