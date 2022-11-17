@@ -481,6 +481,19 @@ config_2017.x.btag_working_points = DotDict.wrap({
     },
 })
 
+# 2017 top-tagging working pointsi (DeepAK8, 1% mistagging rate, )
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
+config_2017.x.toptag_working_points = DotDict.wrap({
+    "deepak8": {
+        # regular tagger
+        "top": 0.344,
+        "w": 0.739,
+        # mass-decorrelated tagger
+        "top_md": 0.725,
+        "w_md": 0.925,
+    },
+})
+
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
     "source": "https://raw.githubusercontent.com/cms-jet/JECDatabase/master/textFiles",
