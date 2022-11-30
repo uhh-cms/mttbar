@@ -47,14 +47,16 @@ def jet_selection(
     # - require that at least one AK4 jet (pt>50 and abseta<2.5) is b-tagged
 
 
-    # jets (pt>15)
+    # jets (pt>30)
     jet_mask = (
         (abs(events.Jet.eta) < 2.5) &
         (events.Jet.pt > 30)
     )
     jet_indices = masked_sorted_indices(jet_mask, events.Jet.pt)
 
-    jet = ak.pad_none(events.Jet, 2)
+    # at least two jets, leading jet pt > 50,
+    # subleading jet pt > 30
+    jet = ak.pad_none(events.Jet[jet_indices], 2)
     sel_jet = (
         (jet[..., 0].pt > 50) &
         (jet[..., 1].pt > 30)
@@ -67,13 +69,12 @@ def jet_selection(
     # TODO: update to DeepJet
     wp_med = self.config_inst.x.btag_working_points.deepcsv.medium
     bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_med)
+    lightjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB < wp_med)
     sel_bjet = ak.sum(bjet_mask, axis=-1) >= 1
 
-    # sort jets after b-score and define b-jets as the two b-score leading jets
-    bjet_indices = masked_sorted_indices(jet_mask, events.Jet.btagDeepFlavB)[:, :2]
-
-    # lightjets are the remaining jets (TODO: b-score sorted but should be pt-sorted?)
-    lightjet_indices = masked_sorted_indices(jet_mask, events.Jet.btagDeepFlavB)[:, 2:]
+    # indices of the b-tagged and non-b-tagged (light) jets
+    bjet_indices = masked_sorted_indices(bjet_mask, events.Jet.pt)
+    lightjet_indices = masked_sorted_indices(lightjet_mask, events.Jet.pt)
 
     # build and return selection results plus new columns
     return events, SelectionResult(
