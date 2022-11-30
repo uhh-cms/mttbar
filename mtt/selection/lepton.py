@@ -83,6 +83,8 @@ def electron_selection(
     lepton_indices = masked_sorted_indices(lepton_mask, lepton.pt)
     first_lepton = ak.firsts(lepton[lepton_mask])
 
+    # veto events if additional leptons present
+    # (note the looser cuts)
     add_leptons = (
         (abs(lepton.eta + lepton.deltaEtaSC) < 2.5) &
         (lepton.pt > 25) &
@@ -108,29 +110,10 @@ def electron_selection(
     is_lowpt = (pt_regime == 1)
     is_highpt = (pt_regime == 2)
 
-    # select events where lepton is sufficiently isolated
-    pass_iso = ak.zeros_like(events.event, dtype=bool)
-    pass_iso = ak.where(
-        is_lowpt,
-        # ID includes isolation requirement
-        True,
-        pass_iso
-    )
-    pass_iso = ak.where(
-        is_highpt,
-        # TODO: calc iso wrt closest jet
-        # (
-        #     ak.min(
-        #         deltaR(event.Lepton, jets_pt_15),
-        #         axis=-1
-        #     ) > 0.4 |
-        #     abs(event.Lepton.pt - closest_jet.pt) > 25
-        # ),
-        True,
-        pass_iso
-    )
-    # if undefined, consider selection failed
-    pass_iso = ak.fill_none(pass_iso, False)
+    # select events where low-pt lepton is sufficiently
+    # isolated (always true for electrons becausee the ID
+    # includes the isolation requirement)
+    pass_iso = ak.ones_like(events.event, dtype=bool)
 
     return SelectionResult(
         steps={
@@ -197,6 +180,8 @@ def muon_selection(
     lepton_indices = masked_sorted_indices(lepton_mask, lepton.pt)
     first_lepton = ak.firsts(lepton[lepton_mask])
 
+    # veto events if additional leptons present
+    # (note the looser cuts)
     add_leptons = (
         (abs(lepton.eta) < 2.4) &
         (lepton.pt > 25) &
@@ -222,24 +207,13 @@ def muon_selection(
     is_lowpt = (pt_regime == 1)
     is_highpt = (pt_regime == 2)
 
-    # select events where lepton is sufficiently isolated
-    pass_iso = ak.zeros_like(events.event, dtype=bool)
+    # select events where low-pt lepton is sufficiently isolated
+    # (for high-pt, a jet/lepton 2D cut is implemented via
+    # another selector)
+    pass_iso = ak.ones_like(events.event, dtype=bool)
     pass_iso = ak.where(
         is_lowpt,
         first_lepton.pfIsoId == 4,
-        pass_iso
-    )
-    pass_iso = ak.where(
-        is_highpt,
-        # TODO: calc iso wrt closest jet
-        # (
-        #     ak.min(
-        #         deltaR(event.Lepton, jets_pt_15),
-        #         axis=-1
-        #     ) > 0.4 |
-        #     abs(event.Lepton.pt - closest_jet.pt) > 25
-        # ),
-        True,
         pass_iso
     )
     # if undefined, consider selection failed
@@ -410,7 +384,7 @@ def lepton_selection(
             add_channel_index[add_channel_index != -1],
         ], axis=-1)
 
-        # add the object indices to the selection
+        # add the trigger result as a selection step
         results.steps["LeptonTrigger"] = pass_trigger
 
         # add the object indices to the selection
