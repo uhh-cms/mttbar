@@ -64,10 +64,8 @@ colors = {
 }
 
 for proc in config_2017.processes:
-    #config_2017.get_process(proc).color1 = colors.get(proc, "#aaaaaa")
-    #config_2017.get_process(proc).color2 = colors.get(proc, "#000000")
-    config_2017.get_process(proc).color1 = "#000000"
-    config_2017.get_process(proc).color2 = "#000000"
+    config_2017.get_process(proc).color1 = colors.get(proc.name, "#aaaaaa")
+    config_2017.get_process(proc).color2 = colors.get(proc.name, "#000000")
 
 # add datasets we need to study
 dataset_names = [
