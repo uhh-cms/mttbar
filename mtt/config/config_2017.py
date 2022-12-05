@@ -499,11 +499,11 @@ config_2017.x.toptag_working_points = DotDict.wrap({
 
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
-    "source": "https://raw.githubusercontent.com/cms-jet/JECDatabase/master/textFiles",
     "campaign": "Summer19UL17",
-    "version": "V6",
+    "version": "V5",
     "jet_type": "AK4PFchs",
-    "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
+    "levels": ["L1L2L3Res"],
+    "levels_for_type1_met": ["L1FastJet"],
     "data_eras": sorted(filter(None, {d.x("jec_era", None) for d in config_2017.datasets if d.is_data})),
     "uncertainty_sources": [
         # comment out most for now to prevent large file sizes
@@ -567,7 +567,6 @@ config_2017.set_aux("jec", DotDict.wrap({
 }))
 
 config_2017.set_aux("jer", DotDict.wrap({
-    "source": "https://raw.githubusercontent.com/cms-jet/JRDatabase/master/textFiles",
     "campaign": "Summer19UL17",
     "version": "JRV2",
     "jet_type": "AK4PFchs",
@@ -651,7 +650,10 @@ def make_jme_filename(jme_aux, sample_type, name, era=None):
 
 # external files
 config_2017.x.external_files = DotDict.wrap({
-    # files from TODO
+    # jet energy corrections
+    "jet_jerc": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
+
+    # electron scale factors
     "electron_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
 
     # files from TODO
@@ -669,40 +671,6 @@ config_2017.x.external_files = DotDict.wrap({
             "minbias_xs_up": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root", "v1"),  # noqa
             "minbias_xs_down": ("/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root", "v1"),  # noqa
         },
-    },
-
-    # jet energy correction
-    "jec": {
-        "mc": OrderedDict([
-            (level, (make_jme_filename(config_2017.x.jec, "mc", name=level), "v1"))
-            for level in config_2017.x.jec.levels
-        ]),
-        "data": {
-            era: OrderedDict([
-                (level, (make_jme_filename(config_2017.x.jec, "data", name=level, era=era), "v1"))
-                for level in config_2017.x.jec.levels
-            ])
-            for era in config_2017.x.jec.data_eras
-        },
-    },
-
-    # jec energy correction uncertainties
-    "junc": {
-        "mc": [(make_jme_filename(config_2017.x.jec, "mc", name="UncertaintySources"), "v1")],
-        "data": {
-            era: [(make_jme_filename(config_2017.x.jec, "data", name="UncertaintySources", era=era), "v1")]
-            for era in config_2017.x.jec.data_eras
-        },
-    },
-
-    # jet energy resolution (pt resolution)
-    "jer": {
-        "mc": [(make_jme_filename(config_2017.x.jer, "mc", name="PtResolution"), "v1")],
-    },
-
-    # jet energy resolution (data/mc scale factors)
-    "jersf": {
-        "mc": [(make_jme_filename(config_2017.x.jer, "mc", name="SF"), "v1")],
     },
 })
 
