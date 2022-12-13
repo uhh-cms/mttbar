@@ -653,8 +653,14 @@ config_2017.x.external_files = DotDict.wrap({
     # jet energy corrections
     "jet_jerc": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
 
+    # btag scale factors
+    "btag_sf_corr": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
+
     # electron scale factors
     "electron_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
+
+    # muon scale factors
+    "muon_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
 
     # files from TODO
     "lumi": {
@@ -691,6 +697,7 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.deltaEtaSC",
         "Electron.pfRelIso03_all", # TODO
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB",
+        "Jet.hadronFlavour",
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass", "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
         "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB",
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
@@ -709,6 +716,19 @@ config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")
 # TODO: enable different cases for number of pdf/scale weights
 # config_2017.x.event_weights["scale_weight"])
 # config_2017.x.event_weights["pdf_weight"])
+
+# names of electron correction sets and working points
+# (used in the electron_sf producer)
+# TODO: check that these are appropriate
+config_2017.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
+
+# names of muon correction sets and working points
+# (used in the muon producer)
+# TODO: check that these are appropriate
+config_2017.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL")
+
+# name of the btag_sf correction set
+config_2017.x.btag_sf_correction_set = "deepJet_shape"
 
 # versions per task family and optionally also dataset and shift
 # None can be used as a key to define a default value
