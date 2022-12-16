@@ -62,15 +62,17 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     uses={
         attach_coffea_behavior,
         jj_features,
-        "Muon.pt", "Jet.pt", "BJet.pt",
+        "Electron.pt", "Muon.pt", "FatJet.pt", "Jet.pt", "Bjet.pt",
     },
     produces={
         attach_coffea_behavior,
         jj_features,
         "ht",
-        "n_jet_ak4",
-        "n_jet_ak8",
+        "n_jet",
+        "n_bjet",
+        "n_fatjet",
         "n_muon",
+        "n_electron",
     },
     shifts={
         jet_energy_shifts,
@@ -80,7 +82,10 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """All high-level featues, e.g. scalar jet pt sum (ht), number of jets, electrons, muons, etc."""
 
     events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=-1))
+    events = set_ak_column(events, "n_bjet", ak.num(events.Bjet.pt, axis=-1))
+    events = set_ak_column(events, "n_fatjet", ak.num(events.FatJet.pt, axis=-1))
     events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=-1))
+    events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=-1))
 
     events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=-1))
 
