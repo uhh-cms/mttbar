@@ -86,6 +86,14 @@ def add_variables(config: od.Config) -> None:
             x_title=obj + r" $p_{T}$",
         )
         config.add_variable(
+            name=f"{obj.lower()}_pt_more",
+            expression=f"{obj}.pt[:,0]",
+            null_value=EMPTY_FLOAT,
+            binning=(70, 0., 900.),
+            unit="GeV",
+            x_title=obj + r" $p_{T}$",
+        )
+        config.add_variable(
             name=f"{obj.lower()}_phi",
             expression=f"{obj}.phi[:,0]",
             null_value=EMPTY_FLOAT,
