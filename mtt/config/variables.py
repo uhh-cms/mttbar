@@ -144,6 +144,16 @@ def add_variables(config: od.Config) -> None:
         binning=(40, 0, 5),
         x_title=r"$\Delta R(j_{1},j_{2})$",
     )
+    config.add_variable(
+        name="deltaeta_jj",
+        binning=(40, 0, 5),
+        x_title=r"$\Delta \eta(j_{1},j_{2})$",
+    )
+    config.add_variable(
+        name="deltaphi_jj",
+        binning=(40, 0, 5),
+        x_title=r"$\Delta \phi(j_{1},j_{2})$",
+    )
 
     # cutflow variables
 
