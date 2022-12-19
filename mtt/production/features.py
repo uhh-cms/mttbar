@@ -10,6 +10,7 @@ from columnflow.production.mc_weight import mc_weight
 from columnflow.util import maybe_import
 from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
 from columnflow.production.util import attach_coffea_behavior
+import numpy as np
 
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
@@ -30,10 +31,10 @@ def jet_energy_shifts_init(self: Producer) -> None:
     Register shifts.
     """
     self.shifts |= {
-        f"jec_{junc_name}_{junc_dir}"
-        for junc_name in self.config_inst.x.jec.uncertainty_sources
-        for junc_dir in ("up", "down")
-    } | {"jer_up", "jer_down"}
+                       f"jec_{junc_name}_{junc_dir}"
+                       for junc_name in self.config_inst.x.jec.uncertainty_sources
+                       for junc_dir in ("up", "down")
+                   } | {"jer_up", "jer_down"}
 
 
 @producer(
@@ -60,7 +61,7 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "deltaeta_jj", deltaeta_jj)
 
     # calculate and save delta phi
-    deltaphi_jj = abs((jets[:, 0] - jets[:, 1]).phi)
+    deltaphi_jj = np.pi - abs(abs(jets[:, 0] - jets[:, 1]).phi - np.pi)
     events = set_ak_column(events, "deltaphi_jj", deltaphi_jj)
 
     return events
