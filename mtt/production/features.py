@@ -57,11 +57,11 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "deltaR_jj", deltaR_jj)
 
     # calculate and save delta eta
-    deltaeta_jj = abs((jets[:, 0] - jets[:, 1]).eta)
+    deltaeta_jj = abs((jets[:, 0].eta - jets[:, 1].eta))
     events = set_ak_column(events, "deltaeta_jj", deltaeta_jj)
 
     # calculate and save delta phi
-    deltaphi_jj = np.pi - abs(abs(jets[:, 0] - jets[:, 1]).phi - np.pi)
+    deltaphi_jj = np.pi - abs(abs(jets[:, 0].phi - jets[:, 1].phi) - np.pi)
     events = set_ak_column(events, "deltaphi_jj", deltaphi_jj)
 
     return events
