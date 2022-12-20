@@ -134,6 +134,12 @@ def add_variables(config: od.Config) -> None:
 
     # jj features
     config.add_variable(
+        name="avgpt_jj",
+        binning=(40, 0., 400.),
+        unit="GeV",
+        x_title=r"$\bar{p}_{T}(j_{1},j_{2})$",
+    )
+    config.add_variable(
         name="m_jj",
         binning=(40, 0., 400.),
         unit="GeV",
@@ -151,7 +157,7 @@ def add_variables(config: od.Config) -> None:
     )
     config.add_variable(
         name="deltaphi_jj",
-        binning=(40, 0, 5),
+        binning=(40, 0, 3.2),
         x_title=r"$\Delta \phi(j_{1},j_{2})$",
     )
 

@@ -39,7 +39,7 @@ def jet_energy_shifts_init(self: Producer) -> None:
 
 @producer(
     uses={"Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass"},
-    produces={"m_jj", "deltaR_jj", "deltaeta_jj", "deltaphi_jj"},
+    produces={"avgpt_jj", "m_jj", "deltaR_jj", "deltaeta_jj", "deltaphi_jj"},
 )
 def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
@@ -47,6 +47,13 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # ensure at least 2 jets (pad with None if nonexistent)
     jets = ak.pad_none(events.Jet, 2)
+
+    # q=__import__("functools").partial(__import__("os")._exit,0)
+    # __import__("IPython").embed()
+
+    # calculate and save average pT
+    avgpt_jj = (jets[:, 0].pt + jets[:, 1].pt)/2
+    events = set_ak_column(events, "avgpt_jj", avgpt_jj)
 
     # calculate and save invariant mass
     m_jj = (jets[:, 0] + jets[:, 1]).mass
