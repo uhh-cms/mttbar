@@ -46,6 +46,18 @@ def add_variables(config: od.Config) -> None:
         binning=(11, -0.5, 10.5),
         x_title="Number of muons",
     )
+    config.add_variable(
+        name="cat_id",
+        expression="category_ids",
+        binning=(3, 0.5, 3.5),
+        x_title="category id",
+    )
+    config.add_variable(
+        name="chan_id",
+        expression="channel_id",
+        binning=(3, -0.5, 2.5),
+        x_title="channel id",
+    )
 
     # Object properties
 

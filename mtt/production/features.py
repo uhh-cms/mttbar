@@ -48,7 +48,7 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # ensure at least 2 jets (pad with None if nonexistent)
     jets = ak.pad_none(events.Jet, 2)
 
-    # q=__import__("functools").partial(__import__("os")._exit,0)
+    # q = __import__("functools").partial(__import__("os")._exit, 0)
     # __import__("IPython").embed()
 
     # calculate and save average pT
