@@ -20,7 +20,8 @@ ak = maybe_import("awkward")
     produces={mc_weight, deterministic_seeds, jets},
 )
 def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
-    events = self[mc_weight](events, **kwargs)
+    if self.dataset_inst.is_mc:
+        events = self[mc_weight](events, **kwargs)
     events = self[deterministic_seeds](events, **kwargs)
     events = self[jets](events, **kwargs)
 
@@ -33,7 +34,8 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
 )
 def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     """ only uses jec_nominal for test purposes """
-    events = self[mc_weight](events, **kwargs)
+    if self.dataset_inst.is_mc:
+        events = self[mc_weight](events, **kwargs)
     events = self[deterministic_seeds](events, **kwargs)
     events = self[jet_energy](events, **kwargs)
 
