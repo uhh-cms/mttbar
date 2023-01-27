@@ -330,20 +330,65 @@ def lepton_selection(
 
         # compute trigger masks
         trigger_masks = {}
+        trigger_found = {}  # checked at end to see if valid trigger was found
+        missing_triggers = set()  # for more information on error
         for key, trigger_names in triggers.items():
             trigger_masks[key] = ak.zeros_like(events.event, dtype=bool)
-            for trigger_name in trigger_names:
-                trigger_masks[key] = (
-                    trigger_masks[key] | 
-                    events.HLT[trigger_name]
-                )
 
-        # determine which high-pt trigger combination is used
-        trigger_masks["highpt"] = ak.where(
-            is_early,
-            trigger_masks["highpt_early"],
-            trigger_masks["highpt_late"],
+            # keep track of missing triggers
+            missing_triggers |= {
+                tn for tn in trigger_names
+                if tn not in events.HLT.fields
+            }
+
+            # retrieve trigger decisions
+            all_triggers_found = True
+            for trigger_name in trigger_names:
+                # skip if trigger not found
+                if trigger_name not in events.HLT.fields:
+                    all_triggers_found = False
+                    continue
+                else:
+                    trigger_masks[key] = (
+                        trigger_masks[key] |
+                        events.HLT[trigger_name]
+                    )
+
+            # key is considered 'found' iff all component triggers are found
+            trigger_found[key] = ak.full_like(events.event, all_triggers_found, dtype=bool)
+
+        # determine which high-pt trigger combination to use
+        # and whether it was found
+        for trigger_arr in (trigger_masks, trigger_found):
+            trigger_arr["highpt"] = ak.where(
+                is_early,
+                trigger_arr["highpt_early"],
+                trigger_arr["highpt_late"],
+            )
+
+        # sanity check: make sure that at least one of the
+        # required triggers was found (catch misspellings, etc.)
+        trigger_exists = ak.zeros_like(events.event, dtype=bool)
+        trigger_exists = ak.where(
+            is_lowpt,
+            trigger_found["lowpt"],
+            trigger_exists,
         )
+        trigger_exists = ak.where(
+            is_highpt,
+            trigger_found["highpt"],
+            trigger_exists,
+        )
+        n_expected = ak.sum(is_lowpt | is_highpt)
+        n_trigger_exists = ak.sum(trigger_exists)
+        if n_trigger_exists != n_expected:
+            missing_triggers_str = "\n".join(
+                f"  - {t}" for t in sorted(missing_triggers)
+            )
+            raise RuntimeError(
+                f"One or more required trigger(s) not found in trigger table for "
+                f"{n_trigger_exists}/{n_expected} preselected events:\n{missing_triggers_str}"
+            )
 
         # trigger selection
         pass_trigger = ak.zeros_like(events.event, dtype=bool)
