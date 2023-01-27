@@ -1,0 +1,60 @@
+# coding: utf-8
+
+"""
+Producers related to event weights.
+"""
+
+from columnflow.production import Producer, producer
+from columnflow.production.btag import btag_weights
+from columnflow.production.electron import electron_weights
+from columnflow.production.mc_weight import mc_weight
+from columnflow.production.muon import muon_weights
+from columnflow.production.normalization import normalization_weights
+from columnflow.production.pileup import pu_weight
+from columnflow.util import maybe_import
+
+ak = maybe_import("awkward")
+
+
+@producer
+def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Main event weight producer (e.g. MC generator, scale factors, normalization).
+    """
+    if self.dataset_inst.is_mc:
+        # compute electron weights
+        electron_mask = (events.Electron.pt >= 35)
+        events = self[electron_weights](events, electron_mask=electron_mask, **kwargs)
+
+        # compute muon weights
+        muon_mask = (events.Muon.pt >= 30) & (abs(events.Muon.eta) < 2.4)
+        events = self[muon_weights](events, muon_mask=muon_mask, **kwargs)
+
+        # compute btag weights
+        jet_mask = (events.Jet.pt >= 100)
+        events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+
+        # compute normalization weights
+        events = self[normalization_weights](events, **kwargs)
+
+        # compute MC weights
+        events = self[mc_weight](events, **kwargs)
+
+        # compute pu weights
+        events = self[pu_weight](events, **kwargs)
+
+    return events
+
+
+@weights.init
+def weights_init(self: Producer) -> None:
+    if getattr(self, "dataset_inst", None) and self.dataset_inst.is_mc:
+        # dynamically add dependencies if running on MC
+        self.uses |= {
+            electron_weights, muon_weights, btag_weights,
+            normalization_weights, pu_weight, mc_weight,
+        }
+        self.produces |= {
+            electron_weights, muon_weights, btag_weights,
+            normalization_weights, pu_weight, mc_weight,
+        }
