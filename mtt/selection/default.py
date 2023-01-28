@@ -211,6 +211,14 @@ def lepton_jet_2d_selection(
         (ch_m, "Muon"),
     ]:
         lepton_indices = lepton_results.objects[route].Lepton
+
+        # if chunk contains no leptons, return early
+        # (seems awkward is unable to handle arrays where
+        # every entry is masked here)
+        if len(ak.flatten(lepton_indices)) == 0:
+            selections[ch.id] = ak.ones_like(events.event, dtype=bool)
+            continue
+
         leptons = ak.firsts(events[route][lepton_indices])
         lepton_jet_deltar = ak.firsts(jets.metric_table(leptons), axis=-1)
 
