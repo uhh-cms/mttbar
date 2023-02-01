@@ -14,9 +14,9 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    #uses={
-    #    #deterministic_seeds,  # TODO
-    #},
+    # uses={
+    #     #deterministic_seeds,  # TODO
+    # },
 )
 def check_early(
     self: Selector,

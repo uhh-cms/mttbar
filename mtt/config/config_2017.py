@@ -311,7 +311,7 @@ for dataset_name in dataset_names:
             "zprime_tt",
             "hpseudo_tt",
             "hscalar_tt",
-            "rsgluon_tt"
+            "rsgluon_tt",
         ]
     ):
         dataset.x.is_mtt_signal = True
@@ -392,7 +392,7 @@ config_2017.set_aux("dataset_groups", {
     "default": [
         "zprime_tt_*", "hpseudo_tt_*", "hscalar_tt_*", "rsgluon_tt_*",
         "tt_*", "st_*", "dy_lep_*", "w_lnu_*",
-        "qcd_*", "ww_*", "wz_*", "zz_*"
+        "qcd_*", "ww_*", "wz_*", "zz_*",
     ],
     "tt": ["tt_*"], "st": ["st_*"], "w": ["w_lnu_*"], "dy": ["dy_*"],
     "qcd": ["qcd_*"],
@@ -577,6 +577,7 @@ config_2017.set_aux("electron_sf_names",
     ("UL-Electron-ID-SF", "2017", "wp80iso"),
 )
 
+
 # helper to add column aliases for both shifts of a source
 def add_aliases(shift_source: str, aliases: Set[str], selection_dependent: bool):
     for direction in ["up", "down"]:
@@ -692,9 +693,9 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         "LHEWeight.*",
         "LHEPdfWeight", "LHEScaleWeight",
         # object properties
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",  #TODO
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",  # TODO
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.deltaEtaSC",
-        "Electron.pfRelIso03_all", # TODO
+        "Electron.pfRelIso03_all",  # TODO
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB",
         "Jet.hadronFlavour",
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass", "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
@@ -708,7 +709,13 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
 }))
 
 # event weight columns
-get_shifts = lambda *names: sum(([config_2017.get_shift(f"{name}_up"), config_2017.get_shift(f"{name}_down")] for name in names), [])
+get_shifts = lambda *names: sum(
+    (
+        [config_2017.get_shift(f"{name}_up"), config_2017.get_shift(f"{name}_down")]
+        for name in names
+    ),
+    [],
+)
 config_2017.x.event_weights = DotDict()
 config_2017.x.event_weights["normalization_weight"] = []
 config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")

@@ -17,11 +17,13 @@ def sel_incl(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
     """Passes every event."""
     return ak.ones_like(events.event, dtype=bool)
 
+
 @selector(uses={"event", "channel_id"})
 def sel_1m(self: Selector, events: ak.Array, **kwargs) -> ak.Array:
     """Select only events in the muon channel."""
     ch = self.config_inst.get_channel("mu")
     return events["channel_id"] == ch.id
+
 
 @selector(uses={"event", "channel_id"})
 def sel_1e(self: Selector, events: ak.Array, **kwargs) -> ak.Array:

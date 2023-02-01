@@ -21,7 +21,7 @@ ak = maybe_import("awkward")
         "cutflow.muon_pt", "cutflow.muon_eta",
         "cutflow.electron_pt", "cutflow.electron_eta",
         "cutflow.n_jet", "cutflow.n_bjet", "cutflow.n_lightjet",
-        "cutflow.n_muon", "cutflow.n_electron"
+        "cutflow.n_muon", "cutflow.n_electron",
     },
 )
 def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult, **kwargs) -> ak.Array:

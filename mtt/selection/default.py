@@ -44,7 +44,6 @@ def jet_selection(
     # - require a second AK4 jet with pt>30 and abseta<2.5
     # - require that at least one AK4 jet (pt>50 and abseta<2.5) is b-tagged
 
-
     # jets (pt>30)
     jet_mask = (
         (abs(events.Jet.eta) < 2.5) &
@@ -84,8 +83,8 @@ def jet_selection(
             "Jet": {
                 "Jet": jet_indices,
                 "Bjet": bjet_indices,
-                "Lightjet": lightjet_indices
-            }
+                "Lightjet": lightjet_indices,
+            },
         },
     )
 
@@ -112,7 +111,7 @@ def all_had_veto(
     )
     fatjet_indices_toptag = masked_sorted_indices(
         fatjet_mask_toptag,
-        events.FatJet.pt
+        events.FatJet.pt,
     )
 
     fatjet_mask_msoftdrop = (
@@ -121,7 +120,7 @@ def all_had_veto(
     )
     fatjet_indices_msoftdrop = masked_sorted_indices(
         fatjet_mask_msoftdrop,
-        events.FatJet.pt
+        events.FatJet.pt,
     )
 
     fatjet_mask_vetoregion = (
@@ -141,7 +140,7 @@ def all_had_veto(
             "FatJet": {
                 "TopTag": fatjet_indices_toptag,
                 "MSoftDrop": fatjet_indices_msoftdrop,
-            }
+            },
         },
     )
 
@@ -221,7 +220,7 @@ def lepton_jet_2d_selection(
         lepton_jet_deltar = ak.firsts(jets.metric_table(leptons), axis=-1)
 
         lepton_closest_jet = ak.firsts(
-            jets[masked_sorted_indices(jets_mask, lepton_jet_deltar)]
+            jets[masked_sorted_indices(jets_mask, lepton_jet_deltar)],
         )
 
         # veto events where there is a jet too close to the lepton
@@ -232,7 +231,7 @@ def lepton_jet_2d_selection(
         sel = ak.where(
             (leptons.pt - lepton_closest_jet.pt) > 25,
             True,
-            sel
+            sel,
         )
 
         selections[ch.id] = sel
@@ -253,7 +252,7 @@ def lepton_jet_2d_selection(
     sel_lepton = ak.where(
         is_highpt,
         sel_lepton,
-        True
+        True,
     )
 
     # include undefined events in selection
@@ -265,6 +264,7 @@ def lepton_jet_2d_selection(
             "JetLepton2DCut": sel_lepton,
         },
     )
+
 
 @selector(
     uses={
@@ -306,7 +306,7 @@ def default(
     events, lepton_jet_2d_results = self[lepton_jet_2d_selection](
         events,
         lepton_results,
-        **kwargs
+        **kwargs,
     )
     results += lepton_jet_2d_results
 

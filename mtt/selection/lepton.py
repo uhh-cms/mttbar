@@ -18,7 +18,6 @@ np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 
-
 @selector(
     uses={
         "event",
@@ -74,7 +73,6 @@ def electron_selection(
         lepton_mask_lowpt | lepton_mask_highpt
     )
     lepton_indices = masked_sorted_indices(lepton_mask, lepton.pt)
-    first_lepton = ak.firsts(lepton[lepton_mask])
 
     # veto events if additional leptons present
     # (note the looser cuts)
@@ -99,10 +97,6 @@ def electron_selection(
     pt_regime = ak.where(
         (n_lep == 1) & (n_lep_highpt == 1), 2, pt_regime)
 
-    # pt regime booleans for convenience
-    is_lowpt = (pt_regime == 1)
-    is_highpt = (pt_regime == 2)
-
     # select events where low-pt lepton is sufficiently
     # isolated (always true for electrons becausee the ID
     # includes the isolation requirement)
@@ -117,7 +111,7 @@ def electron_selection(
         objects={
             "Electron": {
                 "Lepton": lepton_indices,
-            }
+            },
         },
         aux={
             "pt_regime": pt_regime,
@@ -196,9 +190,8 @@ def muon_selection(
     pt_regime = ak.where(
         (n_lep == 1) & (n_lep_highpt == 1), 2, pt_regime)
 
-    # pt regime booleans for convenience
+    # pt regime boolean for convenience
     is_lowpt = (pt_regime == 1)
-    is_highpt = (pt_regime == 2)
 
     # select events where low-pt lepton is sufficiently isolated
     # (for high-pt, a jet/lepton 2D cut is implemented via
@@ -207,7 +200,7 @@ def muon_selection(
     pass_iso = ak.where(
         is_lowpt,
         first_lepton.pfIsoId == 4,
-        pass_iso
+        pass_iso,
     )
     # if undefined, consider selection failed
     pass_iso = ak.fill_none(pass_iso, False)
@@ -245,8 +238,8 @@ def merge_selection_steps(step_dicts):
     # check for step name incompatibilities
     if any(step_names != set(step_dict) for step_dict in step_dicts):
         raise ValueError(
-            "Selection steps to merge must have identical"
-            "selection step names!"
+            "Selection steps to merge must have identical "
+            "selection step names!",
         )
 
     merged_steps = {
@@ -293,15 +286,14 @@ def lepton_selection(
     )
 
     merged_objects = {}
-    for ch_index, (channel, selector, lepton_name, lepton_route) in enumerate([
+    for ch_index, (channel, ch_selector, lepton_name, lepton_route) in enumerate([
         (ch_mu.id, muon_selection, "muon", "Muon"),
         (ch_e.id, electron_selection, "electron", "Electron"),
     ]):
 
         # selection results for channel
-        channel_results[channel] = results = self[selector](events, **kwargs)
+        channel_results[channel] = results = self[ch_selector](events, **kwargs)
 
-        lepton_indices = results.objects[lepton_route].Lepton
         pt_regime = results.aux["pt_regime"]
 
         # pt regime booleans for convenience
@@ -380,7 +372,7 @@ def lepton_selection(
             )
             raise RuntimeError(
                 f"One or more required trigger(s) not found in trigger table for "
-                f"{n_trigger_exists}/{n_expected} preselected events:\n{missing_triggers_str}"
+                f"{n_trigger_exists}/{n_expected} preselected events:\n{missing_triggers_str}",
             )
 
         # trigger selection
@@ -402,7 +394,7 @@ def lepton_selection(
                 results.steps["Lepton"],
                 channel,
                 0,
-            )
+            ),
         )
         channel_ids = ak.concatenate([
             channel_ids,
@@ -415,7 +407,7 @@ def lepton_selection(
                 results.steps["Lepton"],
                 ch_index,
                 -1,
-            )
+            ),
         )
         channel_indexes = ak.concatenate([
             channel_indexes,
@@ -428,7 +420,6 @@ def lepton_selection(
         # add the object indices to the selection
         merged_objects.update(results.objects)
 
-
     # concatenate selection results
     step_dicts = [r.steps for r in channel_results.values()]
     aux_dicts = [r.aux for r in channel_results.values()]
@@ -438,13 +429,13 @@ def lepton_selection(
     # decide channel and merge selection results
     merged_steps = {
         step: ak.fill_none(ak.firsts(
-            selection[channel_indexes]
+            selection[channel_indexes],
         ), False)
         for step, selection in merged_steps.items()
     }
     merged_aux = {
         var: ak.firsts(
-            vals[channel_indexes]
+            vals[channel_indexes],
         )
         for var, vals in merged_aux.items()
     }
@@ -471,4 +462,3 @@ def lepton_selection(
         objects=merged_objects,
         aux=merged_aux,
     )
-

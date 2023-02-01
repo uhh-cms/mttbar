@@ -11,20 +11,20 @@ def add_categories(config: od.Config) -> None:
     """
     Adds all categories to a *config*.
     """
-    cat_incl = config.add_category(
+    config.add_category(
         name="incl",
         id=1,
         selection="sel_incl",
         label="inclusive",
     )
-    cat_1e = config.add_category(
+    config.add_category(
         name="1e",
         id=2,
         selection="sel_1e",
         label="1e",
         channel=config.get_channel("e"),
     )
-    cat_1m = config.add_category(
+    config.add_category(
         name="1m",
         id=3,
         selection="sel_1m",
