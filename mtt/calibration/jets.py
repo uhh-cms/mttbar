@@ -5,7 +5,7 @@ Custom jet energy calibration methods that disable data uncertainties (for searc
 """
 
 from columnflow.calibration import Calibrator, calibrator
-from columnflow.calibration.jets import jec, jer
+from columnflow.calibration.cms.jets import jec, jer
 from columnflow.util import maybe_import
 
 ak = maybe_import("awkward")

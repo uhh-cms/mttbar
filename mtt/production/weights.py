@@ -5,12 +5,12 @@ Producers related to event weights.
 """
 
 from columnflow.production import Producer, producer
-from columnflow.production.btag import btag_weights
-from columnflow.production.electron import electron_weights
-from columnflow.production.mc_weight import mc_weight
-from columnflow.production.muon import muon_weights
+from columnflow.production.cms.btag import btag_weights
+from columnflow.production.cms.electron import electron_weights
+from columnflow.production.cms.mc_weight import mc_weight
+from columnflow.production.cms.muon import muon_weights
 from columnflow.production.normalization import normalization_weights
-from columnflow.production.pileup import pu_weight
+from columnflow.production.cms.pileup import pu_weight
 from columnflow.util import maybe_import
 
 ak = maybe_import("awkward")

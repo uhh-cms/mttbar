@@ -9,7 +9,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 from columnflow.util import maybe_import
 from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.production.mc_weight import mc_weight
+from columnflow.production.cms.mc_weight import mc_weight
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
