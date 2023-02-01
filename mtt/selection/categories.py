@@ -5,11 +5,8 @@ Selection methods defining masks for categories.
 """
 
 from columnflow.util import maybe_import
-from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.columnar_util import set_ak_column
+from columnflow.selection import Selector, selector
 
-#from mtt.selection.default import muon_selection, electron_selection
-from mtt.selection.lepton import lepton_selection
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

@@ -4,22 +4,10 @@
 Selection methods for m(ttbar).
 """
 
-from collections import defaultdict
-from typing import Tuple
-
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
-from columnflow.production.util import attach_coffea_behavior
 from columnflow.calibration.cms.jets import ak_random  # TODO: move function
+from columnflow.selection import Selector, selector
 
-from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.production.categories import category_ids
-from columnflow.production.cms.mc_weight import mc_weight
-from columnflow.production.processes import process_ids
-
-from mtt.selection.util import masked_sorted_indices
-from mtt.selection.general import increment_stats, jet_energy_shifts
-from mtt.selection.cutflow_features import cutflow_features
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

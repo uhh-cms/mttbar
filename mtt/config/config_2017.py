@@ -7,7 +7,6 @@ Configuration of the 2017 m(ttbar) analysis.
 import os
 import re
 from typing import Set
-from collections import OrderedDict
 
 import yaml
 from scinum import Number, REL
