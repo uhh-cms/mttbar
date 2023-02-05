@@ -496,6 +496,24 @@ config_2017.x.toptag_working_points = DotDict.wrap({
     },
 })
 
+# chi2 tuning parameters (mean masses/widths of top quarks
+# with hadronically/leptonically decaying W bosons)
+# AN2019_197_v3
+config_2017.x.chi2_parameters = DotDict.wrap({
+    "resolved": {
+        "m_had": 175.4,  # GeV
+        "s_had": 20.7,  # GeV
+        "m_lep": 175.0,  # GeV
+        "s_lep": 23.3,  # GeV
+    },
+    "boosted": {
+        "m_had": 182.3,  # GeV
+        "s_had": 16.1,  # GeV
+        "m_lep": 172.2,  # GeV
+        "s_lep": 21.7,  # GeV
+    },
+})
+
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
     "campaign": "Summer19UL17",
