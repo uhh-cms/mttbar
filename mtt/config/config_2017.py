@@ -370,6 +370,20 @@ config_2017.x.triggers.highpt.late.mc_trigger_percent = (
     100. - config_2017.x.triggers.highpt.early.mc_trigger_percent
 )
 
+# MET filters
+# https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2?rev=158#2018_2017_data_and_MC_UL
+config_2017.set_aux("met_filters", {
+    "Flag.goodVertices",
+    "Flag.globalSuperTightHalo2016Filter",
+    "Flag.HBHENoiseFilter",
+    "Flag.HBHENoiseIsoFilter",
+    "Flag.EcalDeadCellTriggerPrimitiveFilter",
+    "Flag.BadPFMuonFilter",
+    "Flag.BadPFMuonDzFilter",
+    "Flag.eeBadScFilter",
+    "Flag.ecalBadCalibFilter",
+})
+
 # default calibrator, selector, producer, ml model and inference model
 config_2017.set_aux("default_calibrator", "skip_jecunc")
 config_2017.set_aux("default_selector", "default")
