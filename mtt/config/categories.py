@@ -22,12 +22,12 @@ def add_categories(config: od.Config) -> None:
         id=2,
         selection="sel_1e",
         label="1e",
-        channel=config.get_channel("e"),
+        #channel=config.get_channel("e"),
     )
     config.add_category(
         name="1m",
         id=3,
         selection="sel_1m",
         label=r"1$\mu$",
-        channel=config.get_channel("mu"),
+        #channel=config.get_channel("mu"),
     )
