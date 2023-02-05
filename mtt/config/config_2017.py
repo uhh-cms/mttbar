@@ -291,13 +291,6 @@ dataset_names = [
 for dataset_name in dataset_names:
     dataset = config_2017.add_dataset(campaign_run2_2017.get_dataset(dataset_name))
 
-    # reduce n_files to max. 2 for testing purposes (TODO switch to full dataset)
-    for k in dataset.info.keys():
-        # if dataset.name == "zprime_tt_m400_w40_madgraph":
-        #    continue
-        if dataset[k].n_files > 2:
-            dataset[k].n_files = 2
-
     # add aux info to datasets
     if dataset.name.startswith(("st", "tt")):
         dataset.x.has_top = True
@@ -315,6 +308,17 @@ for dataset_name in dataset_names:
         ]
     ):
         dataset.x.is_mtt_signal = True
+    else:
+        dataset.x.is_mtt_signal = False
+
+    # reduce n_files to max. 2 for testing purposes (TODO switch to full dataset)
+    for k in dataset.info.keys():
+        ## keep full data set for signal samples
+        #if dataset.x.is_mtt_signal:
+        #    continue
+        if dataset[k].n_files > 2:
+            dataset[k].n_files = 2
+
 
 # trigger paths for muon/electron channels
 config_2017.set_aux("triggers", DotDict.wrap({
