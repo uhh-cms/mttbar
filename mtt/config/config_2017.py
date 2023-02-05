@@ -393,6 +393,9 @@ config_2017.set_aux("process_groups", {
 # (used in wrapper_factory and during plotting)
 config_2017.set_aux("dataset_groups", {
     "all": ["*"],
+    "data": [
+        "data_mu_*", "data_e_*", "data_pho_*",
+    ],
     "default": [
         "zprime_tt_*", "hpseudo_tt_*", "hscalar_tt_*", "rsgluon_tt_*",
         "tt_*", "st_*", "dy_lep_*", "w_lnu_*",
