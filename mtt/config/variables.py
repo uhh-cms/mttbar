@@ -137,6 +137,22 @@ def add_variables(config: od.Config) -> None:
         x_title=r"$\Delta R(j_{1},j_{2})$",
     )
 
+    # ttbar features
+    config.add_variable(
+        name=f"chi2",
+        expression=f"TTbar.chi2",
+        binning=(600, 0, 600),
+        x_title=rf"$\chi^2$",
+    )
+    for decay in ('had', 'lep'):
+        config.add_variable(
+            name=f"top_{decay}_mass",
+            expression=f"TTbar.top_{decay}_mass",
+            binning=(100, 0, 700),
+            unit="GeV",
+            x_title=rf"$M_{{t}}^{{{decay}}}$",
+        )
+
     # cutflow variables
 
     # Jet properties
