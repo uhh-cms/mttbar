@@ -77,13 +77,13 @@ def jet_selection(
     return events, SelectionResult(
         steps={
             "Jet": sel_jet,
-            "Bjet": sel_bjet,
+            "BJet": sel_bjet,
         },
         objects={
             "Jet": {
                 "Jet": jet_indices,
-                "Bjet": bjet_indices,
-                "Lightjet": lightjet_indices,
+                "BJet": bjet_indices,
+                "LightJet": lightjet_indices,
             },
         },
     )

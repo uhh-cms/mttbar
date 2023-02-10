@@ -456,6 +456,9 @@ def lepton_selection(
     # put channel in a column
     events = set_ak_column(events, "channel_id", channel_id)
 
+    # put pt regime in a column
+    events = set_ak_column(events, "pt_regime", merged_aux["pt_regime"])
+
     # build and return selection results plus new columns
     return events, SelectionResult(
         steps=merged_steps,

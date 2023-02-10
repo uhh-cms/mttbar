@@ -725,24 +725,49 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*",
     },
     "cf.ReduceEvents": {
-        # general event information
+        # -- general event information
         "run", "luminosityBlock", "event",
-        # weights
+
+        # -- weights
         "genWeight",
         "LHEWeight.*",
         "LHEPdfWeight", "LHEScaleWeight",
-        # object properties
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",  # TODO
+
+        # -- leptons
+        # generic
+        "Lepton.pt", "Lepton.eta", "Lepton.phi", "Lepton.mass",
+        # muons
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
+        # electrons
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.deltaEtaSC",
-        "Electron.pfRelIso03_all",  # TODO
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB",
-        "Jet.hadronFlavour",
-        "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass", "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
-        "Bjet.pt", "Bjet.eta", "Bjet.phi", "Bjet.mass", "Bjet.btagDeepFlavB",
+        "Electron.pfRelIso03_all",
+
+        # -- AK4 jets
+        # all
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
+        # with b-tag
+        "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass", "BJet.btagDeepFlavB", "BJet.hadronFlavour",
+        # without b-tag
+        "LightJet.pt", "LightJet.eta", "LightJet.phi", "LightJet.mass",
+        "LightJet.btagDeepFlavB", "LightJet.hadronFlavour",
+
+        # -- AK8 jets
+        # all
+        "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
+        "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
+        # with top tag
+        "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
+        "FatJetTopTag.msoftdrop", "FatJetTopTag.deepTagMD_TvsQCD",
+
+        # -- missing transverse momentum
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
+
+        # -- number of primary vertices
         "PV.npvs",
+
         # columns added during selection, required in general
         "mc_weight", "channel_id", "category_ids", "deterministic_seed", "process_id",
+        "pt_regime",
         "pu_weight*", "cutflow.*",
     },
 }))

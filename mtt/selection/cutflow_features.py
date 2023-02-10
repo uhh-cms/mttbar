@@ -51,8 +51,8 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
 
     # count number of objects after appyling selection
     events = set_ak_column(events, "cutflow.n_jet", ak.num(results.objects.Jet.Jet, axis=-1))
-    events = set_ak_column(events, "cutflow.n_bjet", ak.num(results.objects.Jet.Bjet, axis=-1))
-    events = set_ak_column(events, "cutflow.n_lightjet", ak.num(results.objects.Jet.Lightjet, axis=-1))
+    events = set_ak_column(events, "cutflow.n_bjet", ak.num(results.objects.Jet.BJet, axis=-1))
+    events = set_ak_column(events, "cutflow.n_lightjet", ak.num(results.objects.Jet.LightJet, axis=-1))
 
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
     events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
