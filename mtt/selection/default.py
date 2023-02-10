@@ -107,29 +107,26 @@ def all_had_veto(
     wp_top_md = self.config_inst.x.toptag_working_points.deepak8.top_md
 
     fatjet_mask_toptag = (
-        events.FatJet.deepTagMD_TvsQCD > wp_top_md  # TODO
+        # kinematic cuts
+        (events.FatJet.pt > 400) &
+        (abs(events.FatJet.eta) < 2.5) &
+        # 1st topjet requirement: top tagger working point
+        (events.FatJet.deepTagMD_TvsQCD > wp_top_md) &
+        # 2nd topjet requirement: softdrop mass window
+        (events.FatJet.msoftdrop > 105) &
+        (events.FatJet.msoftdrop < 210)
     )
     fatjet_indices_toptag = masked_sorted_indices(
         fatjet_mask_toptag,
         events.FatJet.pt,
     )
 
-    fatjet_mask_msoftdrop = (
-        (events.FatJet.msoftdrop > 105) &
-        (events.FatJet.msoftdrop < 210)
-    )
-    fatjet_indices_msoftdrop = masked_sorted_indices(
-        fatjet_mask_msoftdrop,
-        events.FatJet.pt,
-    )
+    sel_all_had_veto = (ak.sum(fatjet_mask_toptag, axis=-1) < 2)
 
-    fatjet_mask_vetoregion = (
-        (events.FatJet.pt > 400) &
-        (abs(events.FatJet.eta) < 2.5)
+    fatjet_toptag_indices = masked_sorted_indices(
+        fatjet_mask_toptag,
+        events.FatJet.pt
     )
-
-    fatjet_mask = (fatjet_mask_vetoregion & fatjet_mask_msoftdrop & fatjet_mask_toptag)
-    sel_all_had_veto = (ak.sum(fatjet_mask, axis=-1) < 2)
 
     # build and return selection results plus new columns
     return events, SelectionResult(
@@ -138,8 +135,7 @@ def all_had_veto(
         },
         objects={
             "FatJet": {
-                "TopTag": fatjet_indices_toptag,
-                "MSoftDrop": fatjet_indices_msoftdrop,
+                "FatJetTopTag": fatjet_indices_toptag,
             },
         },
     )
