@@ -110,7 +110,7 @@ def electron_selection(
         },
         objects={
             "Electron": {
-                "Lepton": lepton_indices,
+                "Electron": lepton_indices,
             },
         },
         aux={
@@ -213,7 +213,7 @@ def muon_selection(
         },
         objects={
             "Muon": {
-                "Lepton": lepton_indices,
+                "Muon": lepton_indices,
             },
         },
         aux={

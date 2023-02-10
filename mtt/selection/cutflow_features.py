@@ -40,7 +40,7 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
 
     # muon properties
     for lepton_name in ["Muon", "Electron"]:
-        lepton_indices = results.objects[lepton_name].Lepton
+        lepton_indices = results.objects[lepton_name][lepton_name]
         leptons = events[lepton_name][lepton_indices]
         for var in ("pt", "eta"):
             events = set_ak_column(
@@ -54,7 +54,7 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
     events = set_ak_column(events, "cutflow.n_bjet", ak.num(results.objects.Jet.Bjet, axis=-1))
     events = set_ak_column(events, "cutflow.n_lightjet", ak.num(results.objects.Jet.Lightjet, axis=-1))
 
-    events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Lepton, axis=-1))
-    events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Lepton, axis=-1))
+    events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
+    events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
 
     return events

@@ -207,7 +207,7 @@ def lepton_jet_2d_selection(
         (ch_e, "Electron"),
         (ch_m, "Muon"),
     ]:
-        lepton_indices = lepton_results.objects[route].Lepton
+        lepton_indices = lepton_results.objects[route][route]
 
         # if chunk contains no leptons, return early
         # (seems awkward is unable to handle arrays where
