@@ -45,6 +45,26 @@ config_2017.add_process(procs.n.qcd)
 config_2017.add_process(procs.n.vv)
 # TODO: add all signals
 config_2017.add_process(procs.n.zprime_tt_m400_w40)
+config_2017.add_process(procs.n.zprime_tt_m500_w50)
+config_2017.add_process(procs.n.zprime_tt_m1000_w100)
+config_2017.add_process(procs.n.zprime_tt_m3000_w300)
+config_2017.add_process(procs.n.zprime_tt_m4500_w450)
+
+# for the lookup tables below, determine the maximum process id
+for process, _, _ in config_2017.walk_processes():
+    if any(
+        process.name.startswith(prefix)
+        for prefix in [
+            "zprime_tt",
+            "hpseudo_tt",
+            "hscalar_tt",
+            "rsgluon_tt",
+        ]
+    ):
+        process.x.is_mtt_signal = True
+        process.unstack = True
+    else:
+        process.x.is_mtt_signal = False
 
 # set color of some processes
 colors = {
