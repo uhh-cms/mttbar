@@ -6,7 +6,7 @@ Column production methods related to ttbar mass reconstruction.
 
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
+from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
 from columnflow.production.util import attach_coffea_behavior
 
 ak = maybe_import("awkward")
@@ -247,15 +247,32 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     top_had = ak.firsts(hyp_top_had[hyp_top_had_chi2_argmin])
     top_lep = ak.firsts(hyp_top_lep[hyp_top_lep_chi2_argmin])
 
+    # sum over top quarks to form ttbar system
+    ttbar = ak.concatenate(
+        list(map(ak.singletons, [top_had, top_lep])),
+        axis=1,
+    ).sum(axis=1)
+
     # final chi2 value
     chi2 = top_had_chi2 + top_lep_chi2
 
+    # -- calculate cos(theta*)
+
+    # boost lepton + leptonic top quark to ttbar rest frame
+    lepton_ttrest = lepton.boost(-ttbar.boostvec)
+    top_lep_ttrest = top_lep.boost(-ttbar.boostvec)
+
+    # get cosine from three-vector dot product and magnitudes
+    cos_theta_star = lepton_ttrest.dot(top_lep_ttrest) / (lepton_ttrest.pvec.p * top_lep_ttrest.pvec.p)
+
     # write out columns
     for var in ('pt', 'eta', 'phi', 'mass'):
-        events = set_ak_column(events, f"TTbar.top_had_{var}", getattr(top_had, var))
-        events = set_ak_column(events, f"TTbar.top_lep_{var}", getattr(top_lep, var))
-    events = set_ak_column(events, "TTbar.chi2_had", top_had_chi2)
-    events = set_ak_column(events, "TTbar.chi2_lep", top_lep_chi2)
-    events = set_ak_column(events, "TTbar.chi2", top_lep_chi2)
+        events = set_ak_column(events, f"TTbar.top_had_{var}", ak.fill_none(getattr(top_had, var), EMPTY_FLOAT))
+        events = set_ak_column(events, f"TTbar.top_lep_{var}", ak.fill_none(getattr(top_lep, var), EMPTY_FLOAT))
+        events = set_ak_column(events, f"TTbar.{var}", ak.fill_none(getattr(ttbar, var), EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.chi2_had", ak.fill_none(top_had_chi2, EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.chi2_lep", ak.fill_none(top_lep_chi2, EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.chi2", ak.fill_none(top_lep_chi2, EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.cos_theta_star", ak.fill_none(cos_theta_star, EMPTY_FLOAT))
 
     return events

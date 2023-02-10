@@ -144,6 +144,18 @@ def add_variables(config: od.Config) -> None:
         binning=(600, 0, 600),
         x_title=rf"$\chi^2$",
     )
+    config.add_variable(
+        name=f"ttbar_mass",
+        expression=f"TTbar.mass",
+        binning=(500, 300, 3300),
+        x_title=r"$m({t}\overline{t})$",
+    )
+    config.add_variable(
+        name=f"cos_theta_star",
+        expression=f"TTbar.cos_theta_star",
+        binning=(100, -1, 1),
+        x_title=r"${cos}(\theta^{*})$",
+    )
     for decay in ('had', 'lep'):
         config.add_variable(
             name=f"top_{decay}_mass",
