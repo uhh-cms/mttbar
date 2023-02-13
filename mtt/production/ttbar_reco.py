@@ -262,11 +262,10 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # -- calculate cos(theta*)
 
     # boost lepton + leptonic top quark to ttbar rest frame
-    lepton_ttrest = lepton.boost(-ttbar.boostvec)
     top_lep_ttrest = top_lep.boost(-ttbar.boostvec)
 
     # get cosine from three-vector dot product and magnitudes
-    cos_theta_star = lepton_ttrest.dot(top_lep_ttrest) / (lepton_ttrest.pvec.p * top_lep_ttrest.pvec.p)
+    cos_theta_star = ttbar.dot(top_lep_ttrest) / (ttbar.pvec.p * top_lep_ttrest.pvec.p)
 
     # write out columns
     for var in ('pt', 'eta', 'phi', 'mass'):
