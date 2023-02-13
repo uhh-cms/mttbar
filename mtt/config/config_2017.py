@@ -43,14 +43,13 @@ config_2017.add_process(procs.n.w_lnu)
 config_2017.add_process(procs.n.dy_lep)
 config_2017.add_process(procs.n.qcd)
 config_2017.add_process(procs.n.vv)
-# TODO: add all signals
-config_2017.add_process(procs.n.zprime_tt_m400_w40)
-config_2017.add_process(procs.n.zprime_tt_m500_w50)
-config_2017.add_process(procs.n.zprime_tt_m1000_w100)
-config_2017.add_process(procs.n.zprime_tt_m3000_w300)
-config_2017.add_process(procs.n.zprime_tt_m4500_w450)
+# ttbar signal processes
+config_2017.add_process(procs.n.zprime_tt)
+config_2017.add_process(procs.n.hscalar_tt)
+config_2017.add_process(procs.n.hpseudo_tt)
+config_2017.add_process(procs.n.rsgluon_tt)
 
-# for the lookup tables below, determine the maximum process id
+# set `unstack` flag for signal processes (used when plotting)
 for process, _, _ in config_2017.walk_processes():
     if any(
         process.name.startswith(prefix)
@@ -61,6 +60,8 @@ for process, _, _ in config_2017.walk_processes():
             "rsgluon_tt",
         ]
     ):
+        process.color1 = "#aaaaaa"
+        process.color2 = "#000000"
         process.x.is_mtt_signal = True
         process.unstack = True
     else:
