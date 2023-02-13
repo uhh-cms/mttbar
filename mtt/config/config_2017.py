@@ -4,6 +4,7 @@
 Configuration of the 2017 m(ttbar) analysis.
 """
 
+import functools
 import os
 import re
 from typing import Set
@@ -14,7 +15,12 @@ import order as od
 import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
-from columnflow.util import DotDict, get_root_processes_from_campaign
+from columnflow.util import DotDict
+from columnflow.config_util import (
+    add_shift_aliases,
+    get_root_processes_from_campaign,
+    get_shifts_from_sources
+)
 from mtt.config.categories import add_categories
 from mtt.config.variables import add_variables
 
@@ -638,18 +644,6 @@ config_2017.set_aux("electron_sf_names",
 )
 
 
-# helper to add column aliases for both shifts of a source
-def add_aliases(shift_source: str, aliases: Set[str], selection_dependent: bool):
-    for direction in ["up", "down"]:
-        shift = config_2017.get_shift(od.Shift.join_name(shift_source, direction))
-        # format keys and values
-        inject_shift = lambda s: re.sub(r"\{([^_])", r"{_\1", s).format(**shift.__dict__)
-        _aliases = {inject_shift(key): inject_shift(value) for key, value in aliases.items()}
-        alias_type = "column_aliases_selection_dependent" if selection_dependent else "column_aliases"
-        # extend existing or register new column aliases
-        shift.set_aux(alias_type, shift.get_aux(alias_type, {})).update(_aliases)
-
-
 # register shifts
 config_2017.add_shift(name="nominal", id=0)
 config_2017.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
@@ -658,10 +652,10 @@ config_2017.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_
 config_2017.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal"})
 config_2017.add_shift(name="minbias_xs_up", id=7, type="shape")
 config_2017.add_shift(name="minbias_xs_down", id=8, type="shape")
-add_aliases("minbias_xs", {"pu_weight": "pu_weight_{name}"}, selection_dependent=False)
+add_shift_aliases(config_2017, "minbias_xs", {"pu_weight": "pu_weight_{name}"}, selection_dependent=False)
 config_2017.add_shift(name="top_pt_up", id=9, type="shape")
 config_2017.add_shift(name="top_pt_down", id=10, type="shape")
-add_aliases("top_pt", {"top_pt_weight": "top_pt_weight_{direction}"}, selection_dependent=False)
+add_shift_aliases(config_2017, "top_pt", {"top_pt_weight": "top_pt_weight_{direction}"}, selection_dependent=False)
 
 config_2017.add_shift(name="mur_up", id=101, type="shape")
 config_2017.add_shift(name="mur_down", id=102, type="shape")
@@ -675,7 +669,7 @@ config_2017.add_shift(name="alpha_up", id=109, type="shape")
 config_2017.add_shift(name="alpha_down", id=110, type="shape")
 
 for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
-    add_aliases(unc, {f"{unc}_weight": unc + "_weight_{direction}"}, selection_dependent=False)
+    add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"}, selection_dependent=False)
 
 with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
     all_jec_sources = yaml.load(f, yaml.Loader)["names"]
@@ -683,7 +677,8 @@ for jec_source in config_2017.x.jec["uncertainty_sources"]:
     idx = all_jec_sources.index(jec_source)
     config_2017.add_shift(name=f"jec_{jec_source}_up", id=5000 + 2 * idx, type="shape")
     config_2017.add_shift(name=f"jec_{jec_source}_down", id=5001 + 2 * idx, type="shape")
-    add_aliases(
+    add_shift_aliases(
+        config_2017,
         f"jec_{jec_source}",
         {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"},
         selection_dependent=True,
@@ -691,7 +686,12 @@ for jec_source in config_2017.x.jec["uncertainty_sources"]:
 
 config_2017.add_shift(name="jer_up", id=6000, type="shape", tags={"selection_dependent"})
 config_2017.add_shift(name="jer_down", id=6001, type="shape", tags={"selection_dependent"})
-add_aliases("jer", {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"}, selection_dependent=True)
+add_shift_aliases(
+    config_2017,
+    "jer",
+    {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"},
+    selection_dependent=True
+)
 
 
 def make_jme_filename(jme_aux, sample_type, name, era=None):
@@ -794,13 +794,7 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
 }))
 
 # event weight columns
-get_shifts = lambda *names: sum(
-    (
-        [config_2017.get_shift(f"{name}_up"), config_2017.get_shift(f"{name}_down")]
-        for name in names
-    ),
-    [],
-)
+get_shifts = functools.partial(get_shifts_from_sources, config_2017)
 config_2017.x.event_weights = DotDict()
 config_2017.x.event_weights["normalization_weight"] = []
 config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")
