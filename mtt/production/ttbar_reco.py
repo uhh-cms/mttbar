@@ -193,11 +193,14 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[choose_lepton](events, **kwargs)
     lepton = events["Lepton"]
 
+    # -- only keep <= 10 jets per event
+    jet = events.Jet[ak.local_index(events.Jet) < 10]
+
     # -- filter fat jets
     fatjet = events.FatJetTopTag
 
     # well separated from all AK4 jets (deltaR >= 1.2)
-    delta_r_fatjet_jet = fatjet.metric_table(events.Jet)
+    delta_r_fatjet_jet = fatjet.metric_table(jet)
     fatjet = fatjet[ak.all(delta_r_fatjet_jet > 1.2, axis=-1)]
 
     # well separated from lepton
@@ -210,7 +213,7 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # (the first is assigned to the leptonic decaying top quark,
     # and the remaining ones to the hadronic decaying one)
     jet_comb = ak.combinations(
-        events.Jet, 4,
+        jet, 4,
         fields=('lep', 'had_1', 'had_2', 'had_3')
     )
 
