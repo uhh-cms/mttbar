@@ -193,25 +193,31 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = self[choose_lepton](events, **kwargs)
     lepton = events["Lepton"]
 
-    # -- only keep <= 10 jets per event
-    jet = events.Jet[ak.local_index(events.Jet) < 10]
-
-    # -- filter fat jets
+    # -- AK8 jets: only top-tagged jets
     fatjet = events.FatJetTopTag
-
-    # well separated from all AK4 jets (deltaR >= 1.2)
-    delta_r_fatjet_jet = fatjet.metric_table(jet)
-    fatjet = fatjet[ak.all(delta_r_fatjet_jet > 1.2, axis=-1)]
 
     # well separated from lepton
     delta_r_fatjet_lepton = ak.firsts(fatjet.metric_table(lepton))
     fatjet = fatjet[delta_r_fatjet_lepton > 0.8]
 
+    # tag events as boosted if there is at least one AK8 jet
+    is_boosted = ak.fill_none(ak.num(fatjet, axis=1) >= 1, False)
+
+    # -- AK4 jets: only keep <= 10 jets per event
+    jet = events.Jet[ak.local_index(events.Jet) < 10]
+
+    # well separated from AK8 jets (deltaR >= 1.2)
+    delta_r_jet_fatjet = ak.min(jet.metric_table(fatjet), axis=2)
+    jet_isolated = ak.fill_none(delta_r_jet_fatjet > 1.2, True)
+    jet = jet[jet_isolated]
+
     # -- combinatorics
 
+    # == RESOLVED: 1 AK4 jet (lep decay) + 3 AK4 jets (had decay)
+
     # all possible combinations of four jets
-    # (the first is assigned to the leptonic decaying top quark,
-    # and the remaining ones to the hadronic decaying one)
+    # (the first is assigned to the leptonically decaying top quark,
+    # and the remaining three to the hadronically decaying one)
     jet_comb = ak.combinations(
         jet, 4,
         fields=('lep', 'had_1', 'had_2', 'had_3')
@@ -226,6 +232,28 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         axis=1,
     ).sum(axis=1)
 
+    hyp_top_had = ak.zip({
+        "pt": hyp_top_had.pt,
+        "eta": hyp_top_had.eta,
+        "phi": hyp_top_had.phi,
+        "mass": hyp_top_had.mass
+    }, with_name="PtEtaPhiMLorentzVector")
+
+    # == BOOSTED: 1 AK4 jet (lep decay) + 1 AK8 jet (had decay)
+
+    # map the AK8 jet to the hadrinocally decaying top
+    hyp_top_had = ak.where(
+        is_boosted,
+        fatjet,
+        hyp_top_had
+    )
+    # map the AK4 jets to the leptonically decaying top
+    hyp_jet_lep = ak.where(
+        is_boosted,
+        jet,
+        hyp_jet_lep
+    )
+
     # expand hypothesis space to cover leptonic decay
     hyp_lep, hyp_nu, hyp_jet_lep = ak.unzip(
         ak.cartesian([ak.singletons(lepton), nu_cands_lv, hyp_jet_lep])
@@ -237,10 +265,25 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         axis=1,
     ).sum(axis=1)
 
+    hyp_top_lep = ak.zip({
+        "pt": hyp_top_lep.pt,
+        "eta": hyp_top_lep.eta,
+        "phi": hyp_top_lep.phi,
+        "mass": hyp_top_lep.mass
+    }, with_name="PtEtaPhiMLorentzVector")
+
     # calculate hypothesis chi2 scores
-    chi2_pars = self.config_inst.x.chi2_parameters.resolved  # TODO: boosted
-    hyp_top_had_chi2 = ((hyp_top_had.mass - chi2_pars.m_had) / chi2_pars.s_had) ** 2
-    hyp_top_lep_chi2 = ((hyp_top_lep.mass - chi2_pars.m_lep) / chi2_pars.s_lep) ** 2
+    chi2_pars = self.config_inst.x.chi2_parameters
+    hyp_top_had_chi2 = ak.where(
+        is_boosted,
+        ((hyp_top_had.mass - chi2_pars.boosted.m_had) / chi2_pars.boosted.s_had) ** 2,
+        ((hyp_top_had.mass - chi2_pars.resolved.m_had) / chi2_pars.resolved.s_had) ** 2,
+    )
+    hyp_top_lep_chi2 = ak.where(
+        is_boosted,
+        ((hyp_top_lep.mass - chi2_pars.boosted.m_lep) / chi2_pars.boosted.s_lep) ** 2,
+        ((hyp_top_lep.mass - chi2_pars.resolved.m_lep) / chi2_pars.resolved.s_lep) ** 2,
+    )
 
     # reduce hypytheses based on minimal chi2 score
     hyp_top_had_chi2_argmin = ak.argmin(hyp_top_had_chi2, axis=1, keepdims=True)
@@ -266,6 +309,7 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # get cosine from three-vector dot product and magnitudes
     cos_theta_star = ttbar.dot(top_lep_ttrest) / (ttbar.pvec.p * top_lep_ttrest.pvec.p)
+    abs_cos_theta_star = abs(cos_theta_star)
 
     # write out columns
     for var in ('pt', 'eta', 'phi', 'mass'):
@@ -276,5 +320,6 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "TTbar.chi2_lep", ak.fill_none(top_lep_chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.chi2", ak.fill_none(top_lep_chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.cos_theta_star", ak.fill_none(cos_theta_star, EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.abs_cos_theta_star", ak.fill_none(abs_cos_theta_star, EMPTY_FLOAT))
 
     return events
