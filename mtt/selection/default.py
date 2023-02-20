@@ -333,6 +333,9 @@ def default(
     # add cutflow features
     events = self[cutflow_features](events, results=results, **kwargs)
 
+    # add mc weights (needed for cutflow plots)
+    events = self[mc_weight](events, **kwargs)
+
     # increment stats
     self[increment_stats](events, event_sel, stats, **kwargs)
 
