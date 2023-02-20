@@ -21,7 +21,7 @@ from columnflow.config_util import (
     get_root_processes_from_campaign,
     get_shifts_from_sources
 )
-from mtt.config.categories import add_categories
+from mtt.config.categories import add_categories_selection, add_categories_production
 from mtt.config.variables import add_variables
 
 from mtt.config.analysis_mtt import analysis_mtt
@@ -652,10 +652,10 @@ config_2017.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_
 config_2017.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal"})
 config_2017.add_shift(name="minbias_xs_up", id=7, type="shape")
 config_2017.add_shift(name="minbias_xs_down", id=8, type="shape")
-add_shift_aliases(config_2017, "minbias_xs", {"pu_weight": "pu_weight_{name}"}, selection_dependent=False)
+add_shift_aliases(config_2017, "minbias_xs", {"pu_weight": "pu_weight_{name}"})
 config_2017.add_shift(name="top_pt_up", id=9, type="shape")
 config_2017.add_shift(name="top_pt_down", id=10, type="shape")
-add_shift_aliases(config_2017, "top_pt", {"top_pt_weight": "top_pt_weight_{direction}"}, selection_dependent=False)
+add_shift_aliases(config_2017, "top_pt", {"top_pt_weight": "top_pt_weight_{direction}"})
 
 config_2017.add_shift(name="mur_up", id=101, type="shape")
 config_2017.add_shift(name="mur_down", id=102, type="shape")
@@ -669,7 +669,7 @@ config_2017.add_shift(name="alpha_up", id=109, type="shape")
 config_2017.add_shift(name="alpha_down", id=110, type="shape")
 
 for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
-    add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"}, selection_dependent=False)
+    add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"})
 
 with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
     all_jec_sources = yaml.load(f, yaml.Loader)["names"]
@@ -681,16 +681,14 @@ for jec_source in config_2017.x.jec["uncertainty_sources"]:
         config_2017,
         f"jec_{jec_source}",
         {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"},
-        selection_dependent=True,
     )
 
-config_2017.add_shift(name="jer_up", id=6000, type="shape", tags={"selection_dependent"})
-config_2017.add_shift(name="jer_down", id=6001, type="shape", tags={"selection_dependent"})
+config_2017.add_shift(name="jer_up", id=6000, type="shape")
+config_2017.add_shift(name="jer_down", id=6001, type="shape")
 add_shift_aliases(
     config_2017,
     "jer",
     {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"},
-    selection_dependent=True
 )
 
 
@@ -823,8 +821,13 @@ config_2017.set_aux("versions", {
 config_2017.add_channel("e", id=1)
 config_2017.add_channel("mu", id=2)
 
+# working points for event categorization
+config_2017.x.categorization = DotDict({
+    "chi2_max": 30,
+})
+
 # add categories
-add_categories(config_2017)
+add_categories_selection(config_2017)
 
 # add variables
 add_variables(config_2017)

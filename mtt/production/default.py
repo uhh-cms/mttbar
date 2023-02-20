@@ -28,13 +28,13 @@ def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # features
     events = self[features](events, **kwargs)
 
-    # category ids
-    events = self[category_ids](events, **kwargs)
+    # ttbar reconstruction
+    events = self[ttbar](events, **kwargs)
 
     # weights
     events = self[weights](events, **kwargs)
 
-    # ttbar reconstruction
-    events = self[ttbar](events, **kwargs)
+    # category ids
+    events = self[category_ids](events, **kwargs)
 
     return events

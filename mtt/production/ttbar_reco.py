@@ -9,6 +9,9 @@ from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
 from columnflow.production.util import attach_coffea_behavior
 
+from mtt.config.categories import add_categories_production
+
+
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
 coffea = maybe_import("coffea")
@@ -16,7 +19,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 
 @producer(
     uses={
-        "channel_id", "category_ids",
+        "channel_id",
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
     },
@@ -161,7 +164,7 @@ def neutrino_candidates(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 @producer(
     uses={
         choose_lepton, neutrino_candidates,
-        "channel_id", "category_ids",
+        "channel_id",
         "pt_regime",
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
         "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass",
@@ -323,3 +326,11 @@ def ttbar(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "TTbar.abs_cos_theta_star", ak.fill_none(abs_cos_theta_star, EMPTY_FLOAT))
 
     return events
+
+
+@ttbar.init
+def ttbar_init(self: Producer) -> None:
+    # add production categories to config
+    if not self.config_inst.get_aux("has_production_categories", False):
+        add_categories_production(self.config_inst)
+        self.config_inst.x.has_production_categories = True

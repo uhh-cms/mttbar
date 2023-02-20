@@ -264,12 +264,16 @@ def lepton_jet_2d_selection(
 @selector(
     uses={
         jet_selection, lepton_selection, met_selection, all_had_veto, lepton_jet_2d_selection,
-        cutflow_features, category_ids, process_ids, increment_stats, attach_coffea_behavior,
+        cutflow_features,
+        category_ids,
+        process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
     },
     produces={
         jet_selection, lepton_selection, met_selection, all_had_veto, lepton_jet_2d_selection,
-        cutflow_features, category_ids, process_ids, increment_stats, attach_coffea_behavior,
+        cutflow_features,
+        category_ids,
+        process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
     },
     shifts={
@@ -324,14 +328,14 @@ def default(
     n_sel = ak.sum(event_sel, axis=-1)
     print(f"__all__: {n_sel}")
 
+    # add cutflow features
+    events = self[cutflow_features](events, results=results, **kwargs)
+
     # build categories
     events = self[category_ids](events, results=results, **kwargs)
 
     # create process ids
     events = self[process_ids](events, **kwargs)
-
-    # add cutflow features
-    events = self[cutflow_features](events, results=results, **kwargs)
 
     # add mc weights (needed for cutflow plots)
     events = self[mc_weight](events, **kwargs)

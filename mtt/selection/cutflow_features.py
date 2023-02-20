@@ -21,6 +21,7 @@ ak = maybe_import("awkward")
         "cutflow.muon_pt", "cutflow.muon_eta",
         "cutflow.electron_pt", "cutflow.electron_eta",
         "cutflow.n_jet", "cutflow.n_bjet", "cutflow.n_lightjet",
+        "cutflow.n_toptag",
         "cutflow.n_muon", "cutflow.n_electron",
     },
 )
@@ -53,6 +54,8 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
     events = set_ak_column(events, "cutflow.n_bjet", ak.num(results.objects.Jet.BJet, axis=-1))
     events = set_ak_column(events, "cutflow.n_lightjet", ak.num(results.objects.Jet.LightJet, axis=-1))
     events = set_ak_column(events, "cutflow.n_jet", events.cutflow.n_bjet + events.cutflow.n_lightjet)
+
+    events = set_ak_column(events, "cutflow.n_toptag", ak.num(results.objects.FatJet.FatJetTopTag, axis=-1))
 
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
     events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
