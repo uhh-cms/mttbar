@@ -141,13 +141,25 @@ def add_variables(config: od.Config) -> None:
     config.add_variable(
         name=f"chi2",
         expression=f"TTbar.chi2",
-        binning=(600, 0, 600),
+        binning=(100, 0, 600),
+        x_title=rf"$\chi^2$",
+    )
+    config.add_variable(
+        name=f"chi2_lt30",
+        expression=f"TTbar.chi2",
+        binning=(15, 0, 30),
         x_title=rf"$\chi^2$",
     )
     config.add_variable(
         name=f"ttbar_mass",
         expression=f"TTbar.mass",
-        binning=(500, 300, 3300),
+        binning=(300, 300, 3300),
+        x_title=r"$m({t}\overline{t})$",
+    )
+    config.add_variable(
+        name=f"ttbar_mass_wide",
+        expression=f"TTbar.mass",
+        binning=(30, 0, 6000),
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
@@ -155,6 +167,12 @@ def add_variables(config: od.Config) -> None:
         expression=f"TTbar.cos_theta_star",
         binning=(100, -1, 1),
         x_title=r"${cos}(\theta^{*})$",
+    )
+    config.add_variable(
+        name=f"abs_cos_theta_star",
+        expression=f"TTbar.abs_cos_theta_star",
+        binning=(50, 0, 1),
+        x_title=r"$|{cos}(\theta^{*})|$",
     )
     for decay in ('had', 'lep'):
         config.add_variable(
@@ -204,7 +222,7 @@ def add_variables(config: od.Config) -> None:
         name="cf_n_jet",
         expression="cutflow.n_jet",
         binning=(11, -0.5, 10.5),
-        x_title=r"Number of jets ($p_{T}$ > 30 GeV)",
+        x_title=r"Number of jets ($p_{T}$ > 30 GeV, $|\eta| < 2.5$)",
     )
     config.add_variable(
         name="cf_n_electron",
@@ -217,4 +235,10 @@ def add_variables(config: od.Config) -> None:
         expression="cutflow.n_muon",
         binning=(5, -0.5, 4.5),
         x_title=r"Number of muons",
+    )
+    config.add_variable(
+        name="cf_n_toptag",
+        expression="cutflow.n_toptag",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of top-tagged AK8 jets",
     )

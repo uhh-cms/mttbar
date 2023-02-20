@@ -70,6 +70,7 @@ for process, _, _ in config_2017.walk_processes():
         process.color2 = "#000000"
         process.x.is_mtt_signal = True
         process.unstack = True
+        process.hide_errors = True
     else:
         process.x.is_mtt_signal = False
 
@@ -419,7 +420,7 @@ config_2017.set_aux("default_ml_model", None)
 config_2017.set_aux("default_inference_model", None)
 config_2017.set_aux("default_categories", ["incl", "1e", "1m"])
 config_2017.set_aux("default_process_settings", [
-    ["zprime_tt_m400_w40", "scale=2000", "unstack"],
+    ["zprime_tt_m400_w40", "unstack"],
 ])
 
 # process groups for conveniently looping over certain processs
