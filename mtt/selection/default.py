@@ -183,7 +183,23 @@ def lepton_jet_2d_selection(
     lepton_results: SelectionResult,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
-    """Lepton/Jet 2D cut (replaces isolation criterion for high-pt lepton)."""
+    """
+    Lepton/Jet 2D cut (replaces isolation criterion for high-pt lepton).
+
+    The 2D requirement is defined as
+
+      delta_r(l, jet) > 0.4  ||  pt_rel(l, jet) > 25 GeV,
+
+    where *pt_rel* denotes the magnitude of the perpendicular component
+    of the lepton three-vector with respect to the jet axis:
+
+      pt_rel = p_l * sin(angle(p_l, p_jet))
+
+    and can be calculated eqivalently via the cross product of the jet
+    and lepton three-momenta as:
+
+      pt_rel = |cross(p_l, p_jet)| / |p_jet|
+    """
 
     # note: returns only 'events' if lepton_selection has been called before
     #       and is cached (we assume this here), otherwise returns a tuple
@@ -221,10 +237,11 @@ def lepton_jet_2d_selection(
         # veto events where there is a jet too close to the lepton
         sel = ak.all(lepton_jet_deltar > 0.4, axis=-1)
 
-        # but keep events where the lepton/jet pt difference is
-        # sufficiently large
+        # but keep events where the perpendicular lepton momentum relative
+        # to the jet is sufficiently large
+        pt_rel = leptons.cross(lepton_closest_jet).p / lepton_closest_jet.p
         sel = ak.where(
-            (leptons.pt - lepton_closest_jet.pt) > 25,
+            pt_rel > 25,
             True,
             sel,
         )

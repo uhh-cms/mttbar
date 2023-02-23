@@ -41,9 +41,11 @@ def electron_selection(
       either (30 < pt < 120 GeV) and MVA ID WP80,
       or (pt > 120 GeV) and MVA ID WP80 without isolation
     - for low-pt electrons, the isolation is part of the ID and
-      is not applied separatelu
-    - high-pt electrons have to satisfy the 2D cut defined as:
-      delta_r(l, jet) > 0.4 || pt_rel(l, jet) > 25 GeV
+      is not applied separately
+    - for high-pt electrons, no isolation criteria are applied
+      here. An additional 2D isolation criterion, which considers
+      the separation from the nearest jet, is applied via a
+      separate selector.
     """
 
     lepton = events.Electron
@@ -138,8 +140,10 @@ def muon_selection(
       either (30 < pt < 55 GeV) and CutBasedIdTight,
       or (pt > 55 GeV) and CutBasedIdGlobalHighPt
     - low-pt muons have to satisfy the isolation ID "PfIsoTight"
-    - high-pt muons have to satisfy the 2D cut defined as:
-      delta_r(l, jet) > 0.4 || pt_rel(l, jet) > 25 GeV
+    - for high-pt muons, no isolation criteria are applied
+      here. An additional 2D isolation criterion, which considers
+      the separation from the nearest jet, is applied via a
+      separate selector.
     """
 
     lepton = events.Muon
