@@ -81,7 +81,6 @@ def jet_selection(
         },
         objects={
             "Jet": {
-                "Jet": jet_indices,
                 "BJet": bjet_indices,
                 "LightJet": lightjet_indices,
             },

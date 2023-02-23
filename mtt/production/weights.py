@@ -31,7 +31,7 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[muon_weights](events, muon_mask=muon_mask, **kwargs)
 
         # compute btag weights
-        jet_mask = (events.Jet.pt >= 100)
+        jet_mask = (events.Jet.pt >= 100) & (abs(events.Jet.eta) < 2.5)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
         # compute normalization weights
