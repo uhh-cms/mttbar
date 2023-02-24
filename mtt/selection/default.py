@@ -12,6 +12,8 @@ from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
 
 from columnflow.selection import Selector, SelectionResult, selector
+from columnflow.selection.cms.met_filters import met_filters
+from columnflow.selection.cms.json_filter import json_filter
 from columnflow.production.categories import category_ids
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
@@ -285,6 +287,8 @@ def lepton_jet_2d_selection(
         category_ids,
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
+        met_filters,
+        json_filter,
     },
     produces={
         jet_selection, lepton_selection, met_selection, all_had_veto, lepton_jet_2d_selection,
@@ -292,6 +296,8 @@ def lepton_jet_2d_selection(
         category_ids,
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
+        met_filters,
+        json_filter,
     },
     shifts={
         jet_energy_shifts,
@@ -309,6 +315,13 @@ def default(
 
     # prepare the selection results that are updated at every step
     results = SelectionResult()
+
+    # MET filters
+    results.steps.METFilters = self[met_filters](events, **kwargs)
+
+    # JSON filter (data-only)
+    if self.dataset_inst.is_data:
+        results.steps.JSON = self[json_filter](events, **kwargs)
 
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
