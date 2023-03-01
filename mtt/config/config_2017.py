@@ -811,8 +811,51 @@ config_2017.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
 # TODO: check that these are appropriate
 config_2017.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL")
 
-# name of the btag_sf correction set
-config_2017.x.btag_sf_correction_set = "deepJet_shape"
+# JEC uncertainty sources propagated to btag scale factors
+# (names derived from contents in BTV correctionlib file)
+year = "2017"
+config_2017.x.btag_sf_jec_sources = [
+    "",  # same as "Total"
+    "Absolute",
+    "AbsoluteMPFBias",
+    "AbsoluteScale",
+    "AbsoluteStat",
+    f"Absolute_{year}",
+    "BBEC1",
+    f"BBEC1_{year}",
+    "EC2",
+    f"EC2_{year}",
+    "FlavorQCD",
+    "Fragmentation",
+    "HF",
+    f"HF_{year}",
+    "PileUpDataMC",
+    "PileUpPtBB",
+    "PileUpPtEC1",
+    "PileUpPtEC2",
+    "PileUpPtHF",
+    "PileUpPtRef",
+    "RelativeBal",
+    "RelativeFSR",
+    "RelativeJEREC1",
+    "RelativeJEREC2",
+    "RelativeJERHF",
+    "RelativePtBB",
+    "RelativePtEC1",
+    "RelativePtEC2",
+    "RelativePtHF",
+    "RelativeSample",
+    f"RelativeSample_{year}",
+    "RelativeStatEC",
+    "RelativeStatFSR",
+    "RelativeStatHF",
+    "SinglePionECAL",
+    "SinglePionHCAL",
+    "TimePtEta",
+]
+
+# name of the btag_sf correction set and jec uncertainties to propagate through
+config_2017.x.btag_sf = ("deepJet_shape", config_2017.x.btag_sf_jec_sources)
 
 # versions per task family and optionally also dataset and shift
 # None can be used as a key to define a default value
