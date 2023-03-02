@@ -486,12 +486,13 @@ config_2017.set_aux("shift_groups", {
 # selector step groups for conveniently looping over certain steps
 # (used in cutflow tasks)
 config_2017.set_aux("selector_step_groups", {
-    "default": ["Lepton", "LeptonIso", "LeptonTrigger", "Jet", "DileptonVeto", "AllHadronicVeto"],
+    "default": ["Lepton", "MET", "Jet", "BJet", "JetLepton2DCut", "AllHadronicVeto", "DileptonVeto", "METFilters"],
 })
 
 config_2017.set_aux("selector_step_labels", {
+    "JetLepton2DCut": "2D cut",
     "AllHadronicVeto": r"all-hadr. veto",
-    "DileptonVetp": r"dilep. veto",
+    "DileptonVeto": r"dilep. veto",
 })
 
 
