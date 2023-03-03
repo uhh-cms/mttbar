@@ -233,7 +233,7 @@ def lepton_jet_2d_selection(
         lepton_jet_deltar = ak.firsts(jets.metric_table(leptons), axis=-1)
 
         lepton_closest_jet = ak.firsts(
-            jets[masked_sorted_indices(jets_mask, lepton_jet_deltar)],
+            jets[masked_sorted_indices(jets_mask, lepton_jet_deltar, ascending=True)],
         )
 
         # veto events where there is a jet too close to the lepton
