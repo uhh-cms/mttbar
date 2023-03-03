@@ -36,7 +36,7 @@ def jet_energy_shifts_init(self: Producer) -> None:
 
 @producer(
     uses={"Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass"},
-    produces={"m_jj", "deltaR_jj"},
+    produces={"dijet_mass", "dijet_delta_r"},
 )
 def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
@@ -46,12 +46,12 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     jets = ak.pad_none(events.Jet, 2)
 
     # calculate and save invariant mass
-    m_jj = (jets[:, 0] + jets[:, 1]).mass
-    events = set_ak_column(events, "m_jj", m_jj)
+    dijet_mass = (jets[:, 0] + jets[:, 1]).mass
+    events = set_ak_column(events, "dijet_mass", dijet_mass)
 
     # calculate and save delta-R
-    deltaR_jj = jets[:, 0].delta_r(jets[:, 1])
-    events = set_ak_column(events, "deltaR_jj", deltaR_jj)
+    dijet_delta_r = jets[:, 0].delta_r(jets[:, 1])
+    events = set_ak_column(events, "dijet_delta_r", dijet_delta_r)
 
     return events
 

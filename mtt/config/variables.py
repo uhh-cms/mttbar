@@ -153,13 +153,15 @@ def add_variables(config: od.Config) -> None:
     config.add_variable(
         name=f"ttbar_mass",
         expression=f"TTbar.mass",
-        binning=(300, 300, 3300),
+        binning=(30, 300, 3300),
+        unit="GeV",
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
         name=f"ttbar_mass_wide",
         expression=f"TTbar.mass",
         binning=(30, 0, 6000),
+        unit="GeV",
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
