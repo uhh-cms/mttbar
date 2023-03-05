@@ -417,7 +417,7 @@ config_2017.set_aux("default_calibrator", "skip_jecunc")
 config_2017.set_aux("default_selector", "default")
 config_2017.set_aux("default_producer", "default")
 config_2017.set_aux("default_ml_model", None)
-config_2017.set_aux("default_inference_model", None)
+config_2017.set_aux("default_inference_model", "an_2019_197")
 config_2017.set_aux("default_categories", ["incl", "1e", "1m"])
 config_2017.set_aux("default_process_settings", [
     ["zprime_tt_m400_w40", "unstack"],
