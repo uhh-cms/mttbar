@@ -99,16 +99,10 @@ def electron_selection(
     pt_regime = ak.where(
         (n_lep == 1) & (n_lep_highpt == 1), 2, pt_regime)
 
-    # select events where low-pt lepton is sufficiently
-    # isolated (always true for electrons becausee the ID
-    # includes the isolation requirement)
-    pass_iso = ak.ones_like(events.event, dtype=bool)
-
     return SelectionResult(
         steps={
             "Lepton": (ak.num(lepton_indices) == 1),
             "DileptonVeto": dilepton_veto,
-            "LeptonIso": pass_iso,
         },
         objects={
             "Electron": {
@@ -156,6 +150,8 @@ def muon_selection(
         lepton_mask_eta &
         (lepton.pt > 30) &
         (lepton.pt <= 55) &
+        # 4 == PFIsoTight
+        (lepton.pfIsoId == 4) &
         # CutBasedIdTight
         (lepton.tightId)
     )
@@ -169,7 +165,6 @@ def muon_selection(
         lepton_mask_lowpt | lepton_mask_highpt
     )
     lepton_indices = masked_sorted_indices(lepton_mask, lepton.pt)
-    first_lepton = ak.firsts(lepton[lepton_mask])
 
     # veto events if additional leptons present
     # (note the looser cuts)
@@ -197,23 +192,10 @@ def muon_selection(
     # pt regime boolean for convenience
     is_lowpt = (pt_regime == 1)
 
-    # select events where low-pt lepton is sufficiently isolated
-    # (for high-pt, a jet/lepton 2D cut is implemented via
-    # another selector)
-    pass_iso = ak.ones_like(events.event, dtype=bool)
-    pass_iso = ak.where(
-        is_lowpt,
-        first_lepton.pfIsoId == 4,
-        pass_iso,
-    )
-    # if undefined, consider selection failed
-    pass_iso = ak.fill_none(pass_iso, False)
-
     return SelectionResult(
         steps={
             "Lepton": (ak.num(lepton_indices) == 1),
             "DileptonVeto": dilepton_veto,
-            "LeptonIso": pass_iso,
         },
         objects={
             "Muon": {
