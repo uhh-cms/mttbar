@@ -53,10 +53,10 @@ def jet_energy_init(self: Calibrator) -> None:
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.rawFactor", "nJet",
         "Jet.muonIdx1", "Jet.muonIdx2", "Jet.electronIdx1", "Jet.electronIdx2",
         attach_coffea_behavior,
-    }
+    },
     produces={
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.rawFactor",
-    }
+    },
 )
 def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     """
