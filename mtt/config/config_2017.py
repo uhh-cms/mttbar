@@ -695,6 +695,14 @@ config_2017.add_shift(name="pdf_down", id=108, type="shape")
 config_2017.add_shift(name="alpha_up", id=109, type="shape")
 config_2017.add_shift(name="alpha_down", id=110, type="shape")
 
+config_2017.add_shift(name="muon_up", id=111, type="shape")
+config_2017.add_shift(name="muon_down", id=112, type="shape")
+add_shift_aliases(config_2017, "muon", {"muon_weight": "muon_weight_{direction}"})
+
+config_2017.add_shift(name="electron_up", id=113, type="shape")
+config_2017.add_shift(name="electron_down", id=114, type="shape")
+add_shift_aliases(config_2017, "electron", {"electron_weight": "electron_weight_{direction}"})
+
 for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
     add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"})
 
