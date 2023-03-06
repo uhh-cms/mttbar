@@ -814,7 +814,7 @@ config_2017.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL")
 
 # JEC uncertainty sources propagated to btag scale factors
 # (names derived from contents in BTV correctionlib file)
-year = "2017"
+year = config_2017.campaign.x.year
 config_2017.x.btag_sf_jec_sources = [
     "",  # same as "Total"
     "Absolute",
