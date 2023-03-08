@@ -8,6 +8,8 @@ from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
 from columnflow.production.util import attach_coffea_behavior
+from mtt.production.ttbar_reco import choose_lepton
+from mtt.selection.util import masked_sorted_indices
 
 ak = maybe_import("awkward")
 coffea = maybe_import("coffea")
@@ -56,15 +58,65 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     return events
 
 
+
+@producer(
+    uses={
+        attach_coffea_behavior,
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "nElectron",
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "nMuon",
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "nJet",
+        "Jet.muonIdx1", "Jet.muonIdx2", "Jet.electronIdx1", "Jet.electronIdx2",
+        choose_lepton
+    },
+    produces={
+        attach_coffea_behavior,
+        "jet_lep_pt_rel", "jet_lep_delta_r",
+    },
+)
+def jet_lepton_features(self:Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    jet lepton features...
+    """
+    events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
+    events["Jet"] = ak.with_name(events.Jet, "PtEtaPhiMLorentzVector")
+    events["Electron"] = ak.with_name(events.Electron, "PtEtaPhiMLorentzVector")
+    events["Muon"] = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
+
+    jets_mask = (events.Jet.pt > 15)
+    jets = events.Jet[jets_mask]
+
+    events = self[choose_lepton](events, **kwargs)
+    lepton = events["Lepton"]
+
+    # attach lorentz vector behavior to lepton
+    lepton = ak.with_name(lepton, "PtEtaPhiMLorentzVector")
+
+    lepton_jet_deltar = ak.firsts(jets.metric_table(lepton), axis=-1)
+
+    lepton_closest_jet = ak.firsts(
+        jets[masked_sorted_indices(jets_mask, lepton_jet_deltar, ascending=True)],
+    )
+
+    jet_lep_pt_rel = lepton.cross(lepton_closest_jet).pt / lepton_closest_jet.p
+    jet_lep_delta_r = lepton_closest_jet.delta_r(lepton)
+
+    events = set_ak_column(events, "jet_lep_pt_rel", jet_lep_pt_rel)
+    events = set_ak_column(events, "jet_lep_delta_r", jet_lep_delta_r)
+
+    return events
+
+
 @producer(
     uses={
         attach_coffea_behavior,
         jj_features,
+        jet_lepton_features,
         "Electron.pt", "Muon.pt", "FatJet.pt", "Jet.pt",
     },
     produces={
         attach_coffea_behavior,
         jj_features,
+        jet_lepton_features,
         "ht",
         "n_jet",
         "n_fatjet",
@@ -87,5 +139,8 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # dijet features
     events = self[jj_features](events, **kwargs)
+
+    # jet lepton features
+    events = self[jet_lepton_features](events, **kwargs)
 
     return events

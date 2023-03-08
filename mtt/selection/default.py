@@ -374,3 +374,90 @@ def default(
     self[increment_stats](events, event_sel, stats, **kwargs)
 
     return events, results
+
+@selector(
+    uses={
+        jet_selection, lepton_selection, met_selection, all_had_veto,
+        cutflow_features,
+        category_ids,
+        process_ids, increment_stats, attach_coffea_behavior,
+        mc_weight,
+        met_filters,
+        json_filter,
+    },
+    produces={
+        jet_selection, lepton_selection, met_selection, all_had_veto,
+        cutflow_features,
+        category_ids,
+        process_ids, increment_stats, attach_coffea_behavior,
+        mc_weight,
+        met_filters,
+        json_filter,
+    },
+    shifts={
+        jet_energy_shifts,
+    },
+    exposed=True,
+)
+def default_without_2d_selection(
+    self: Selector,
+    events: ak.Array,
+    stats: defaultdict,
+    **kwargs,
+) -> tuple[ak.Array, SelectionResult]:
+    # ensure coffea behavior
+    events = self[attach_coffea_behavior](events, **kwargs)
+
+    # prepare the selection results that are updated at every step
+    results = SelectionResult()
+
+    # MET filters
+    results.steps.METFilters = self[met_filters](events, **kwargs)
+
+    # JSON filter (data-only)
+    if self.dataset_inst.is_data:
+        results.steps.JSON = self[json_filter](events, **kwargs)
+
+    # jet selection
+    events, jet_results = self[jet_selection](events, **kwargs)
+    results += jet_results
+
+    # lepton selection
+    events, lepton_results = self[lepton_selection](events, **kwargs)
+    results += lepton_results
+
+    # met selection
+    events, met_results = self[met_selection](events, **kwargs)
+    results += met_results
+
+    # all-hadronic veto
+    events, all_had_veto_results = self[all_had_veto](events, **kwargs)
+    results += all_had_veto_results
+
+    # combined event selection after all steps
+    event_sel = reduce(and_, results.steps.values())
+    results.main["event"] = event_sel
+
+    for step, sel in results.steps.items():
+        n_sel = ak.sum(sel, axis=-1)
+        print(f"{step}: {n_sel}")
+
+    n_sel = ak.sum(event_sel, axis=-1)
+    print(f"__all__: {n_sel}")
+
+    # add cutflow features
+    events = self[cutflow_features](events, results=results, **kwargs)
+
+    # build categories
+    events = self[category_ids](events, results=results, **kwargs)
+
+    # create process ids
+    events = self[process_ids](events, **kwargs)
+
+    # add mc weights (needed for cutflow plots)
+    events = self[mc_weight](events, **kwargs)
+
+    # increment stats
+    self[increment_stats](events, event_sel, stats, **kwargs)
+
+    return events, results

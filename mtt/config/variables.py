@@ -137,6 +137,32 @@ def add_variables(config: od.Config) -> None:
         x_title=r"$\Delta R(j_{1},j_{2})$",
     )
 
+    # jet lepton features
+    config.add_variable(
+        name=f"jet_lep_pt_rel",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"$p_{T}^{rel}$",
+    )
+    config.add_variable(
+        name=f"jet_lep_delta_r",
+        binning=(40, 0, 5),
+        x_title=r"$\Delta R(jet, lep)$",
+    )
+    config.add_variable(
+        name=f"jet_lep_pt_rel_zoom",
+        expression=f"jet_lep_pt_rel",
+        binning=(10, 0, 50),
+        unit="GeV",
+        x_title=r"$p_{T}^{rel}$",
+    )
+    config.add_variable(
+        name=f"jet_lep_delta_r_zoom",
+        expression=f"jet_lep_delta_r",
+        binning=(15, 0, 1.4),
+        x_title=r"$\Delta R(jet, lep)$",
+    )
+
     # ttbar features
     config.add_variable(
         name=f"chi2",
@@ -148,6 +174,12 @@ def add_variables(config: od.Config) -> None:
         name=f"chi2_lt30",
         expression=f"TTbar.chi2",
         binning=(15, 0, 30),
+        x_title=rf"$\chi^2$",
+    )
+    config.add_variable(
+        name=f"chi2_lt100",
+        expression=f"TTbar.chi2",
+        binning=(20, 0, 100),
         x_title=rf"$\chi^2$",
     )
     config.add_variable(
