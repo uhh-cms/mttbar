@@ -75,31 +75,38 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 )
 def jet_lepton_features(self:Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
-    jet lepton features...
+    Produces jet lepton pTrel and deltaR.
     """
+    # load coffea behaviors for simplified arithmetic with vectors
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Jet"] = ak.with_name(events.Jet, "PtEtaPhiMLorentzVector")
     events["Electron"] = ak.with_name(events.Electron, "PtEtaPhiMLorentzVector")
     events["Muon"] = ak.with_name(events.Muon, "PtEtaPhiMLorentzVector")
 
+    # select jets with pT > 15
     jets_mask = (events.Jet.pt > 15)
     jets = events.Jet[jets_mask]
 
+    # select lepton of event
     events = self[choose_lepton](events, **kwargs)
     lepton = events["Lepton"]
 
     # attach lorentz vector behavior to lepton
     lepton = ak.with_name(lepton, "PtEtaPhiMLorentzVector")
 
+    # calculate deltaR
     lepton_jet_deltar = ak.firsts(jets.metric_table(lepton), axis=-1)
 
+    # define closest lepton to jet
     lepton_closest_jet = ak.firsts(
         jets[masked_sorted_indices(jets_mask, lepton_jet_deltar, ascending=True)],
     )
 
+    # calculate pTrel and deltaR
     jet_lep_pt_rel = lepton.cross(lepton_closest_jet).pt / lepton_closest_jet.p
     jet_lep_delta_r = lepton_closest_jet.delta_r(lepton)
 
+    # save as new columns
     events = set_ak_column(events, "jet_lep_pt_rel", jet_lep_pt_rel)
     events = set_ak_column(events, "jet_lep_delta_r", jet_lep_delta_r)
 
