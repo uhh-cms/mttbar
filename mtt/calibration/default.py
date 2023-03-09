@@ -41,3 +41,16 @@ def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     events = self[jet_energy](events, **kwargs)
 
     return events
+
+@calibrator(
+    uses={mc_weight, deterministic_seeds, jet_energy},
+    produces={mc_weight, deterministic_seeds, jet_energy},
+)
+def skip_jecunc_wo_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
+    """ only uses jec_nominal for test purposes """
+    if self.dataset_inst.is_mc:
+        events = self[mc_weight](events, **kwargs)
+    events = self[deterministic_seeds](events, **kwargs)
+    events = self[jet_energy](events, **kwargs)
+
+    return events
