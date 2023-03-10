@@ -94,7 +94,7 @@ def jet_lepton_features(self:Producer, events: ak.Array, **kwargs) -> ak.Array:
     # attach lorentz vector behavior to lepton
     lepton = ak.with_name(lepton, "PtEtaPhiMLorentzVector")
 
-    # calculate deltaR
+    # calculate deltaR between lepton and every jet
     lepton_jet_deltar = ak.firsts(jets.metric_table(lepton), axis=-1)
 
     # define closest lepton to jet
