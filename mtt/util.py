@@ -2,71 +2,34 @@
 """
 Analysis-wide utility functions
 """
-
-import tracemalloc
-from time import perf_counter
-
-from law.util import human_duration, human_bytes
+import math
 
 
-class Timer:
+def iter_chunks(*arrays, max_chunk_size):
     """
-    Provides a context for timed execution of tasks.
-
-    To use, instantiate a new *Timer* object in a `with` block
-    and wrap the task to be executed:
-    ```
-    with Timer() as t:
-        do_something()
-
-    print(f"Execution took {t.human_duration}"
-    ```
+    Iterate over one or more arrays in chunks of at most `max_chunk_size`.
+    If `max_chunked_size` is negative or zero, no chunking is done.
     """
-    def __enter__(self):
-        # don't stop tracing on exit it it was enabled on on enter
-        self._stop_tracing_on_exit = True
-        if tracemalloc.is_tracing():
-            self._stop_tracing_on_exit = False
-        else:
-            tracemalloc.start()
-        self.mem_start, self.mem_peak = tracemalloc.get_traced_memory()
-        self.time_start = perf_counter()
-        return self
 
-    def __exit__(self, type, value, traceback):
-        self.time_stop = perf_counter()
-        self.mem_stop, self.mem_peak = tracemalloc.get_traced_memory()
-        if self._stop_tracing_on_exit:
-            tracemalloc.stop()
+    # validate input sizes
+    size = len(arrays[0])
+    if any(len(arr) != size for arr in arrays[1:]):
+        lengths_str = ", ".join(str(len(arr)) for arr in arrays)
+        raise ValueError(f"array length mismatch: {lengths_str}")
 
-    @property
-    def duration(self):
-        return self.time_stop - self.time_start
+    # compute number of chunks
+    n_chunks = 1
+    if max_chunk_size > 0:
+        n_chunks = int(math.ceil(size / max_chunk_size))
 
-    @property
-    def mem_diff(self):
-        return self.mem_stop - self.mem_start
+    # if no chunking is needed, yield the arrays directly
+    if n_chunks == 1:
+        yield arrays
+        return
 
-    @property
-    def human_duration(self):
-        return human_duration(seconds=self.duration)
+    # loop over chunks
+    for i_chunk in range(n_chunks):
+        end = min(size, (i_chunk + 1) * max_chunk_size)
+        slc = slice(i_chunk * max_chunk_size, end)
 
-    @property
-    def human_mem_start(self):
-        return human_bytes(self.mem_start, fmt=True)
-
-    @property
-    def human_mem_stop(self):
-        return human_bytes(self.mem_stop, fmt=True)
-
-    @property
-    def human_mem_diff(self):
-        return human_bytes(self.mem_diff, fmt=True)
-
-    @property
-    def human_mem_peak(self):
-        return human_bytes(self.mem_peak, fmt=True)
-
-    @property
-    def human_mem(self):
-        return f"{self.human_mem_start} -> {self.human_mem_stop} ({self.human_mem_diff} diff, {self.human_mem_peak} peak)"
+        yield tuple(a[slc] for a in arrays)

@@ -564,6 +564,31 @@ config_2017.x.chi2_parameters = DotDict.wrap({
     },
 })
 
+# parameters to fine-tune the ttbar combinatoric
+# reconstruction
+config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
+    # -- minimal settings (fast runtime)
+    #"n_jet_max": 9,
+    #"n_jet_lep_range": (1, 1),
+    #"n_jet_had_range": (3, 3),
+    #"n_jet_ttbar_range": (4, 4),
+    #"max_chunk_size": 100000,
+
+    # -- default settings
+    "n_jet_max": 9,
+    "n_jet_lep_range": (1, 2),
+    "n_jet_had_range": (2, 6),
+    "n_jet_ttbar_range": (3, 6),
+    "max_chunk_size": 30000,
+
+    # -- "maxed out" settings (very slow)
+    #"n_jet_max": 10,
+    #"n_jet_lep_range": (1, 8),
+    #"n_jet_had_range": (2, 9),
+    #"n_jet_ttbar_range": (3, 10),
+    #"max_chunk_size": 10000,
+}))
+
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
     "campaign": "Summer19UL17",
