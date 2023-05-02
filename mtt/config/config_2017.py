@@ -806,6 +806,13 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
         "FatJetTopTag.msoftdrop", "FatJetTopTag.deepTagMD_TvsQCD",
 
+        # -- Gen quantities
+        "Generator.*",
+        "GenMET.*",
+        "GenJet.*",
+        "GenJetAK8.*",
+        "GenPart.*",
+
         # -- missing transverse momentum
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
 
