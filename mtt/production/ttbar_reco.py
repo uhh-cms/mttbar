@@ -6,8 +6,6 @@ Column production methods related to ttbar mass reconstruction.
 import itertools
 import math
 
-from functools import partial
-
 from law.util import human_duration
 
 from columnflow.production import Producer, producer
@@ -16,116 +14,16 @@ from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
 
 from mtt.config.categories import add_categories_production
 from mtt.util import iter_chunks
+from mtt.production.util import (
+    ak_argcartesian, ak_arg_grouped_combinations, lv_xyzt, lv_mass, lv_sum,
+)
+from mtt.production.ttbar_gen import ttbar_gen
 from mtt.profiling_tools import Profiler
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
 coffea = maybe_import("coffea")
 maybe_import("coffea.nanoevents.methods.nanoaod")
-
-
-def ak_arg_grouped_combinations(
-    array: ak.Array,
-    group_sizes: list[int],
-    axis: int = 1,
-    cache: dict[int, tuple[ak.Array]] = None,
-    as_type=np.uint8,
-) -> tuple[tuple[ak.Array]]:
-    """
-    Like `ak.argcombinations`, but considers all possible ways to arrange
-    the entries of an input `array` into non-overlapping groups with specified
-    sizes `group_sizes`.
-
-    Optionally, an `axis` along which to build the combinations can be specified
-    (default is `1`).
-
-    An optional `cache` dictionary with pre-computed index combinations ca
-    nbe given.
-
-    Returns a nested tuple of unzipped index arrrays (`combinations`) organized
-    by group index and object position within the group. For example,
-    `combinations[0][2]` yields the index of the third object in the first
-    group.
-
-    As an example, consider an array with four objects:
-
-    >>> arr = ak.Array([[10, 31, 25, 19]])
-    <Array [[10, 31, 25, 19]] type='1 * var * int64'>
-
-    We can obtain all possible combinations of objects arranged into two groups
-    with sizes 1 and 2:
-
-    >>> combs = ak_arg_grouped_combinations(arr, [1, 2], axis=1)
-    ((<Array [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]] type='1 * var * int64'>,),
-     (<Array [[1, 1, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1]] type='1 * var * int64'>,
-      <Array [[2, 3, 3, 2, 3, 3, 1, 3, 3, 1, 2, 2]] type='1 * var * int64'>))
-
-    The resulting arrays can be used to index the original array. For example,
-    we can sum over all elements of the second group like this:
-
-    >>> arr[combs[1][0]] + arr[combs[1][1]]
-    <Array [[56, 50, 44, 35, 29, ..., 29, 50, 41, 35, 56]] type='1 * var * int64'>
-    """
-
-    if cache is None:
-        cache = {}
-
-    n_groups = len(group_sizes)
-    if n_groups < 1:
-        raise ValueError("at least one group size is required")
-
-    # build combinations for each individual group size
-    for n in group_sizes:
-        if n not in cache:
-            cache[n] = tuple(
-                ak.values_astype(item, as_type)
-                for item in ak.unzip(
-                    ak.argcombinations(array, n, axis=axis),
-                )
-            )
-
-    combs = [cache[n] for n in group_sizes]
-
-    # build cartesian product of all different-size combinations
-    comb_prod = tuple(
-        ak.values_astype(item, as_type)
-        for item in ak.unzip(
-            ak.argcartesian([c[0] for c in combs]),
-        )
-    )
-
-    # -- exclude combinations with a common index across any two groups
-
-    keep = ak.ones_like(comb_prod[0], dtype=bool)
-    # loop over all configurations of object indices within groups
-    for obj_idxs in itertools.product(*(range(n) for n in group_sizes)):
-        # loop over all combinations of two groups
-        for g_idx_1, g_idx_2 in itertools.product(range(n_groups), range(n_groups)):
-            # skip lower triangle
-            if g_idx_1 >= g_idx_2:
-                continue
-            # drop cases where the same index is contained in two groups
-            keep = keep & (
-                combs[g_idx_1][obj_idxs[g_idx_1]][comb_prod[g_idx_1]] !=
-                combs[g_idx_2][obj_idxs[g_idx_2]][comb_prod[g_idx_2]]
-            )
-
-    # apply filter to combination product
-    comb_prod_filtered = tuple(p[keep] for p in comb_prod)
-
-    # build index arrays from combinations product and return
-    grouped_combs = tuple(
-        tuple(
-            ak.values_astype(
-                c[comb_prod_filtered[g_idx]],
-                as_type,
-            )
-            for c in combs[g_idx]
-        )
-        for g_idx in range(n_groups)
-    )
-
-    return grouped_combs
 
 
 @producer(
@@ -265,49 +163,6 @@ def neutrino_candidates(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     events = set_ak_column(events, "NeutrinoCandidates", nu_cands_lv)
 
     return events
-
-
-# helper functions for making lorentz vectors
-def ak_extract_fields(arr, fields, **kwargs):
-    """
-    """
-    # reattach behavior
-    if "behavior" not in kwargs:
-        kwargs["behavior"] = arr.behavior
-
-    return ak.zip(
-        {
-            field: getattr(arr, field)
-            for field in fields
-        },
-        **kwargs,
-    )
-
-
-lv_xyzt = partial(ak_extract_fields, fields=["x", "y", "z", "t"], with_name="LorentzVector")
-lv_mass = partial(ak_extract_fields, fields=["pt", "eta", "phi", "mass"], with_name="PtEtaPhiMLorentzVector")
-
-
-# helper function for lorentz vector summation
-def lv_sum(lv_arrays):
-    # don't use `reduce` or list comprehensions
-    # to keep memory use as low as pposible
-    tmp_lv_sum = None
-    for lv in lv_arrays:
-        if tmp_lv_sum is None:
-            tmp_lv_sum = lv
-        else:
-            tmp_lv_sum = tmp_lv_sum + lv
-
-    return tmp_lv_sum
-
-
-# helper function with customizable index type
-def ak_argcartesian(*arrs, as_type=np.uint8):
-    return tuple(
-        ak.values_astype(item, as_type)
-        for item in ak.unzip(ak.argcartesian(arrs))
-    )
 
 
 @producer(
