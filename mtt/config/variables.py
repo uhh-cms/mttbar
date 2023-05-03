@@ -165,12 +165,14 @@ def add_variables(config: od.Config) -> None:
             2800, 3000, 3200, 3400, 3600, 3800,
             4000, 4400, 4800, 5200, 5600, 6000,
         ],
+        unit="GeV",
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
         name=f"ttbar_mass_narrow",
         expression=f"TTbar.mass",
         binning=(100, 400, 4400),
+        unit="GeV",
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
@@ -204,6 +206,42 @@ def add_variables(config: od.Config) -> None:
         expression="n_jet_sum",
         binning=(11, -0.5, 10.5),
     )
+
+    # gen variables
+    config.add_variable(
+        name=f"gen_ttbar_mass",
+        expression=f"TTbar.gen_mass",
+        binning=config.get_variable("ttbar_mass").binning,
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+    )
+    config.add_variable(
+        name=f"gen_ttbar_mass_narrow",
+        expression=f"TTbar.gen_mass",
+        binning=config.get_variable("ttbar_mass_narrow").binning,
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+    )
+    config.add_variable(
+        name=f"gen_cos_theta_star",
+        expression=f"TTbar.gen_cos_theta_star",
+        binning=config.get_variable("cos_theta_star").binning,
+        x_title=r"${cos}(\theta^{*})^{gen}$",
+    )
+    config.add_variable(
+        name=f"gen_abs_cos_theta_star",
+        expression=f"TTbar.gen_abs_cos_theta_star",
+        binning=config.get_variable("abs_cos_theta_star").binning,
+        x_title=r"$|{cos}(\theta^{*})^{gen}|$",
+    )
+    for decay in ('had', 'lep'):
+        config.add_variable(
+            name=f"gen_top_{decay}_mass",
+            expression=f"TTbar.gen_top_{decay}_mass",
+            binning=config.get_variable(f"top_{decay}_mass").binning,
+            unit="GeV",
+            x_title=rf"$M_{{t}}^{{{decay}}}^{{gen}}$",
+        )
 
     # cutflow variables
 
