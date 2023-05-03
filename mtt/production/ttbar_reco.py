@@ -760,6 +760,75 @@ def ttbar(
     events = set_ak_column(events, "n_jet_had", ak.fill_none(n_jet_had, EMPTY_FLOAT))
     events = set_ak_column(events, "n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, EMPTY_FLOAT))
 
+    if self.dataset_inst.is_mc:
+        # run producer to obtain gen-level ttbar
+        events = self[ttbar_gen](events, **kwargs)
+        gen_ttbar = events["GenTTbar"]
+        gen_part = events["GenPart"]
+        gen_top_1 = ak.firsts(gen_part[gen_ttbar.top_1])
+        gen_top_2 = ak.firsts(gen_part[gen_ttbar.top_2])
+
+        # match gen-level tops to hadronic and leptonic reco tops
+        dr_top_had_gen_top_1 = top_had.delta_r(gen_top_1)
+        dr_top_lep_gen_top_2 = top_lep.delta_r(gen_top_2)
+        dr_top_had_gen_top_2 = top_had.delta_r(gen_top_2)
+        dr_top_lep_gen_top_1 = top_lep.delta_r(gen_top_1)
+
+        dr_sum_match_12 = dr_top_had_gen_top_1 + dr_top_lep_gen_top_2
+        dr_sum_match_21 = dr_top_had_gen_top_2 + dr_top_lep_gen_top_1
+
+        top_had_first = dr_sum_match_12 < dr_sum_match_21
+        gen_top_had = ak.where(
+            top_had_first,
+            gen_top_1,
+            gen_top_2,
+        )
+        gen_top_lep = ak.where(
+            top_had_first,
+            gen_top_2,
+            gen_top_1,
+        )
+        gen_w_had = gen_part[ak.where(
+            top_had_first,
+            gen_ttbar.w_1,
+            gen_ttbar.w_2,
+        )]
+        gen_w_lep = gen_part[ak.where(
+            top_had_first,
+            gen_ttbar.w_2,
+            gen_ttbar.w_1,
+        )]
+        gen_ttbar_lv = lv_mass(gen_top_had) + lv_mass(gen_top_lep)
+
+        # -- calculate gen-level cos(theta*)
+
+        # boost lepton + leptonic top quark to ttbar rest frame
+        gen_top_lep_ttrest = lv_mass(gen_top_lep).boost(-gen_ttbar_lv.boostvec)
+        gen_cos_theta_star = (
+            gen_ttbar_lv.pvec.dot(gen_top_lep_ttrest.pvec) / (gen_ttbar_lv.pvec.p * gen_top_lep_ttrest.pvec.p)
+        )
+        gen_abs_cos_theta_star = abs(gen_cos_theta_star)
+
+        dr_gen_top_had = lv_mass(gen_top_had).delta_r(top_had)
+        dr_gen_top_lep = lv_mass(gen_top_lep).delta_r(top_lep)
+        dr_gen_ttbar = gen_ttbar_lv.delta_r(ttbar)
+
+        def set_ak_column_ef(events, name, value):
+            """Set float column, replacing missing values by EMPTY_FLOAT."""
+            return set_ak_column(events, name, ak.fill_none(value, EMPTY_FLOAT))
+
+        for var in ("pt", "eta", "phi", "mass"):
+            events = set_ak_column_ef(events, f"TTbar.gen_top_had_{var}", getattr(gen_top_had, var))
+            events = set_ak_column_ef(events, f"TTbar.gen_top_lep_{var}", getattr(gen_top_lep, var))
+            events = set_ak_column_ef(events, f"TTbar.gen_w_had_{var}", getattr(gen_w_had, var))
+            events = set_ak_column_ef(events, f"TTbar.gen_w_lep_{var}", getattr(gen_w_lep, var))
+            events = set_ak_column_ef(events, f"TTbar.gen_{var}", getattr(gen_ttbar_lv, var))
+        events = set_ak_column_ef(events, "TTbar.gen_top_had_delta_r", dr_gen_top_had)
+        events = set_ak_column_ef(events, "TTbar.gen_top_lep_delta_r", dr_gen_top_lep)
+        events = set_ak_column_ef(events, "TTbar.gen_delta_r", dr_gen_ttbar)
+        events = set_ak_column_ef(events, "TTbar.gen_cos_theta_star", gen_cos_theta_star)
+        events = set_ak_column_ef(events, "TTbar.gen_abs_cos_theta_star", gen_abs_cos_theta_star)
+
     return events
 
 
@@ -769,3 +838,7 @@ def ttbar_init(self: Producer) -> None:
     if not self.config_inst.get_aux("has_production_categories", False):
         add_categories_production(self.config_inst)
         self.config_inst.x.has_production_categories = True
+
+    if hasattr(self, "dataset_inst") and self.dataset_inst.is_mc:
+        self.uses |= {ttbar_gen}
+        self.produces |= {ttbar_gen}
