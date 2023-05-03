@@ -323,6 +323,7 @@ def ak_argcartesian(*arrs, as_type=np.uint8):
     produces={
         choose_lepton, neutrino_candidates,
         "TTbar.*",
+        "n_jet_lep", "n_jet_had", "n_jet_sum",
     },
 )
 def ttbar(
@@ -900,6 +901,9 @@ def ttbar(
     events = set_ak_column(events, "TTbar.chi2", ak.fill_none(chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.cos_theta_star", ak.fill_none(cos_theta_star, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.abs_cos_theta_star", ak.fill_none(abs_cos_theta_star, EMPTY_FLOAT))
+    events = set_ak_column(events, "n_jet_lep", ak.fill_none(n_jet_lep, EMPTY_FLOAT))
+    events = set_ak_column(events, "n_jet_had", ak.fill_none(n_jet_had, EMPTY_FLOAT))
+    events = set_ak_column(events, "n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, EMPTY_FLOAT))
 
     return events
 

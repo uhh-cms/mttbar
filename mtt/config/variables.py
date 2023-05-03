@@ -193,6 +193,17 @@ def add_variables(config: od.Config) -> None:
             unit="GeV",
             x_title=rf"$M_{{t}}^{{{decay}}}$",
         )
+    for decay in ('had', 'lep'):
+        config.add_variable(
+            name=f"n_jet_{decay}",
+            expression=f"n_jet_{decay}",
+            binning=(11, -0.5, 10.5),
+        )
+    config.add_variable(
+        name="n_jet_sum",
+        expression="n_jet_sum",
+        binning=(11, -0.5, 10.5),
+    )
 
     # cutflow variables
 
