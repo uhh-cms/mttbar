@@ -20,6 +20,7 @@
 .env_*.sh
 .env_*.sh.tmp
 .coverage
+.ipynb_checkpoints
 coverage*.xml
 requirements_user.txt
 __pycache__
