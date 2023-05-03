@@ -339,13 +339,13 @@ for dataset_name in dataset_names:
     else:
         dataset.x.is_mtt_signal = False
 
-    # reduce n_files to max. 2 for testing purposes (TODO switch to full dataset)
+    # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
     for k in dataset.info.keys():
         ## keep full data set for signal samples
         #if dataset.x.is_mtt_signal:
         #    continue
-        if dataset[k].n_files > 2:
-            dataset[k].n_files = 2
+        if dataset[k].n_files > 10:
+            dataset[k].n_files = 10
 
 
 # trigger paths for muon/electron channels
@@ -579,7 +579,7 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     "n_jet_lep_range": (1, 2),
     "n_jet_had_range": (2, 6),
     "n_jet_ttbar_range": (3, 6),
-    "max_chunk_size": 30000,
+    "max_chunk_size": 10000,
 
     # -- "maxed out" settings (very slow)
     #"n_jet_max": 10,
@@ -734,18 +734,19 @@ def make_jme_filename(jme_aux, sample_type, name, era=None):
 
 
 # external files
+json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-dfd90038"
 config_2017.x.external_files = DotDict.wrap({
     # jet energy corrections
-    "jet_jerc": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
+    "jet_jerc": (f"{json_mirror}/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
 
     # btag scale factors
-    "btag_sf_corr": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
+    "btag_sf_corr": (f"{json_mirror}/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
 
     # electron scale factors
-    "electron_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
+    "electron_sf": (f"{json_mirror}/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
 
     # muon scale factors
-    "muon_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
+    "muon_sf": (f"{json_mirror}/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
 
     # files from TODO
     "lumi": {
