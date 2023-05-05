@@ -203,7 +203,7 @@ def delta_r_match(dst_lvs, src_lv, max_dr=None):
     and a view of `dst_lvs` with the matches removed.
     """
     # calculate delta_r for all possible src-dst pairs
-    delta_r = src_lv.metric_table(dst_lvs)
+    delta_r = ak.singletons(src_lv).metric_table(dst_lvs)
 
     # invalidate entries above delta_r threshold
     if max_dr is not None:
@@ -214,7 +214,7 @@ def delta_r_match(dst_lvs, src_lv, max_dr=None):
     best_match_dst_lv = ak.firsts(dst_lvs[best_match_idx])
 
     # filter dst_lvs to remove the best matches (if any)
-    keep = (ak.local_index(dst_lvs) != best_match_idx)
+    keep = (ak.local_index(dst_lvs) != ak.firsts(best_match_idx))
     keep = ak.fill_none(keep, True)
     dst_lvs = ak.mask(dst_lvs, keep)
     dst_lvs = ak.where(ak.is_none(dst_lvs, axis=0), [[]], dst_lvs)
@@ -224,17 +224,17 @@ def delta_r_match(dst_lvs, src_lv, max_dr=None):
 
 def delta_r_match_multiple(dst_lvs, src_lvs, max_dr=None):
     """
-    Like `match`, except source array `src_lvs` can contain more than one entry
-    per event. The matching is done sequentially for each entry in `src_lvs`,
-    with previous matches being filetersfrom the destination array each time
-    to prevent double counting.
+    Like `delta_r_match`, except source array `src_lvs` can contain more than
+    one entry per event. The matching is done sequentially for each entry in
+    `src_lvs`, with previous matches being filetered from the destination array
+    each time to prevent double counting.
     """
 
     # save the index structure of the supplied source array
     src_lvs_idx = ak.local_index(src_lvs)
 
-    # pad sub-lists to the same length
-    max_num = ak.max(ak.num(src_lvs))
+    # pad sub-lists to the same length (but at least 1)
+    max_num = max(1, ak.max(ak.num(src_lvs)))
     src_lvs = ak.pad_none(src_lvs, max_num)
 
     # run matching for each position,
