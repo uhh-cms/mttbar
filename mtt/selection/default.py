@@ -97,13 +97,16 @@ def jet_selection(
     },
     exposed=True,
 )
-def all_had_veto(
+def top_tagged_jets(
     self: Selector,
     events: ak.Array,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
-    """Veto events with more than one AK8 jet with pT>400 GeV and |eta|<2.5
-    passing the top-tagging requirements."""
+    """
+    Apply top tagging criteria to AK8 jets.
+
+    Veto events with more than one top-tagged AK8 jet with pT>400 GeV and |eta|<2.5.
+    """
 
     wp_top_md = self.config_inst.x.toptag_working_points.deepak8.top_md
 
@@ -282,7 +285,7 @@ def lepton_jet_2d_selection(
 
 @selector(
     uses={
-        jet_selection, lepton_selection, met_selection, all_had_veto, lepton_jet_2d_selection,
+        jet_selection, lepton_selection, met_selection, top_tagged_jets, lepton_jet_2d_selection,
         cutflow_features,
         category_ids,
         process_ids, increment_stats, attach_coffea_behavior,
@@ -291,7 +294,7 @@ def lepton_jet_2d_selection(
         json_filter,
     },
     produces={
-        jet_selection, lepton_selection, met_selection, all_had_veto, lepton_jet_2d_selection,
+        jet_selection, lepton_selection, met_selection, top_tagged_jets, lepton_jet_2d_selection,
         cutflow_features,
         category_ids,
         process_ids, increment_stats, attach_coffea_behavior,
@@ -344,8 +347,8 @@ def default(
     results += met_results
 
     # all-hadronic veto
-    events, all_had_veto_results = self[all_had_veto](events, **kwargs)
-    results += all_had_veto_results
+    events, top_tagged_jets_results = self[top_tagged_jets](events, **kwargs)
+    results += top_tagged_jets_results
 
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
