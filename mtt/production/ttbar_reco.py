@@ -32,7 +32,6 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
     uses={
         choose_lepton, neutrino_candidates,
         "channel_id",
-        "pt_regime",
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
         "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass",
         "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",

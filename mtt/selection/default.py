@@ -59,8 +59,8 @@ def jet_selection(
     # subleading jet pt > 30
     jet = ak.pad_none(events.Jet[jet_indices], 2)
     sel_jet = (
-        (jet[..., 0].pt > 50) &
-        (jet[..., 1].pt > 30)
+        (jet[:, 0].pt > 50) &
+        (jet[:, 1].pt > 30)
     )
     sel_jet = ak.fill_none(sel_jet, False)
 
