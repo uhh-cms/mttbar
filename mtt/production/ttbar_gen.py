@@ -18,7 +18,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 @producer(
     uses={
         "channel_id",
-        "Generator.*"
+        "Generator.*",
         "nGenJet", "GenJet.*",
         "nGenJetAK8", "GenJetAK8.*",
         "nGenPart", "GenPart.*",
@@ -80,14 +80,14 @@ def ttbar_gen(
     gen_part_hp = gen_part[is_hard_proc]
     gen_hp_top = gen_part_hp[gen_part_hp.absPdgId == 6]
     gen_hp_top = ak.pad_none(gen_hp_top, 2)
-    gen_hp_top_1 = gen_hp_top[..., 0]
-    gen_hp_top_2 = gen_hp_top[..., 1]
+    gen_hp_top_1 = gen_hp_top[:, 0]
+    gen_hp_top_2 = gen_hp_top[:, 1]
 
     # find last copy of top quarks before decay
     gen_top = gen_part[(gen_part.absPdgId == 6) & is_last_copy]
     gen_top = ak.pad_none(gen_top, 2)
-    gen_top_1 = gen_top[..., 0]
-    gen_top_2 = gen_top[..., 1]
+    gen_top_1 = gen_top[:, 0]
+    gen_top_2 = gen_top[:, 1]
 
     # identify top quark decay products
     is_top_1_decay = is_descended_from(gen_part, gen_top_1.index)

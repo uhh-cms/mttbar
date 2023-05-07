@@ -11,6 +11,7 @@ from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import set_ak_column
 
 ak = maybe_import("awkward")
+np = maybe_import("numpy")
 
 
 # custom jec calibrator that only runs nominal correction
@@ -51,11 +52,15 @@ def jet_energy_init(self: Calibrator) -> None:
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "nElectron",
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "nMuon",
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.rawFactor", "nJet",
+        # index of electrons/muons matched to jets
         "Jet.muonIdx1", "Jet.muonIdx2", "Jet.electronIdx1", "Jet.electronIdx2",
+        # PF energy fractions
+        "Jet.chEmEF", "Jet.muEF",
         attach_coffea_behavior,
     },
     produces={
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.rawFactor",
+        "Jet.chEmEF", "Jet.muEF",
     },
 )
 def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
@@ -81,12 +86,30 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
     idx_m1 = ak.mask(events.Jet.muonIdx1, events.Jet.muonIdx1 >= 0)
     idx_m2 = ak.mask(events.Jet.muonIdx2, events.Jet.muonIdx2 >= 0)
 
+    # energy sum of PF leptons clustered into jet
+    jet_muon_energy = events.Jet.energy * events.Jet.muEF
+    jet_charged_em_energy = events.Jet.energy * events.Jet.chEmEF
+
     # list with matched leptons
     jet_leptons = [
         events.Electron[idx_e1],
         events.Electron[idx_e2],
         events.Muon[idx_m1],
         events.Muon[idx_m2],
+    ]
+
+    # only do cleaning if lepton energy is compatible with PF energy
+    tolerance = 0.1
+    jet_lepton_do_cleaning = [
+        jet_leptons[0].energy > (1 - tolerance) * jet_charged_em_energy,
+        jet_leptons[1].energy > (1 - tolerance) * jet_charged_em_energy,
+        jet_leptons[2].energy > (1 - tolerance) * jet_muon_energy,
+        jet_leptons[3].energy > (1 - tolerance) * jet_muon_energy,
+    ]
+    jet_leptons = [
+        ak.mask(jet_lepton, do_cleaning)
+        for jet_lepton, do_cleaning
+        in zip(jet_leptons, jet_lepton_do_cleaning)
     ]
 
     # convert to four-vectors for leptons in jets
@@ -106,11 +129,20 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         axis=2,
     ).sum(axis=2)
 
-    # substract lepton contributions from jets
+    # subtract lepton contributions from jets
     jet_cleaned = ak.with_name(events.Jet - jet_lepton_sum, "LorentzVector")
+
+    # keep only cases where cleaning results in positive mass
+    mass_is_positive = (jet_cleaned.energy > jet_cleaned.pvec.rho)
+    jet_cleaned = ak.mask(jet_cleaned, mass_is_positive)
+
+    # also filter out cases where cleaning results in a large change of direction
+    delta_r = events.Jet.delta_r(jet_cleaned)
+    jet_cleaned = ak.mask(jet_cleaned, delta_r < np.pi/2)
 
     # save updated jet variables
     for var in ["pt", "eta", "phi", "mass"]:
-        events = set_ak_column(events, f"Jet.{var}", getattr(jet_cleaned, var))
+        value = ak.fill_none(getattr(jet_cleaned, var), 0.0)
+        events = set_ak_column(events, f"Jet.{var}", value)
 
     return events

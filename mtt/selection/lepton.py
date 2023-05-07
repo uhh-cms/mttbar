@@ -265,9 +265,9 @@ def lepton_selection(
     channel_results = {}
 
     # array of lists to keep track of matching channels
-    channel_ids = ak.singletons(events.event)[..., :0]
+    channel_ids = ak.singletons(events.event)[:, :0]
     channel_indexes = ak.values_astype(
-        ak.singletons(events.event)[..., :0],
+        ak.singletons(events.event)[:, :0],
         np.int8,
     )
 

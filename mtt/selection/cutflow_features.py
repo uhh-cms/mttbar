@@ -21,7 +21,7 @@ ak = maybe_import("awkward")
         "cutflow.muon_pt", "cutflow.muon_eta",
         "cutflow.electron_pt", "cutflow.electron_eta",
         "cutflow.n_jet", "cutflow.n_bjet", "cutflow.n_lightjet",
-        "cutflow.n_toptag",
+        "cutflow.n_toptag", "cutflow.n_toptag_delta_r_lepton",
         "cutflow.n_muon", "cutflow.n_electron",
     },
 )
@@ -39,7 +39,7 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
                     Route(f"{var}[:, {i}]").apply(jets, EMPTY_FLOAT),
                 )
 
-    # muon properties
+    # pt-leading electron/muon properties
     for lepton_name in ["Muon", "Electron"]:
         lepton_indices = results.objects[lepton_name][lepton_name]
         leptons = events[lepton_name][lepton_indices]
@@ -56,6 +56,11 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
     events = set_ak_column(events, "cutflow.n_jet", events.cutflow.n_bjet + events.cutflow.n_lightjet)
 
     events = set_ak_column(events, "cutflow.n_toptag", ak.num(results.objects.FatJet.FatJetTopTag, axis=-1))
+    events = set_ak_column(
+        events,
+        "cutflow.n_toptag_delta_r_lepton",
+        ak.num(results.objects.FatJet.FatJetTopTagDeltaRLepton, axis=-1)
+    )
 
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
     events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
