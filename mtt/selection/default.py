@@ -23,6 +23,8 @@ from mtt.selection.general import increment_stats, jet_energy_shifts
 from mtt.selection.lepton import lepton_selection
 from mtt.selection.cutflow_features import cutflow_features
 
+from mtt.production.lepton import choose_lepton
+
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
@@ -92,7 +94,9 @@ def jet_selection(
 
 @selector(
     uses={
-        "nFatJet", "FatJet.pt", "FatJet.eta",
+        choose_lepton,
+        "nFatJet",
+        "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
         "FatJet.deepTagMD_TvsQCD", "FatJet.msoftdrop",
     },
     exposed=True,
@@ -108,8 +112,10 @@ def top_tagged_jets(
     Veto events with more than one top-tagged AK8 jet with pT>400 GeV and |eta|<2.5.
     """
 
+    # top-tagger working point
     wp_top_md = self.config_inst.x.toptag_working_points.deepak8.top_md
 
+    # top-tagging criteria
     fatjet_mask_toptag = (
         # kinematic cuts
         (events.FatJet.pt > 400) &
@@ -125,11 +131,23 @@ def top_tagged_jets(
         events.FatJet.pt,
     )
 
+    # veto events with more than one top-tagged AK8 jet
     sel_all_had_veto = (ak.sum(fatjet_mask_toptag, axis=-1) < 2)
 
-    fatjet_toptag_indices = masked_sorted_indices(
-        fatjet_mask_toptag,
-        events.FatJet.pt
+    # get main lepton
+    events = self[choose_lepton](events, **kwargs)
+    lepton = events["Lepton"]
+
+    # separation from main lepton
+    delta_r_fatjet_lepton = ak.firsts(events.FatJet.metric_table(lepton), axis=-1)
+    fatjet_mask_toptag_delta_r_lepton = (
+        fatjet_mask_toptag &
+        # pass if no main lepton exists
+        ak.fill_none(delta_r_fatjet_lepton > 0.8, True)
+    )
+    fatjet_indices_toptag_delta_r_lepton = masked_sorted_indices(
+        fatjet_mask_toptag_delta_r_lepton,
+        events.FatJet.pt,
     )
 
     # build and return selection results plus new columns
@@ -140,6 +158,7 @@ def top_tagged_jets(
         objects={
             "FatJet": {
                 "FatJetTopTag": fatjet_indices_toptag,
+                "FatJetTopTagDeltaRLepton": fatjet_indices_toptag_delta_r_lepton,
             },
         },
     )

@@ -35,8 +35,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "pt_regime",
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
         "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass",
-        "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
-        "FatJetTopTag.msoftdrop",
+        "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",
+        "FatJetTopTagDeltaRLepton.phi", "FatJetTopTagDeltaRLepton.mass",
+        "FatJetTopTagDeltaRLepton.msoftdrop",
     },
     produces={
         choose_lepton, neutrino_candidates,
@@ -116,7 +117,7 @@ def ttbar(
     # load coffea behaviors for simplified arithmetic with vectors
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Jet"] = ak.with_name(events.Jet, "PtEtaPhiMLorentzVector")
-    events["FatJetTopTag"] = ak.with_name(events.FatJetTopTag, "PtEtaPhiMLorentzVector")
+    events["FatJetTopTagDeltaRLepton"] = ak.with_name(events.FatJetTopTagDeltaRLepton, "PtEtaPhiMLorentzVector")
 
     # reconstruct neutrino candidates
     events = self[neutrino_candidates](events, **kwargs)
@@ -126,12 +127,8 @@ def ttbar(
     events = self[choose_lepton](events, **kwargs)
     lepton = events["Lepton"]
 
-    # -- AK8 jets: only top-tagged jets
-    topjet = events.FatJetTopTag
-
-    # well separated from lepton
-    delta_r_topjet_lepton = ak.firsts(topjet.metric_table(lepton))
-    topjet = topjet[delta_r_topjet_lepton > 0.8]
+    # -- AK8 jets: only top-tagged jets well separated from main lepton
+    topjet = events.FatJetTopTagDeltaRLepton
 
     # tag events as boosted if there is at least one AK8 jet
     is_boosted = ak.fill_none(ak.num(topjet, axis=1) >= 1, False)

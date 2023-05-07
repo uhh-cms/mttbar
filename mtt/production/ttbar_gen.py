@@ -18,7 +18,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 @producer(
     uses={
         "channel_id",
-        "Generator.*"
+        "Generator.*",
         "nGenJet", "GenJet.*",
         "nGenJetAK8", "GenJetAK8.*",
         "nGenPart", "GenPart.*",
