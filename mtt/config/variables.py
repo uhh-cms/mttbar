@@ -204,12 +204,12 @@ def add_variables(config: od.Config) -> None:
             )
         config.add_variable(
             name=f"n_jet_{decay}",
-            expression=f"n_jet_{decay}",
+            expression=f"TTbar.n_jet_{decay}",
             binning=(11, -0.5, 10.5),
         )
     config.add_variable(
         name="n_jet_sum",
-        expression="n_jet_sum",
+        expression="TTbar.n_jet_sum",
         binning=(11, -0.5, 10.5),
     )
 

@@ -608,16 +608,14 @@ def ttbar(
         events = set_ak_column(events, f"TTbar.top_had_{var}", ak.fill_none(getattr(top_had, var), EMPTY_FLOAT))
         events = set_ak_column(events, f"TTbar.top_lep_{var}", ak.fill_none(getattr(top_lep, var), EMPTY_FLOAT))
         events = set_ak_column(events, f"TTbar.{var}", ak.fill_none(getattr(ttbar, var), EMPTY_FLOAT))
-    events = set_ak_column(events, "TTbar.n_jet_had", ak.fill_none(n_jet_had, 0))
-    events = set_ak_column(events, "TTbar.n_jet_lep", ak.fill_none(n_jet_lep, 0))
+    events = set_ak_column(events, "TTbar.n_jet_had", ak.fill_none(n_jet_had, -1))
+    events = set_ak_column(events, "TTbar.n_jet_lep", ak.fill_none(n_jet_lep, -1))
+    events = set_ak_column(events, "TTbar.n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, -1))
     events = set_ak_column(events, "TTbar.chi2_had", ak.fill_none(top_had_chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.chi2_lep", ak.fill_none(top_lep_chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.chi2", ak.fill_none(chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.cos_theta_star", ak.fill_none(cos_theta_star, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.abs_cos_theta_star", ak.fill_none(abs_cos_theta_star, EMPTY_FLOAT))
-    events = set_ak_column(events, "n_jet_lep", ak.fill_none(n_jet_lep, EMPTY_FLOAT))
-    events = set_ak_column(events, "n_jet_had", ak.fill_none(n_jet_had, EMPTY_FLOAT))
-    events = set_ak_column(events, "n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, EMPTY_FLOAT))
 
     if self.dataset_inst.is_mc:
         # run producer to obtain gen-level ttbar
