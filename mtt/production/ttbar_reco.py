@@ -41,7 +41,6 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
     produces={
         choose_lepton, neutrino_candidates,
         "TTbar.*",
-        "n_jet_lep", "n_jet_had", "n_jet_sum",
     },
 )
 def ttbar(
