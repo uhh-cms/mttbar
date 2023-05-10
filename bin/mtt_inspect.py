@@ -26,8 +26,8 @@ def _load_json(fname):
 
 
 def _load_pickle(fname):
-    with open(fname, "rb") as f:
-        return pickle.load(fname)
+    with open(fname, "rb") as fobj:
+        return pickle.load(fobj)
 
 
 def _load_parquet(fname):
@@ -49,7 +49,7 @@ def load(fname):
     """
     basename, ext = os.path.splitext(fname)
     if ext == ".pickle":
-        return _load_pickle(fobj)
+        return _load_pickle(fname)
     elif ext == ".parquet":
         return _load_parquet(fname)
     elif ext == ".root":
