@@ -206,11 +206,13 @@ def add_variables(config: od.Config) -> None:
             name=f"n_jet_{decay}",
             expression=f"TTbar.n_jet_{decay}",
             binning=(11, -0.5, 10.5),
+            x_title=rf"$n_{AK4 jets}^{decay}$",
         )
     config.add_variable(
         name="n_jet_sum",
         expression="TTbar.n_jet_sum",
         binning=(11, -0.5, 10.5),
+        x_title=rf"$n_{AK4 jets}^{lep+had}$",
     )
 
     # gen variables
