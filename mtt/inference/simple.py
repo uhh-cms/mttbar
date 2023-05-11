@@ -24,15 +24,15 @@ def simple(self):
     # corresponding config category names
     categories = [
         # signal regions
-        ("1e_sr_0t", "1e__0t__chi2pass"),
-        ("1e_sr_1t", "1e__1t__chi2pass"),
-        ("1m_sr_0t", "1m__0t__chi2pass"),
-        ("1m_sr_1t", "1m__1t__chi2pass"),
+        ("sr_1e_0t", "1e__0t__chi2pass"),
+        ("sr_1e_1t", "1e__1t__chi2pass"),
+        ("sr_1m_0t", "1m__0t__chi2pass"),
+        ("sr_1m_1t", "1m__1t__chi2pass"),
         # control regions
-        ("1e_cr_0t", "1e__0t__chi2fail"),
-        ("1e_cr_1t", "1e__1t__chi2fail"),
-        ("1m_cr_0t", "1m__0t__chi2fail"),
-        ("1m_cr_1t", "1m__1t__chi2fail"),
+        ("cr_1e_0t", "1e__0t__chi2fail"),
+        ("cr_1e_1t", "1e__1t__chi2fail"),
+        ("cr_1m_0t", "1m__0t__chi2fail"),
+        ("cr_1m_1t", "1m__1t__chi2fail"),
     ]
 
     # add categories to inference model
