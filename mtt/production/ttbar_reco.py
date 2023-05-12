@@ -411,15 +411,37 @@ def ttbar(
             n_jet_lep = ak.firsts(hyp_n_jet_lep[hyp_top_chi2_argmin])
             top_lep_chi2 = ak.firsts(hyp_top_lep_chi2[hyp_top_chi2_argmin])
 
+            # get mapped jet indices
+            jetcomb_idx = lnu_jetcomb_idx_prod[2][hyp_top_chi2_argmin]
+            jet_idxs_lep = ak.concatenate([
+                jet_idx[jetcomb_idx]
+                for jet_idx in jet_idx_comb_lep
+            ], axis=1)
+
             # store final hadronic top
             if is_boosted_regime:
                 top_had = ak.firsts(topjet_lv)
                 top_had_chi2 = ((ak.firsts(topjet_msoftdrop) - chi2_pars.m_had) / chi2_pars.s_had) ** 2
                 n_jet_had = ak.zeros_like(n_jet_lep, dtype=np.uint8)
+                # array of empty lists
+                jet_idxs_had = ak.values_astype(
+                    ak.drop_none(
+                        ak.mask(
+                            hyp_top_chi2_argmin,
+                            ak.zeros_like(hyp_top_chi2_argmin, dtype=bool),
+                            valid_when=True,
+                        ),
+                    ),
+                    np.uint8,
+                )
             else:
                 top_had = ak.firsts(hyp_top_had[hyp_top_chi2_argmin])
                 top_had_chi2 = ak.firsts(hyp_top_had_chi2[hyp_top_chi2_argmin])
                 n_jet_had = ak.firsts(hyp_n_jet_had[hyp_top_chi2_argmin])
+                jet_idxs_had = ak.concatenate([
+                    jet_idx[jetcomb_idx]
+                    for jet_idx in jet_idx_comb_had
+                ], axis=1)
 
             # store final chi2 score
             chi2 = top_had_chi2 + top_lep_chi2
@@ -429,6 +451,8 @@ def ttbar(
             "top_lep": top_lep,
             "n_jet_had": n_jet_had,
             "n_jet_lep": n_jet_lep,
+            "jet_idxs_had": jet_idxs_had,
+            "jet_idxs_lep": jet_idxs_lep,
             "top_had_chi2": top_had_chi2,
             "top_lep_chi2": top_lep_chi2,
             "chi2": chi2,
@@ -581,7 +605,9 @@ def ttbar(
     top_had = lv_mass(comb_results["top_had"])
     top_lep = lv_mass(comb_results["top_lep"])
 
-    # store final top
+    # store mapped jet indices and counts
+    jet_idxs_had = comb_results["jet_idxs_had"]
+    jet_idxs_lep = comb_results["jet_idxs_lep"]
     n_jet_had = comb_results["n_jet_had"]
     n_jet_lep = comb_results["n_jet_lep"]
 
@@ -610,6 +636,8 @@ def ttbar(
     events = set_ak_column(events, "TTbar.n_jet_had", ak.fill_none(n_jet_had, -1))
     events = set_ak_column(events, "TTbar.n_jet_lep", ak.fill_none(n_jet_lep, -1))
     events = set_ak_column(events, "TTbar.n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, -1))
+    events = set_ak_column(events, "TTbar.jet_idxs_had", ak.drop_none(jet_idxs_had))
+    events = set_ak_column(events, "TTbar.jet_idxs_lep", ak.drop_none(jet_idxs_lep))
     events = set_ak_column(events, "TTbar.chi2_had", ak.fill_none(top_had_chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.chi2_lep", ak.fill_none(top_lep_chi2, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.chi2", ak.fill_none(chi2, EMPTY_FLOAT))
