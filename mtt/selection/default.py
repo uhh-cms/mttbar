@@ -48,6 +48,10 @@ def jet_selection(
     # - require a second AK4 jet with pt>30 and abseta<2.5
     # - require that at least one AK4 jet (pt>50 and abseta<2.5) is b-tagged
 
+    # loose jets (pt>0.1) - to filter out cleaned jets etc.
+    loose_jet_mask = (events.Jet.pt > 0.1)
+    loose_jet_indices = masked_sorted_indices(loose_jet_mask, events.Jet.pt)
+
     # jets (pt>30)
     jet_mask = (
         (abs(events.Jet.eta) < 2.5) &
@@ -85,6 +89,7 @@ def jet_selection(
         },
         objects={
             "Jet": {
+                "Jet": loose_jet_indices,
                 "BJet": bjet_indices,
                 "LightJet": lightjet_indices,
             },
