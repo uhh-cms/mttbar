@@ -20,6 +20,12 @@ def add_variables(config: od.Config) -> None:
         binning=(200, -10, 10),
         x_title="MC weight",
     )
+    config.add_variable(
+        name="event",
+        expression="event",
+        binning=(1, 0, 1e9),
+        x_title="Event ID",
+    )
 
     # Event properties
     config.add_variable(
