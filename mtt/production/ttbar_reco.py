@@ -719,9 +719,9 @@ def ttbar(
 @ttbar.init
 def ttbar_init(self: Producer) -> None:
     # add production categories to config
-    if not self.config_inst.get_aux("has_production_categories", False):
+    if not self.config_inst.get_aux("has_categories_production", False):
         add_categories_production(self.config_inst)
-        self.config_inst.x.has_production_categories = True
+        self.config_inst.x.has_categories_production = True
 
     if hasattr(self, "dataset_inst") and self.dataset_inst.is_mc:
         self.uses |= {ttbar_gen}

@@ -4,6 +4,7 @@
 Definition of variables.
 """
 
+import itertools
 import numpy as np
 import order as od
 
@@ -335,3 +336,81 @@ def add_variables(config: od.Config) -> None:
         binning=(5, -0.5, 4.5),
         x_title=r"Number of top-tagged AK8 jets",
     )
+
+
+def add_variables_ml(config: od.Config) -> None:
+    """
+    Variables specific to machine learning (input variables, output scores, etc..
+    """
+    # namespace/field under which ML input features are stored
+    ns = "MLInput"
+
+    variables = {
+        "pt": [(100, 0, 3000), "$p_{T}$", "GeV"],
+        "energy": [(100, 0, 5000), "$E$", "GeV"],
+        "mass": [(50, 0, 300), "$m$", "GeV"],
+        "eta": [(50, -2.5, 2.5), r"$\eta$", None],
+        "phi": [(30, -np.pi, np.pi), r"$\phi$", None],
+        "btag": [(50, 0, 1), "b-tag score", None],
+        "msoftdrop": [(50, 0, 500), "$m_{SD}$", "GeV"],
+        "tau21": [(30, 0, 1.2), r"\tau_{21}", None],
+        "tau32": [(30, 0, 1.2), r"\tau_{32}", None],
+    }
+    objects = {
+        "jet": "AK4 jet",
+        "fatjet": "AK8 jet",
+        "lepton": "Lepton",
+        "met": "Missing energy",
+    }
+
+    config.add_variable(
+        name="mli_n_jet",
+        expression=f"{ns}.n_jet",
+        binning=(20, -0.5, 19.5),
+        x_title="ML input (# of AK4 jets)",
+    )
+
+    config.add_variable(
+        name="mli_n_fatjet",
+        expression=f"{ns}.n_fatjet",
+        binning=(20, -0.5, 19.5),
+        x_title="ML input (# of AK8 jets)",
+    )
+
+    # -- helper functions
+
+    def add_vars(name, n_max, attrs):
+        obj_label = objects.get(name, name)
+        for i, attr in itertools.product(range(n_max), attrs):
+            # get variable info
+            binning, var_label, unit = variables[attr]
+
+            # add variable to config
+            config.add_variable(
+                name=f"mli_{name}_{attr}_{i}",
+                expression=f"{ns}.{name}_{attr}_{i}",
+                binning=binning,
+                unit=unit,
+                x_title=f"ML input ({obj_label} #{i+1} {var_label})",
+            )
+
+    def add_vars_single(name, attrs):
+        obj_label = objects.get(name, name)
+        for attr in attrs:
+            # get variable info
+            binning, var_label, unit = variables[attr]
+
+            # add variable to config
+            config.add_variable(
+                name=f"mli_{name}_{attr}",
+                expression=f"{ns}.{name}_{attr}",
+                binning=binning,
+                unit=unit,
+                x_title=f"ML input ({obj_label} {var_label})",
+            )
+
+    add_vars("jet", 5, ("energy", "pt", "eta", "phi", "mass", "btag"))
+    add_vars("fatjet", 3, ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32"))
+
+    add_vars_single("lepton", ("energy", "pt", "eta", "phi"))
+    add_vars_single("met", ("pt", "phi"))

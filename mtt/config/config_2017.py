@@ -846,13 +846,16 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         # all
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
         "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
+        "FatJet.tau1", "FatJet.tau2", "FatJet.tau3",
         # with top tag
         "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
         "FatJetTopTag.msoftdrop", "FatJetTopTag.deepTagMD_TvsQCD",
+        "FatJetTopTag.tau1", "FatJetTopTag.tau2", "FatJetTopTag.tau3",
         # with top tag and well-separated from lepton
         "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",
         "FatJetTopTagDeltaRLepton.phi", "FatJetTopTagDeltaRLepton.mass",
         "FatJetTopTagDeltaRLepton.msoftdrop", "FatJetTopTagDeltaRLepton.deepTagDeltaRLeptonMD_TvsQCD",
+        "FatJetTopTagDeltaRLepton.tau1", "FatJetTopTagDeltaRLepton.tau2", "FatJetTopTagDeltaRLepton.tau3",
 
         # -- Gen quantities
         "Generator.*",
