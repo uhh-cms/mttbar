@@ -10,13 +10,10 @@ from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
 
-from columnflow.production.categories import category_ids
-
 from mtt.config.variables import add_variables_ml
 from mtt.config.categories import add_categories_production
 from mtt.production.weights import weights
 from mtt.production.lepton import choose_lepton
-from mtt.production.ttbar_reco import ttbar
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -29,8 +26,6 @@ set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
 
 @producer(
     uses={
-        ttbar,
-        category_ids,
         weights,
         choose_lepton,
         # AK4 jets
@@ -44,8 +39,6 @@ set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
         "MET.pt", "MET.phi",
     },
     produces={
-        ttbar,
-        category_ids,
         weights,
         # columns for ML inputs are set by the init function
     },
@@ -59,7 +52,6 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # run dependencies
     events = self[choose_lepton](events, **kwargs)
-    events = self[ttbar](events, **kwargs)
 
     # object arrays
     jet = ak.with_name(events.Jet, "Jet")
@@ -123,9 +115,6 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # weights
     events = self[weights](events, **kwargs)
-
-    # category ids
-    events = self[category_ids](events, **kwargs)
 
     return events
 
