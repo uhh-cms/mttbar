@@ -410,7 +410,7 @@ config_2017.set_aux("met_filters", {
 config_2017.set_aux("default_calibrator", "skip_jecunc")
 config_2017.set_aux("default_selector", "default")
 config_2017.set_aux("default_producer", "default")
-config_2017.set_aux("default_ml_model", "simple")
+config_2017.set_aux("default_ml_model", "")
 config_2017.set_aux("default_inference_model", "simple")
 config_2017.set_aux("default_categories", ["incl", "1e", "1m"])
 config_2017.set_aux("default_process_settings", [
