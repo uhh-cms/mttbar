@@ -4,6 +4,8 @@
 Definition of variables.
 """
 
+import itertools
+import numpy as np
 import order as od
 
 from columnflow.columnar_util import EMPTY_FLOAT
@@ -18,6 +20,12 @@ def add_variables(config: od.Config) -> None:
         expression="mc_weight",
         binning=(200, -10, 10),
         x_title="MC weight",
+    )
+    config.add_variable(
+        name="event",
+        expression="event",
+        binning=(1, 0, 1e9),
+        x_title="Event ID",
     )
 
     # Event properties
@@ -165,26 +173,26 @@ def add_variables(config: od.Config) -> None:
 
     # ttbar features
     config.add_variable(
-        name=f"chi2",
-        expression=f"TTbar.chi2",
+        name="chi2",
+        expression="TTbar.chi2",
         binning=(100, 0, 600),
-        x_title=rf"$\chi^2$",
+        x_title=r"$\chi^2$",
     )
     config.add_variable(
-        name=f"chi2_lt30",
-        expression=f"TTbar.chi2",
+        name="chi2_lt30",
+        expression="TTbar.chi2",
         binning=(15, 0, 30),
-        x_title=rf"$\chi^2$",
+        x_title=r"$\chi^2$",
     )
     config.add_variable(
-        name=f"chi2_lt100",
-        expression=f"TTbar.chi2",
+        name="chi2_lt100",
+        expression="TTbar.chi2",
         binning=(20, 0, 100),
-        x_title=rf"$\chi^2$",
+        x_title=r"$\chi^2$",
     )
     config.add_variable(
-        name=f"ttbar_mass",
-        expression=f"TTbar.mass",
+        name="ttbar_mass",
+        expression="TTbar.mass",
         binning=[
             0, 400, 600, 800, 1000, 1200, 1400,
             1600, 1800, 2000, 2200, 2400, 2600,
@@ -195,32 +203,105 @@ def add_variables(config: od.Config) -> None:
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
-        name=f"ttbar_mass_narrow",
-        expression=f"TTbar.mass",
+        name="ttbar_mass_narrow",
+        expression="TTbar.mass",
         binning=(100, 400, 4400),
         unit="GeV",
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
-        name=f"cos_theta_star",
-        expression=f"TTbar.cos_theta_star",
+        name="cos_theta_star",
+        expression="TTbar.cos_theta_star",
         binning=(100, -1, 1),
         x_title=r"${cos}(\theta^{*})$",
     )
     config.add_variable(
-        name=f"abs_cos_theta_star",
-        expression=f"TTbar.abs_cos_theta_star",
+        name="abs_cos_theta_star",
+        expression="TTbar.abs_cos_theta_star",
         binning=(50, 0, 1),
         x_title=r"$|{cos}(\theta^{*})|$",
     )
-    for decay in ('had', 'lep'):
+    for decay in ("had", "lep"):
+        for var, var_label, var_unit, var_binning in [
+            ("mass", "M", "GeV", (100, 0, 700)),
+            ("pt", "p_{T}", "GeV", (50, 0, 800)),
+            ("eta", r"\eta", None, (50, -5, 5)),
+            ("phi", r"\phi", None, (50, -np.pi, np.pi)),
+        ]:
+            config.add_variable(
+                name=f"top_{decay}_{var}",
+                expression=f"TTbar.top_{decay}_{var}",
+                binning=var_binning,
+                unit=var_unit,
+                x_title=rf"${var_label}({{t}}_{{{decay}}})$",
+            )
         config.add_variable(
-            name=f"top_{decay}_mass",
-            expression=f"TTbar.top_{decay}_mass",
-            binning=(100, 0, 700),
-            unit="GeV",
-            x_title=rf"$M_{{t}}^{{{decay}}}$",
+            name=f"n_jet_{decay}",
+            expression=f"TTbar.n_jet_{decay}",
+            binning=(11, -0.5, 10.5),
+            x_title=rf"$n_{{AK4 jets}}^{decay}$",
         )
+    config.add_variable(
+        name="n_jet_sum",
+        expression="TTbar.n_jet_sum",
+        binning=(11, -0.5, 10.5),
+        x_title=r"$n_{AK4 jets}^{lep+had}$",
+    )
+
+    # gen variables
+    config.add_variable(
+        name="gen_ttbar_mass",
+        expression="TTbar.gen_mass",
+        binning=config.get_variable("ttbar_mass").binning,
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+    )
+    config.add_variable(
+        name="gen_ttbar_mass_narrow",
+        expression="TTbar.gen_mass",
+        binning=config.get_variable("ttbar_mass_narrow").binning,
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+    )
+    config.add_variable(
+        name="gen_cos_theta_star",
+        expression="TTbar.gen_cos_theta_star",
+        binning=config.get_variable("cos_theta_star").binning,
+        x_title=r"${cos}(\theta^{*}_{gen})$",
+    )
+    config.add_variable(
+        name="gen_abs_cos_theta_star",
+        expression="TTbar.gen_abs_cos_theta_star",
+        binning=config.get_variable("abs_cos_theta_star").binning,
+        x_title=r"$|{cos}(\theta^{*})^{gen}|$",
+    )
+    for decay in ("had", "lep"):
+        config.add_variable(
+            name=f"gen_top_{decay}_delta_r",
+            expression=f"TTbar.gen_top_{decay}_delta_r",
+            binning=(50, 0, 0.4),
+            x_title=rf"$\Delta R({{t}}_{{{decay}}}, {{t}}_{{{decay}}}^{{gen}})$",
+        )
+        config.add_variable(
+            name=f"gen_top_{decay}_delta_r_wide",
+            expression=f"TTbar.gen_top_{decay}_delta_r",
+            binning=(100, 0, 3),
+            x_title=rf"$\Delta R({{t}}_{{{decay}}}, {{t}}_{{{decay}}}^{{gen}})$",
+        )
+
+        for var, var_label, var_unit in [
+            ("mass", "M", "GeV"),
+            ("pt", "p_{T}", "GeV"),
+            ("eta", r"\eta", None),
+            ("phi", r"\phi", None),
+        ]:
+            config.add_variable(
+                name=f"gen_top_{decay}_{var}",
+                expression=f"TTbar.gen_top_{decay}_{var}",
+                binning=config.get_variable(f"top_{decay}_{var}").binning,
+                unit=var_unit,
+                x_title=rf"${var_label}({{t}}_{{{decay}}}^{{gen}})$",
+            )
 
     # cutflow variables
 
@@ -281,3 +362,81 @@ def add_variables(config: od.Config) -> None:
         binning=(5, -0.5, 4.5),
         x_title=r"Number of top-tagged AK8 jets",
     )
+
+
+def add_variables_ml(config: od.Config) -> None:
+    """
+    Variables specific to machine learning (input variables, output scores, etc..
+    """
+    # namespace/field under which ML input features are stored
+    ns = "MLInput"
+
+    variables = {
+        "pt": [(100, 0, 3000), "$p_{T}$", "GeV"],
+        "energy": [(100, 0, 5000), "$E$", "GeV"],
+        "mass": [(50, 0, 300), "$m$", "GeV"],
+        "eta": [(50, -2.5, 2.5), r"$\eta$", None],
+        "phi": [(30, -np.pi, np.pi), r"$\phi$", None],
+        "btag": [(50, 0, 1), "b-tag score", None],
+        "msoftdrop": [(50, 0, 500), "$m_{SD}$", "GeV"],
+        "tau21": [(30, 0, 1.2), r"\tau_{21}", None],
+        "tau32": [(30, 0, 1.2), r"\tau_{32}", None],
+    }
+    objects = {
+        "jet": "AK4 jet",
+        "fatjet": "AK8 jet",
+        "lepton": "Lepton",
+        "met": "Missing energy",
+    }
+
+    config.add_variable(
+        name="mli_n_jet",
+        expression=f"{ns}.n_jet",
+        binning=(20, -0.5, 19.5),
+        x_title="ML input (# of AK4 jets)",
+    )
+
+    config.add_variable(
+        name="mli_n_fatjet",
+        expression=f"{ns}.n_fatjet",
+        binning=(20, -0.5, 19.5),
+        x_title="ML input (# of AK8 jets)",
+    )
+
+    # -- helper functions
+
+    def add_vars(name, n_max, attrs):
+        obj_label = objects.get(name, name)
+        for i, attr in itertools.product(range(n_max), attrs):
+            # get variable info
+            binning, var_label, unit = variables[attr]
+
+            # add variable to config
+            config.add_variable(
+                name=f"mli_{name}_{attr}_{i}",
+                expression=f"{ns}.{name}_{attr}_{i}",
+                binning=binning,
+                unit=unit,
+                x_title=f"ML input ({obj_label} #{i+1} {var_label})",
+            )
+
+    def add_vars_single(name, attrs):
+        obj_label = objects.get(name, name)
+        for attr in attrs:
+            # get variable info
+            binning, var_label, unit = variables[attr]
+
+            # add variable to config
+            config.add_variable(
+                name=f"mli_{name}_{attr}",
+                expression=f"{ns}.{name}_{attr}",
+                binning=binning,
+                unit=unit,
+                x_title=f"ML input ({obj_label} {var_label})",
+            )
+
+    add_vars("jet", 5, ("energy", "pt", "eta", "phi", "mass", "btag"))
+    add_vars("fatjet", 3, ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32"))
+
+    add_vars_single("lepton", ("energy", "pt", "eta", "phi"))
+    add_vars_single("met", ("pt", "phi"))

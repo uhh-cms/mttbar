@@ -3,8 +3,6 @@
 """
 Useful selection methods.
 """
-import itertools
-from functools import partial
 from typing import Optional
 
 from columnflow.columnar_util import Route, TaskArrayFunction
@@ -82,7 +80,7 @@ def make_selector_range(
     min_val: float,
     max_val: float,
     route_func: Optional[callable] = None,
-    **decorator_kwargs
+    **decorator_kwargs,
 ):
     """
     Construct a selector that evaluates to *True* whenever the value of the specified *route*

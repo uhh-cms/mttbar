@@ -6,12 +6,9 @@ Configuration of the 2017 m(ttbar) analysis.
 
 import functools
 import os
-import re
-from typing import Set
 
 import yaml
 from scinum import Number, REL
-import order as od
 import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
@@ -19,9 +16,9 @@ from columnflow.util import DotDict
 from columnflow.config_util import (
     add_shift_aliases,
     get_root_processes_from_campaign,
-    get_shifts_from_sources
+    get_shifts_from_sources,
 )
-from mtt.config.categories import add_categories_selection, add_categories_production
+from mtt.config.categories import add_categories_selection
 from mtt.config.variables import add_variables
 
 from mtt.config.analysis_mtt import analysis_mtt
@@ -339,13 +336,10 @@ for dataset_name in dataset_names:
     else:
         dataset.x.is_mtt_signal = False
 
-    # reduce n_files to max. 2 for testing purposes (TODO switch to full dataset)
+    # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
     for k in dataset.info.keys():
-        ## keep full data set for signal samples
-        #if dataset.x.is_mtt_signal:
-        #    continue
-        if dataset[k].n_files > 2:
-            dataset[k].n_files = 2
+        if dataset[k].n_files > 10:
+            dataset[k].n_files = 10
 
 
 # trigger paths for muon/electron channels
@@ -416,8 +410,8 @@ config_2017.set_aux("met_filters", {
 config_2017.set_aux("default_calibrator", "skip_jecunc")
 config_2017.set_aux("default_selector", "default")
 config_2017.set_aux("default_producer", "default")
-config_2017.set_aux("default_ml_model", None)
-config_2017.set_aux("default_inference_model", None)
+config_2017.set_aux("default_ml_model", "simple")
+config_2017.set_aux("default_inference_model", "simple")
 config_2017.set_aux("default_categories", ["incl", "1e", "1m"])
 config_2017.set_aux("default_process_settings", [
     ["zprime_tt_m400_w40", "unstack"],
@@ -456,6 +450,48 @@ config_2017.set_aux("dataset_groups", {
 # (used during plotting)
 config_2017.set_aux("category_groups", {
     "default": ["incl", "1e", "1m"],
+    "all": [
+        "1e",
+        "1m",
+        "1e__0t", "1e__1t",
+        "1m__0t", "1m__1t",
+        "1e__0t__chi2pass", "1e__1t__chi2pass",
+        "1m__0t__chi2pass", "1m__1t__chi2pass",
+        "1e__0t__chi2pass__acts_0_5", "1e__1t__chi2pass__acts_0_5",
+        "1m__0t__chi2pass__acts_0_5", "1m__1t__chi2pass__acts_0_5",
+        "1e__0t__chi2pass__acts_5_7", "1e__1t__chi2pass__acts_5_7",
+        "1m__0t__chi2pass__acts_5_7", "1m__1t__chi2pass__acts_5_7",
+        "1e__0t__chi2pass__acts_7_9", "1e__1t__chi2pass__acts_7_9",
+        "1m__0t__chi2pass__acts_7_9", "1m__1t__chi2pass__acts_7_9",
+        "1e__0t__chi2pass__acts_9_1", "1e__1t__chi2pass__acts_9_1",
+        "1m__0t__chi2pass__acts_9_1", "1m__1t__chi2pass__acts_9_1",
+        "1e__0t__chi2fail", "1e__1t__chi2fail",
+        "1m__0t__chi2fail", "1m__1t__chi2fail",
+        "1e__0t__chi2fail__acts_0_5", "1e__1t__chi2fail__acts_0_5",
+        "1m__0t__chi2fail__acts_0_5", "1m__1t__chi2fail__acts_0_5",
+        "1e__0t__chi2fail__acts_5_7", "1e__1t__chi2fail__acts_5_7",
+        "1m__0t__chi2fail__acts_5_7", "1m__1t__chi2fail__acts_5_7",
+        "1e__0t__chi2fail__acts_7_9", "1e__1t__chi2fail__acts_7_9",
+        "1m__0t__chi2fail__acts_7_9", "1m__1t__chi2fail__acts_7_9",
+        "1e__0t__chi2fail__acts_9_1", "1e__1t__chi2fail__acts_9_1",
+        "1m__0t__chi2fail__acts_9_1", "1m__1t__chi2fail__acts_9_1",
+    ],
+    "all_chi2pass": [
+        "1e",
+        "1m",
+        "1e__0t", "1e__1t",
+        "1m__0t", "1m__1t",
+        "1e__0t__chi2pass", "1e__1t__chi2pass",
+        "1m__0t__chi2pass", "1m__1t__chi2pass",
+        "1e__0t__chi2pass__acts_0_5", "1e__1t__chi2pass__acts_0_5",
+        "1m__0t__chi2pass__acts_0_5", "1m__1t__chi2pass__acts_0_5",
+        "1e__0t__chi2pass__acts_5_7", "1e__1t__chi2pass__acts_5_7",
+        "1m__0t__chi2pass__acts_5_7", "1m__1t__chi2pass__acts_5_7",
+        "1e__0t__chi2pass__acts_7_9", "1e__1t__chi2pass__acts_7_9",
+        "1m__0t__chi2pass__acts_7_9", "1m__1t__chi2pass__acts_7_9",
+        "1e__0t__chi2pass__acts_9_1", "1e__1t__chi2pass__acts_9_1",
+        "1m__0t__chi2pass__acts_9_1", "1m__1t__chi2pass__acts_9_1",
+    ],
 })
 
 # variable groups for conveniently looping over certain variables
@@ -564,6 +600,31 @@ config_2017.x.chi2_parameters = DotDict.wrap({
     },
 })
 
+# parameters to fine-tune the ttbar combinatoric
+# reconstruction
+config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
+    # -- minimal settings (fast runtime)
+    # "n_jet_max": 9,
+    # "n_jet_lep_range": (1, 1),
+    # "n_jet_had_range": (3, 3),
+    # "n_jet_ttbar_range": (4, 4),
+    # "max_chunk_size": 100000,
+
+    # -- default settings
+    "n_jet_max": 9,
+    "n_jet_lep_range": (1, 2),
+    "n_jet_had_range": (1, 6),
+    "n_jet_ttbar_range": (2, 6),
+    "max_chunk_size": 10000,
+
+    # -- "maxed out" settings (very slow)
+    # "n_jet_max": 10,
+    # "n_jet_lep_range": (1, 8),
+    # "n_jet_had_range": (1, 9),
+    # "n_jet_ttbar_range": (2, 10),
+    # "max_chunk_size": 10000,
+}))
+
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
     "campaign": "Summer19UL17",
@@ -670,6 +731,14 @@ config_2017.add_shift(name="pdf_down", id=108, type="shape")
 config_2017.add_shift(name="alpha_up", id=109, type="shape")
 config_2017.add_shift(name="alpha_down", id=110, type="shape")
 
+config_2017.add_shift(name="muon_up", id=111, type="shape")
+config_2017.add_shift(name="muon_down", id=112, type="shape")
+add_shift_aliases(config_2017, "muon", {"muon_weight": "muon_weight_{direction}"})
+
+config_2017.add_shift(name="electron_up", id=113, type="shape")
+config_2017.add_shift(name="electron_down", id=114, type="shape")
+add_shift_aliases(config_2017, "electron", {"electron_weight": "electron_weight_{direction}"})
+
 for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
     add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"})
 
@@ -709,18 +778,19 @@ def make_jme_filename(jme_aux, sample_type, name, era=None):
 
 
 # external files
+json_mirror = "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-dfd90038"
 config_2017.x.external_files = DotDict.wrap({
     # jet energy corrections
-    "jet_jerc": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
+    "jet_jerc": (f"{json_mirror}/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
 
     # btag scale factors
-    "btag_sf_corr": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
+    "btag_sf_corr": (f"{json_mirror}/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
 
     # electron scale factors
-    "electron_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
+    "electron_sf": (f"{json_mirror}/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
 
     # muon scale factors
-    "muon_sf": ("/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-d0a522ea/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
+    "muon_sf": (f"{json_mirror}/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
 
     # files from TODO
     "lumi": {
@@ -776,9 +846,23 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         # all
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
         "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
+        "FatJet.tau1", "FatJet.tau2", "FatJet.tau3",
         # with top tag
         "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
         "FatJetTopTag.msoftdrop", "FatJetTopTag.deepTagMD_TvsQCD",
+        "FatJetTopTag.tau1", "FatJetTopTag.tau2", "FatJetTopTag.tau3",
+        # with top tag and well-separated from lepton
+        "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",
+        "FatJetTopTagDeltaRLepton.phi", "FatJetTopTagDeltaRLepton.mass",
+        "FatJetTopTagDeltaRLepton.msoftdrop", "FatJetTopTagDeltaRLepton.deepTagDeltaRLeptonMD_TvsQCD",
+        "FatJetTopTagDeltaRLepton.tau1", "FatJetTopTagDeltaRLepton.tau2", "FatJetTopTagDeltaRLepton.tau3",
+
+        # -- Gen quantities
+        "Generator.*",
+        "GenMET.*",
+        "GenJet.*",
+        "GenJetAK8.*",
+        "GenPart.*",
 
         # -- missing transverse momentum
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",

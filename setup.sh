@@ -47,6 +47,7 @@ setup_mtt() {
     export MTT_BASE="${this_dir}"
     export CF_BASE="${this_dir}/modules/columnflow"
     export CF_REPO_BASE="${MTT_BASE}"
+    export CF_REPO_BASE_ALIAS="MTT_BASE"
     export CF_SETUP_NAME="${setup_name}"
 
     # load cf setup helpers
