@@ -149,7 +149,7 @@ def ttbar_gen(
         # to index original `GenPart` array
         if idx.ndim == 1:
             idx = ak.singletons(idx)
-            events[tuple(route.split('.'))] = idx
+            events[tuple(route.split("."))] = idx
         return events
 
     # -- write gen particle indices to columns

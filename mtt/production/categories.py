@@ -3,15 +3,13 @@
 """
 Selectors related to defining category masks following the froduction step.
 """
-import itertools
 from functools import partial
 
-from columnflow.columnar_util import Route, TaskArrayFunction
+from columnflow.columnar_util import Route
 from columnflow.util import maybe_import
 from columnflow.selection import Selector, selector
 
-from mtt.selection.util import make_selector_and, make_selector_not, make_selector_range
-from mtt.selection.categories import sel_1e, sel_1m, sel_0t, sel_1t
+from mtt.selection.util import make_selector_not, make_selector_range
 from mtt.production.ttbar_reco import ttbar
 
 np = maybe_import("numpy")
@@ -31,6 +29,7 @@ def sel_chi2pass(
     chi2_max = self.config_inst.x.categorization.chi2_max
     return Route("TTbar.chi2").apply(events) < chi2_max
 
+
 sel_chi2fail = make_selector_not("sel_chi2fail", sel_chi2pass)
 
 
@@ -48,7 +47,7 @@ sels_acts = tuple(
     make_selector_range_acts(
         name=f"sel_acts_{acts_name}",
         min_val=min_val,
-        max_val=max_val
+        max_val=max_val,
     )
     for min_val, max_val, acts_name in zip(acts_bins[:-1], acts_bins[1:], acts_names)
 )

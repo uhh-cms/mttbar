@@ -59,7 +59,7 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
     events = set_ak_column(
         events,
         "cutflow.n_toptag_delta_r_lepton",
-        ak.num(results.objects.FatJet.FatJetTopTagDeltaRLepton, axis=-1)
+        ak.num(results.objects.FatJet.FatJetTopTagDeltaRLepton, axis=-1),
     )
 
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))

@@ -6,12 +6,9 @@ Configuration of the 2017 m(ttbar) analysis.
 
 import functools
 import os
-import re
-from typing import Set
 
 import yaml
 from scinum import Number, REL
-import order as od
 import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
@@ -19,9 +16,9 @@ from columnflow.util import DotDict
 from columnflow.config_util import (
     add_shift_aliases,
     get_root_processes_from_campaign,
-    get_shifts_from_sources
+    get_shifts_from_sources,
 )
-from mtt.config.categories import add_categories_selection, add_categories_production
+from mtt.config.categories import add_categories_selection
 from mtt.config.variables import add_variables
 
 from mtt.config.analysis_mtt import analysis_mtt
@@ -341,9 +338,6 @@ for dataset_name in dataset_names:
 
     # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
     for k in dataset.info.keys():
-        ## keep full data set for signal samples
-        #if dataset.x.is_mtt_signal:
-        #    continue
         if dataset[k].n_files > 10:
             dataset[k].n_files = 10
 
@@ -610,11 +604,11 @@ config_2017.x.chi2_parameters = DotDict.wrap({
 # reconstruction
 config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     # -- minimal settings (fast runtime)
-    #"n_jet_max": 9,
-    #"n_jet_lep_range": (1, 1),
-    #"n_jet_had_range": (3, 3),
-    #"n_jet_ttbar_range": (4, 4),
-    #"max_chunk_size": 100000,
+    # "n_jet_max": 9,
+    # "n_jet_lep_range": (1, 1),
+    # "n_jet_had_range": (3, 3),
+    # "n_jet_ttbar_range": (4, 4),
+    # "max_chunk_size": 100000,
 
     # -- default settings
     "n_jet_max": 9,
@@ -624,11 +618,11 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     "max_chunk_size": 10000,
 
     # -- "maxed out" settings (very slow)
-    #"n_jet_max": 10,
-    #"n_jet_lep_range": (1, 8),
-    #"n_jet_had_range": (1, 9),
-    #"n_jet_ttbar_range": (2, 10),
-    #"max_chunk_size": 10000,
+    # "n_jet_max": 10,
+    # "n_jet_lep_range": (1, 8),
+    # "n_jet_had_range": (1, 9),
+    # "n_jet_ttbar_range": (2, 10),
+    # "max_chunk_size": 10000,
 }))
 
 # location of JEC txt files
@@ -856,7 +850,8 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
         "FatJetTopTag.msoftdrop", "FatJetTopTag.deepTagMD_TvsQCD",
         # with top tag and well-separated from lepton
-        "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta", "FatJetTopTagDeltaRLepton.phi", "FatJetTopTagDeltaRLepton.mass",
+        "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",
+        "FatJetTopTagDeltaRLepton.phi", "FatJetTopTagDeltaRLepton.mass",
         "FatJetTopTagDeltaRLepton.msoftdrop", "FatJetTopTagDeltaRLepton.deepTagDeltaRLeptonMD_TvsQCD",
 
         # -- Gen quantities

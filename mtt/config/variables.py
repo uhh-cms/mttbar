@@ -146,26 +146,26 @@ def add_variables(config: od.Config) -> None:
 
     # ttbar features
     config.add_variable(
-        name=f"chi2",
-        expression=f"TTbar.chi2",
+        name="chi2",
+        expression="TTbar.chi2",
         binning=(100, 0, 600),
-        x_title=rf"$\chi^2$",
+        x_title=r"$\chi^2$",
     )
     config.add_variable(
-        name=f"chi2_lt30",
-        expression=f"TTbar.chi2",
+        name="chi2_lt30",
+        expression="TTbar.chi2",
         binning=(15, 0, 30),
-        x_title=rf"$\chi^2$",
+        x_title=r"$\chi^2$",
     )
     config.add_variable(
-        name=f"chi2_lt100",
-        expression=f"TTbar.chi2",
+        name="chi2_lt100",
+        expression="TTbar.chi2",
         binning=(20, 0, 100),
-        x_title=rf"$\chi^2$",
+        x_title=r"$\chi^2$",
     )
     config.add_variable(
-        name=f"ttbar_mass",
-        expression=f"TTbar.mass",
+        name="ttbar_mass",
+        expression="TTbar.mass",
         binning=[
             0, 400, 600, 800, 1000, 1200, 1400,
             1600, 1800, 2000, 2200, 2400, 2600,
@@ -176,25 +176,25 @@ def add_variables(config: od.Config) -> None:
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
-        name=f"ttbar_mass_narrow",
-        expression=f"TTbar.mass",
+        name="ttbar_mass_narrow",
+        expression="TTbar.mass",
         binning=(100, 400, 4400),
         unit="GeV",
         x_title=r"$m({t}\overline{t})$",
     )
     config.add_variable(
-        name=f"cos_theta_star",
-        expression=f"TTbar.cos_theta_star",
+        name="cos_theta_star",
+        expression="TTbar.cos_theta_star",
         binning=(100, -1, 1),
         x_title=r"${cos}(\theta^{*})$",
     )
     config.add_variable(
-        name=f"abs_cos_theta_star",
-        expression=f"TTbar.abs_cos_theta_star",
+        name="abs_cos_theta_star",
+        expression="TTbar.abs_cos_theta_star",
         binning=(50, 0, 1),
         x_title=r"$|{cos}(\theta^{*})|$",
     )
-    for decay in ('had', 'lep'):
+    for decay in ("had", "lep"):
         for var, var_label, var_unit, var_binning in [
             ("mass", "M", "GeV", (100, 0, 700)),
             ("pt", "p_{T}", "GeV", (50, 0, 800)),
@@ -212,43 +212,43 @@ def add_variables(config: od.Config) -> None:
             name=f"n_jet_{decay}",
             expression=f"TTbar.n_jet_{decay}",
             binning=(11, -0.5, 10.5),
-            x_title=rf"$n_{AK4 jets}^{decay}$",
+            x_title=rf"$n_{{AK4 jets}}^{decay}$",
         )
     config.add_variable(
         name="n_jet_sum",
         expression="TTbar.n_jet_sum",
         binning=(11, -0.5, 10.5),
-        x_title=rf"$n_{AK4 jets}^{lep+had}$",
+        x_title=r"$n_{AK4 jets}^{lep+had}$",
     )
 
     # gen variables
     config.add_variable(
-        name=f"gen_ttbar_mass",
-        expression=f"TTbar.gen_mass",
+        name="gen_ttbar_mass",
+        expression="TTbar.gen_mass",
         binning=config.get_variable("ttbar_mass").binning,
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
     )
     config.add_variable(
-        name=f"gen_ttbar_mass_narrow",
-        expression=f"TTbar.gen_mass",
+        name="gen_ttbar_mass_narrow",
+        expression="TTbar.gen_mass",
         binning=config.get_variable("ttbar_mass_narrow").binning,
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
     )
     config.add_variable(
-        name=f"gen_cos_theta_star",
-        expression=f"TTbar.gen_cos_theta_star",
+        name="gen_cos_theta_star",
+        expression="TTbar.gen_cos_theta_star",
         binning=config.get_variable("cos_theta_star").binning,
         x_title=r"${cos}(\theta^{*}_{gen})$",
     )
     config.add_variable(
-        name=f"gen_abs_cos_theta_star",
-        expression=f"TTbar.gen_abs_cos_theta_star",
+        name="gen_abs_cos_theta_star",
+        expression="TTbar.gen_abs_cos_theta_star",
         binning=config.get_variable("abs_cos_theta_star").binning,
         x_title=r"$|{cos}(\theta^{*})^{gen}|$",
     )
-    for decay in ('had', 'lep'):
+    for decay in ("had", "lep"):
         config.add_variable(
             name=f"gen_top_{decay}_delta_r",
             expression=f"TTbar.gen_top_{decay}_delta_r",

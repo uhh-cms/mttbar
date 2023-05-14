@@ -189,9 +189,6 @@ def muon_selection(
     pt_regime = ak.where(
         (n_lep == 1) & (n_lep_highpt == 1), 2, pt_regime)
 
-    # pt regime boolean for convenience
-    is_lowpt = (pt_regime == 1)
-
     return SelectionResult(
         steps={
             "Lepton": (ak.num(lepton_indices) == 1),

@@ -14,7 +14,6 @@ def an_2019_197(self):
     """
 
     year = self.config_inst.campaign.x.year  # noqa; not used right now
-    ecm = self.config_inst.campaign.ecm
 
     #
     # regions/categories
@@ -61,52 +60,52 @@ def an_2019_197(self):
 
     processes = [
         # signals (TODO: add others)
-        #"zprime_tt_m400_w40",
-        #"zprime_tt_m500_w50",
-        #"zprime_tt_m600_w60",
-        #"zprime_tt_m700_w70",
-        #"zprime_tt_m800_w80",
-        #"zprime_tt_m900_w90",
+        # "zprime_tt_m400_w40",
+        # "zprime_tt_m500_w50",
+        # "zprime_tt_m600_w60",
+        # "zprime_tt_m700_w70",
+        # "zprime_tt_m800_w80",
+        # "zprime_tt_m900_w90",
         "zprime_tt_m1000_w100",
-        #"zprime_tt_m1200_w120",
-        #"zprime_tt_m1400_w140",
-        #"zprime_tt_m1600_w160",
-        #"zprime_tt_m1800_w180",
-        #"zprime_tt_m2000_w200",
-        #"zprime_tt_m2500_w250",
-        #"zprime_tt_m3000_w300",
-        #"zprime_tt_m3500_w350",
-        #"zprime_tt_m4000_w400",
-        #"zprime_tt_m4500_w450",
-        #"zprime_tt_m5000_w500",
-        #"zprime_tt_m6000_w600",
-        #"zprime_tt_m7000_w700",
-        #"zprime_tt_m8000_w800",
-        #"zprime_tt_m9000_w900",
+        # "zprime_tt_m1200_w120",
+        # "zprime_tt_m1400_w140",
+        # "zprime_tt_m1600_w160",
+        # "zprime_tt_m1800_w180",
+        # "zprime_tt_m2000_w200",
+        # "zprime_tt_m2500_w250",
+        # "zprime_tt_m3000_w300",
+        # "zprime_tt_m3500_w350",
+        # "zprime_tt_m4000_w400",
+        # "zprime_tt_m4500_w450",
+        # "zprime_tt_m5000_w500",
+        # "zprime_tt_m6000_w600",
+        # "zprime_tt_m7000_w700",
+        # "zprime_tt_m8000_w800",
+        # "zprime_tt_m9000_w900",
 
         # backgrounds (TODO: add others)
         "tt",
-        #"st",
-        #"dy_lep",
-        #"w_lnu",
-        #"qcd",
-        #"vv",
+        # "st",
+        # "dy_lep",
+        # "w_lnu",
+        # "qcd",
+        # "vv",
     ]
 
     # different naming convention for some processes
     inference_processes = {
         "w_lnu": "wjets",
     }
-    
+
     for proc in processes:
-    
+
         # raise if process not defined in config
         if not self.config_inst.has_process(proc):
             raise ValueError(
                 f"Process {proc} requested for inference, but is not "
-                f"present in the config {self.config_inst.name}."
+                f"present in the config {self.config_inst.name}.",
             )
-            
+
         # determine datasets for each process
         process_insts = [
             p for p, _, _ in self.config_inst.get_process(proc).walk_processes(include_self=True)
@@ -123,11 +122,11 @@ def an_2019_197(self):
             is_signal=proc.startswith("zprime_tt"),
             config_mc_datasets=datasets,
         )
-        
+
     #
     # parameters
     #
-    
+
     # lumi
     lumi = self.config_inst.x.luminosity
     for unc_name in lumi.uncertainties:
@@ -141,8 +140,8 @@ def an_2019_197(self):
     # process rates
     for proc, rate in [
         ("tt", 1.2),
-        #("st", 1.3),
-        #("wjets", 1.5),
+        # ("st", 1.3),
+        # ("wjets", 1.5),
     ]:
         self.add_parameter(
             f"{proc}_rate",

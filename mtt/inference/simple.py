@@ -14,7 +14,6 @@ def simple(self):
     """
 
     year = self.config_inst.campaign.x.year  # noqa; not used right now
-    ecm = self.config_inst.campaign.ecm
 
     #
     # regions/categories
@@ -57,27 +56,27 @@ def simple(self):
 
         # backgrounds (TODO: add others)
         "tt",
-        #"st",
-        #"dy_lep",
-        #"w_lnu",
-        #"qcd",
-        #"vv",
+        # "st",
+        # "dy_lep",
+        # "w_lnu",
+        # "qcd",
+        # "vv",
     ]
 
     # different naming convention for some processes
     inference_processes = {
         "w_lnu": "wjets",
     }
-    
+
     for proc in processes:
-    
+
         # raise if process not defined in config
         if not self.config_inst.has_process(proc):
             raise ValueError(
                 f"Process {proc} requested for inference, but is not "
-                f"present in the config {self.config_inst.name}."
+                f"present in the config {self.config_inst.name}.",
             )
-            
+
         # determine datasets for each process
         process_insts = [
             p for p, _, _ in self.config_inst.get_process(proc).walk_processes(include_self=True)
@@ -94,11 +93,11 @@ def simple(self):
             is_signal=proc.startswith("zprime_tt"),
             config_mc_datasets=datasets,
         )
-        
+
     #
     # parameters
     #
-    
+
     # lumi
     lumi = self.config_inst.x.luminosity
     for unc_name in lumi.uncertainties:
@@ -113,8 +112,8 @@ def simple(self):
     for proc, rate in [
         # TODO: why not -1?
         ("tt", 1.2),
-        #("st", 1.3),
-        #("wjets", 1.5),
+        # ("st", 1.3),
+        # ("wjets", 1.5),
     ]:
         self.add_parameter(
             f"{proc}_rate",
