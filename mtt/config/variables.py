@@ -147,27 +147,27 @@ def add_variables(config: od.Config) -> None:
 
     # jet lepton features
     config.add_variable(
-        name=f"jet_lep_pt_rel",
+        name="jet_lep_pt_rel",
         binning=(40, 0, 400),
         unit="GeV",
         x_title=r"$p_{T}^{rel}$",
     )
     config.add_variable(
-        name=f"jet_lep_delta_r",
+        name="jet_lep_delta_r",
         binning=(40, 0, 5),
         x_title=r"$\Delta R(jet, lep)$",
     )
     config.add_variable(
-        name=f"jet_lep_pt_rel_zoom",
-        expression=f"jet_lep_pt_rel",
+        name="jet_lep_pt_rel_zoom",
+        expression="jet_lep_pt_rel",
         binning=(10, 0, 50),
         unit="GeV",
         x_title=r"$p_{T}^{rel}$",
     )
     config.add_variable(
-        name=f"jet_lep_delta_r_zoom",
-        expression=f"jet_lep_delta_r",
-        binning=(15, 0, 1.4),
+        name="jet_lep_delta_r_zoom",
+        expression="jet_lep_delta_r",
+        binning=(15, 0, 1.5),
         x_title=r"$\Delta R(jet, lep)$",
     )
 

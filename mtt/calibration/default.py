@@ -42,6 +42,7 @@ def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
 
     return events
 
+
 @calibrator(
     uses={mc_weight, deterministic_seeds, jet_energy},
     produces={mc_weight, deterministic_seeds, jet_energy},

@@ -6,7 +6,7 @@ Column production methods related to higher-level features.
 
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
+from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
 from columnflow.production.util import attach_coffea_behavior
 from mtt.production.ttbar_reco import choose_lepton
 from mtt.selection.util import masked_sorted_indices
@@ -58,7 +58,6 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     return events
 
 
-
 @producer(
     uses={
         attach_coffea_behavior,
@@ -66,14 +65,14 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "nMuon",
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "nJet",
         "Jet.muonIdx1", "Jet.muonIdx2", "Jet.electronIdx1", "Jet.electronIdx2",
-        choose_lepton
+        choose_lepton,
     },
     produces={
         attach_coffea_behavior,
         "jet_lep_pt_rel", "jet_lep_delta_r",
     },
 )
-def jet_lepton_features(self:Producer, events: ak.Array, **kwargs) -> ak.Array:
+def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     Produces jet lepton pTrel and deltaR.
     """
@@ -107,8 +106,8 @@ def jet_lepton_features(self:Producer, events: ak.Array, **kwargs) -> ak.Array:
     jet_lep_delta_r = lepton_closest_jet.delta_r(lepton)
 
     # save as new columns
-    events = set_ak_column(events, "jet_lep_pt_rel", jet_lep_pt_rel)
-    events = set_ak_column(events, "jet_lep_delta_r", jet_lep_delta_r)
+    events = set_ak_column(events, "jet_lep_pt_rel",  ak.fill_none(jet_lep_pt_rel, EMPTY_FLOAT))
+    events = set_ak_column(events, "jet_lep_delta_r", ak.fill_none(jet_lep_delta_r, EMPTY_FLOAT))
 
     return events
 
