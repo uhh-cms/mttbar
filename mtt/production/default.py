@@ -25,11 +25,11 @@ ak = maybe_import("awkward")
 )
 def default(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
-    # features
-    events = self[features](events, **kwargs)
-
     # ttbar reconstruction
     events = self[ttbar](events, **kwargs)
+
+    # features
+    events = self[features](events, **kwargs)
 
     # weights
     events = self[weights](events, **kwargs)

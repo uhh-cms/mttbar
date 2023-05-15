@@ -134,15 +134,41 @@ def add_variables(config: od.Config) -> None:
 
     # jj features
     config.add_variable(
-        name="m_jj",
+        name="dijet_mass",
         binning=(40, 0., 400.),
         unit="GeV",
         x_title=r"$m_{jj}$",
     )
     config.add_variable(
-        name="deltaR_jj",
+        name="dijet_delta_r",
         binning=(40, 0, 5),
         x_title=r"$\Delta R(j_{1},j_{2})$",
+    )
+
+    # jet lepton features
+    config.add_variable(
+        name="jet_lep_pt_rel",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"$p_{T}^{rel}$",
+    )
+    config.add_variable(
+        name="jet_lep_delta_r",
+        binning=(40, 0, 5),
+        x_title=r"$\Delta R(jet, lep)$",
+    )
+    config.add_variable(
+        name="jet_lep_pt_rel_zoom",
+        expression="jet_lep_pt_rel",
+        binning=(10, 0, 50),
+        unit="GeV",
+        x_title=r"$p_{T}^{rel}$",
+    )
+    config.add_variable(
+        name="jet_lep_delta_r_zoom",
+        expression="jet_lep_delta_r",
+        binning=(15, 0, 1.5),
+        x_title=r"$\Delta R(jet, lep)$",
     )
 
     # ttbar features
