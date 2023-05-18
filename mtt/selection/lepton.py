@@ -428,6 +428,18 @@ def lepton_selection(
     }
 
     # veto events with both electrons and muons
+    # passing the selection cuts
+    merged_steps["DileptonVeto"] = (
+        merged_steps["DileptonVeto"] &
+        (
+            (
+                ak.num(merged_objects["Muon"]["Muon"], axis=-1) +
+                ak.num(merged_objects["Electron"]["Electron"], axis=-1)
+            ) <= 1
+        )
+    )
+
+    # invalidate channel if both e and mu were found
     channel_id = ak.where(
         ak.num(channel_ids, axis=-1) == 1,
         ak.firsts(channel_ids),
