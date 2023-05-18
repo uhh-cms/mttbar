@@ -78,6 +78,18 @@ def increment_stats(
                 weights[mask][events_sel.process_id == p],
             )
 
+        # sums per category
+        stats.setdefault("sum_mc_weight_per_category", defaultdict(float))
+        stats.setdefault("sum_mc_weight_selected_per_category", defaultdict(float))
+        categories = np.unique(ak.ravel(events.category_ids))
+        for c in categories:
+            stats["sum_mc_weight_per_category"][int(c)] += ak.sum(
+                weights[ak.any(events.category_ids == c, axis=-1)],
+            )
+            stats["sum_mc_weight_selected_per_category"][int(c)] += ak.sum(
+                weights[mask][ak.any(events_sel.category_ids == c, axis=-1)],
+            )
+
 
 def cleaning_factory(
     selector_name: str,
