@@ -398,7 +398,7 @@ def default(
     events = self[mc_weight](events, **kwargs)
 
     # increment stats
-    self[increment_stats](events, event_sel, stats, **kwargs)
+    self[increment_stats](events, results, stats, **kwargs)
 
     return events, results
 
@@ -486,6 +486,6 @@ def default_without_2d_selection(
     events = self[mc_weight](events, **kwargs)
 
     # increment stats
-    self[increment_stats](events, event_sel, stats, **kwargs)
+    self[increment_stats](events, results, stats, **kwargs)
 
     return events, results

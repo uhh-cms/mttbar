@@ -39,14 +39,17 @@ def jet_energy_shifts_init(self: Selector) -> None:
 def increment_stats(
     self: Selector,
     events: ak.Array,
-    mask: ak.Array,
+    results: ak.Array,
     stats: dict,
     **kwargs,
 ) -> None:
     """
     Unexposed selector that does not actually select objects but instead increments selection
-    *stats* in-place based on all input *events* and the final selection *mask*.
+    *stats* in-place based on all input *events* and the final selection *results*.
     """
+    # use main event mask
+    mask = results.main["event"]
+
     # ensure mask passed is boolean
     mask = ak.values_astype(mask, bool)
 
@@ -56,6 +59,10 @@ def increment_stats(
     # increment plain counts
     stats["n_events"] += len(events)
     stats["n_events_selected"] += ak.sum(mask, axis=0)
+    stats.setdefault("n_events_selected_per_step", defaultdict(int))
+    for step, step_mask in results.steps.items():
+        step_mask = ak.values_astype(step_mask, bool)
+        stats["n_events_selected_per_step"][step] += int(ak.sum(step_mask, axis=0))
 
     # store sum of event weights for mc events
     if self.dataset_inst.is_mc:
@@ -66,6 +73,14 @@ def increment_stats(
         # sum for all processes
         stats["sum_mc_weight"] += ak.sum(weights)
         stats["sum_mc_weight_selected"] += ak.sum(weights[mask])
+
+        # sums per individual selection steps
+        stats.setdefault("sum_mc_weight_selected_per_step", defaultdict(float))
+        for step, step_mask in results.steps.items():
+            step_mask = ak.values_astype(step_mask, bool)
+            stats["sum_mc_weight_selected_per_step"][step] += ak.sum(
+                weights[step_mask]
+            )
 
         # sums per process id
         stats.setdefault("sum_mc_weight_per_process", defaultdict(float))
