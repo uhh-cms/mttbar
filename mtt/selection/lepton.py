@@ -13,6 +13,7 @@ from columnflow.selection import Selector, SelectionResult, selector
 
 from mtt.selection.util import masked_sorted_indices
 from mtt.selection.early import check_early
+from mtt.production.lepton import choose_lepton
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -240,10 +241,13 @@ def merge_selection_steps(step_dicts):
     uses={
         "event",
         check_early, muon_selection, electron_selection,
+        choose_lepton,
         "HLT.*",
     },
     produces={
         "channel_id",
+        "pt_regime",
+        choose_lepton,
     },
     exposed=True,
 )
@@ -441,6 +445,10 @@ def lepton_selection(
 
     # put pt regime in a column
     events = set_ak_column(events, "pt_regime", merged_aux["pt_regime"])
+
+    # multiplex Muon/Electron to a single Lepton collection
+    # based on channel_id
+    events = self[choose_lepton](events, **kwargs)
 
     # build and return selection results plus new columns
     return events, SelectionResult(
