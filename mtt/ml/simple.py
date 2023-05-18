@@ -643,7 +643,7 @@ class TTbarSimpleDNN(MLModel):
         # described under `mtt.config.categories`, which ensures that
         #     `cat_id_with_ml == cat_id_without_ml + cat_id_ml`
         category_ids = ak.where(
-            events.category_ids != 1,  # do not split inclusive category into DNN sub-categories
+            events.category_ids != 0,  # do not split inclusive category into DNN sub-categories
             events.category_ids + ak.values_astype(ml_category_id, np.int32),
             events.category_ids,
         )

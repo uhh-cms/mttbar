@@ -3,8 +3,6 @@
 """
 Definition of categories.
 
-NOTE: the scheme described below is *not* yet implemented (TODO)
-
 Categories are assigned a unique integer ID according to a fixed numbering
 scheme, with digits/groups of digits indicating the different category groups:
 
@@ -55,7 +53,7 @@ def name_fn(**groups):
 def kwargs_fn(categories: dict[str, od.Category]):
     """Customization function for automatically generated combined categories."""
     return {
-        "id": "+",
+        "id": sum(cat.id for cat in categories.values()),
         "selection": [cat.selection for cat in categories.values()],
         "label": ", ".join(
             cat.label for cat in categories.values()
@@ -69,7 +67,7 @@ def add_categories_selection(config: od.Config) -> None:
     """
     config.add_category(
         name="incl",
-        id=1,
+        id=0,
         selection="sel_incl",
         label="inclusive",
     )
@@ -77,7 +75,7 @@ def add_categories_selection(config: od.Config) -> None:
     # top category for electron channel
     config.add_category(
         name="1e",
-        id=2,
+        id=1,
         selection="sel_1e",
         label="1e",
         #channel=config.get_channel("e"),  # noqa
@@ -86,7 +84,7 @@ def add_categories_selection(config: od.Config) -> None:
     # top category for muon channel
     config.add_category(
         name="1m",
-        id=3,
+        id=2,
         selection="sel_1m",
         label=r"1$\mu$",
         #channel=config.get_channel("mu"),  # noqa
@@ -95,13 +93,13 @@ def add_categories_selection(config: od.Config) -> None:
     # number of top tags
     config.add_category(
         name="0t",
-        id=4,
+        id=10,
         selection="sel_0t",
         label=r"0t",
     )
     config.add_category(
         name="1t",
-        id=5,
+        id=20,
         selection="sel_1t",
         label=r"1t",
     )
@@ -134,13 +132,13 @@ def add_categories_production(config: od.Config) -> None:
     chi2_max = config.x.categorization.chi2_max
     config.add_category(
         name="chi2pass",
-        id=6,
+        id=100,
         selection="sel_chi2pass",
         label=rf"$\chi^2 < {chi2_max}$",
     )
     config.add_category(
         name="chi2fail",
-        id=7,
+        id=200,
         selection="sel_chi2fail",
         label=rf"$\chi^2 \geq {chi2_max}$",
     )
@@ -148,25 +146,25 @@ def add_categories_production(config: od.Config) -> None:
     # categories corresponding to cos(theta*) bins
     config.add_category(
         name="acts_0_5",
-        id=8,
+        id=1000,
         selection="sel_acts_0_5",
         label=r"$|{cos}(\theta^*)| < 0.5$",
     )
     config.add_category(
         name="acts_5_7",
-        id=9,
+        id=2000,
         selection="sel_acts_5_7",
         label=r"$0.5 < |{cos}(\theta^*)| < 0.7$",
     )
     config.add_category(
         name="acts_7_9",
-        id=10,
+        id=3000,
         selection="sel_acts_7_9",
         label=r"$0.7 < |{cos}(\theta^*)| < 0.9$",
     )
     config.add_category(
         name="acts_9_1",
-        id=11,
+        id=4000,
         selection="sel_acts_9_1",
         label=r"$0.9 < |{cos}(\theta^*)| < 1.0$",
     )
@@ -211,7 +209,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
     for i, proc in enumerate(ml_model_inst.processes):
         cat = config.add_category(
             name=f"dnn_{proc}",
-            id=(i + 1) * 10000,
+            id=(i + 1) * 100000,
             selection=f"sel_dnn_{proc}",
             label=f"dnn_{proc}",
         )
