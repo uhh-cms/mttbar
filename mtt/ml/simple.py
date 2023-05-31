@@ -704,7 +704,7 @@ simple_dnn = TTbarSimpleDNN.derive("simple", cls_dict={
         "st_twchannel_t_powheg",
         "st_twchannel_tbar_powheg",
         "st_schannel_lep_amcatnlo",
-        # "st_schannel_had_amcatnlo",
+        "st_schannel_had_amcatnlo",
         # WJets
         "w_lnu_ht70To100_madgraph",
         "w_lnu_ht100To200_madgraph",

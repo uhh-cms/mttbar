@@ -615,7 +615,7 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     "n_jet_lep_range": (1, 2),
     "n_jet_had_range": (1, 6),
     "n_jet_ttbar_range": (2, 6),
-    "max_chunk_size": 10000,
+    "max_chunk_size": 8000,
 
     # -- "maxed out" settings (very slow)
     # "n_jet_max": 10,
