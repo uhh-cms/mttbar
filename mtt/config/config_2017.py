@@ -336,10 +336,10 @@ for dataset_name in dataset_names:
     else:
         dataset.x.is_mtt_signal = False
 
-    # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
+    # reduce n_files to max. 1 for testing purposes (TODO switch to full dataset)
     for k in dataset.info.keys():
-        if dataset[k].n_files > 10:
-            dataset[k].n_files = 10
+        if dataset[k].n_files > 1:
+            dataset[k].n_files = 1
 
 
 # trigger paths for muon/electron channels
@@ -522,7 +522,7 @@ config_2017.set_aux("shift_groups", {
 # selector step groups for conveniently looping over certain steps
 # (used in cutflow tasks)
 config_2017.set_aux("selector_step_groups", {
-    "default": ["Lepton", "MET", "Jet", "BJet", "JetLepton2DCut", "AllHadronicVeto", "DileptonVeto", "METFilters"],
+    "default": ["Lepton", "AllHadronicVeto", "DileptonVeto", "MET", "Jet", "BJet", "JetLepton2DCut", "METFilters"],
 })
 
 config_2017.set_aux("selector_step_labels", {
