@@ -10,20 +10,28 @@ setup_mtt() {
     # The setup also handles the installation of the software stack via virtual environments, and
     # optionally an interactive setup where the user can configure certain variables.
     #
-    #
     # Arguments:
     #   1. The name of the setup. "default" (which is itself the default when no name is set)
     #      triggers a setup with good defaults, avoiding all queries to the user and the writing of
     #      a custom setup file. See "interactive_setup()" for more info.
     #
-    #
-    # Optinally preconfigured environment variables:
+    # Optionally preconfigured environment variables:
     #   None yet.
     #
     #
-    # Variables defined by the setup and potentially required throughout the analysis.
+    # Variables defined by the setup and potentially required throughout the analysis:
     #   MTT_BASE
     #       The absolute analysis base directory. Used to infer file locations relative to it.
+    #   MTT_SETUP
+    #       A flag that is set to 1 after the setup was successful.
+
+    # prevent repeated setups
+    if [ "${MTT_SETUP}" = "1" ]; then
+        >&2 echo "m(ttbar) analysis was already succesfully set up"
+        >&2 echo "re-running the setup requires a new shell"
+        return "1"
+    fi
+
 
     #
     # prepare local variables
@@ -46,8 +54,6 @@ setup_mtt() {
     # start exporting variables
     export MTT_BASE="${this_dir}"
     export CF_BASE="${this_dir}/modules/columnflow"
-    export CF_REPO_BASE="${MTT_BASE}"
-    export CF_REPO_BASE_ALIAS="MTT_BASE"
     export CF_SETUP_NAME="${setup_name}"
 
     # load cf setup helpers
@@ -55,7 +61,7 @@ setup_mtt() {
 
     # interactive setup
     if [ "${CF_REMOTE_JOB}" != "1" ]; then
-    	cf_setup_interactive_body() {
+        cf_setup_interactive_body() {
             # start querying for variables
             query CF_CERN_USER "CERN username" "$( whoami )"
             export_and_save CF_CERN_USER_FIRSTCHAR "\${CF_CERN_USER:0:1}"
@@ -71,22 +77,41 @@ setup_mtt() {
             export_and_save CF_TASK_NAMESPACE "${CF_TASK_NAMESPACE:-cf}"
             query CF_LOCAL_SCHEDULER "Use a local scheduler for law tasks" "True"
             if [ "${CF_LOCAL_SCHEDULER}" != "True" ]; then
-		query CF_SCHEDULER_HOST "Address of a central scheduler for law tasks" "naf-cms15.desy.de"
-		query CF_SCHEDULER_PORT "Port of a central scheduler for law tasks" "8082"
+                query CF_SCHEDULER_HOST "Address of a central scheduler for law tasks" "naf-cms15.desy.de"
+                query CF_SCHEDULER_PORT "Port of a central scheduler for law tasks" "8082"
             else
-		export_and_save CF_SCHEDULER_HOST "127.0.0.1"
-		export_and_save CF_SCHEDULER_PORT "8082"
+                export_and_save CF_SCHEDULER_HOST "127.0.0.1"
+                export_and_save CF_SCHEDULER_PORT "8082"
             fi
             query MTT_BUNDLE_CMSSW "Install and bundle CMSSW sandboxes for job submission?" "True"
-	}
-	cf_setup_interactive "${CF_SETUP_NAME}" "${MTT_BASE}/.setups/${CF_SETUP_NAME}.sh" || return "$?"
+        }
+        cf_setup_interactive "${CF_SETUP_NAME}" "${MTT_BASE}/.setups/${CF_SETUP_NAME}.sh" || return "$?"
     fi
 
     # continue the fixed setup
+    export CF_REPO_BASE="${MTT_BASE}"
+    export CF_REPO_BASE_ALIAS="MTT_BASE"
     export CF_CONDA_BASE="${CF_CONDA_BASE:-${CF_SOFTWARE_BASE}/conda}"
     export CF_VENV_BASE="${CF_VENV_BASE:-${CF_SOFTWARE_BASE}/venvs}"
     export CF_CMSSW_BASE="${CF_CMSSW_BASE:-${CF_SOFTWARE_BASE}/cmssw}"
     export CF_CI_JOB="$( [ "${GITHUB_ACTIONS}" = "true" ] && echo 1 || echo 0 )"
+    export CF_ORIG_PATH="${PATH}"
+    export CF_ORIG_PYTHONPATH="${PYTHONPATH}"
+    export CF_ORIG_PYTHON3PATH="${PYTHON3PATH}"
+    export CF_ORIG_LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
+
+    # show a warning in case no CF_REPO_BASE_ALIAS is set
+    if [ -z "${CF_REPO_BASE_ALIAS}" ]; then
+        cf_color yellow "the variable CF_REPO_BASE_ALIAS is unset"
+        cf_color yellow "please consider setting it to the name of the variable that refers to your analysis base directory"
+    fi
+
+
+    #
+    # minimal local software setup
+    #
+
+    cf_setup_software_stack "${CF_SETUP_NAME}" || return "$?"
 
 
     #
@@ -96,20 +121,15 @@ setup_mtt() {
     cf_setup_common_variables || return "$?"
 
 
-    #
-    # minimal local software setup
-    #
-
-    cf_setup_software_stack "${CF_SETUP_NAME}" || return "$?"
-
-    # ammend paths that are not covered by the central cf setup
+    # amend paths that are not covered by the central cf setup
     export PATH="${MTT_BASE}/bin:${PATH}"
     export PYTHONPATH="${MTT_BASE}:${MTT_BASE}/modules/cmsdb:${PYTHONPATH}"
 
     # initialze submodules
-    if [ -d "${MTT_BASE}/.git" ]; then
+    if [ -e "${MTT_BASE}/.git" ]; then
+        local m
         for m in $( ls -1q "${MTT_BASE}/modules" ); do
-            cf_init_submodule "${MTT_BASE}/modules/${m}"
+            cf_init_submodule "${MTT_BASE}" "modules/${m}"
         done
     fi
 
@@ -129,6 +149,9 @@ setup_mtt() {
         # silently index
         law index -q
     fi
+
+    # finalize
+    export MTT_SETUP="1"
 }
 
 main() {
