@@ -12,7 +12,9 @@ ak = maybe_import("awkward")
 
 
 @selector(
-    uses={"Jet.pt", "Jet.eta", "FatJet.pt", "FatJet.eta"},
+    uses={
+        "Jet.pt", "Jet.eta", "FatJet.pt", "FatJet.eta",
+    },
     produces={
         "cutflow.jet1_pt", "cutflow.jet2_pt", "cutflow.jet3_pt", "cutflow.jet4_pt",
         "cutflow.jet1_eta", "cutflow.jet2_eta", "cutflow.jet3_eta", "cutflow.jet4_eta",
@@ -64,5 +66,15 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
 
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
     events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
+    if not getattr(self.dataset_inst.x, "is_diboson", None):
+        events = set_ak_column(events, "cutflow.lhe_ht", events.LHE.HT)
 
     return events
+
+
+@cutflow_features.init
+def cutflow_features_init(self: Selector) -> None:
+
+    if hasattr(self, "dataset_inst") and not getattr(self.dataset_inst.x, "is_diboson", None):
+        self.uses |= {"LHE.HT"}
+        self.produces |= {"cutflow.lhe_ht"}

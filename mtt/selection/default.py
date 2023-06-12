@@ -306,6 +306,31 @@ def lepton_jet_2d_selection(
         },
     )
 
+@selector(
+    uses={
+        attach_coffea_behavior,
+        "Jet.pt",
+        "GenJet_pt",
+        "LHE.HT",
+    },
+    exposed=True,
+)
+def qcd_spikes(
+    self: Selector,
+    events: ak.Array,
+    **kwargs,
+) -> tuple[ak.Array, SelectionResult]:
+    # ensure coffea behavior
+    events = self[attach_coffea_behavior](events, **kwargs)
+
+    sel_jets = ak.fill_none(events.LHE.HT > ak.firsts(events.Jet.pt), True)
+
+    # build and return selection results plus new columns
+    return events, SelectionResult(
+        steps={
+            "QCDSpikes": sel_jets,
+        },
+    )
 
 @selector(
     uses={
@@ -374,6 +399,10 @@ def default(
     events, top_tagged_jets_results = self[top_tagged_jets](events, **kwargs)
     results += top_tagged_jets_results
 
+    if getattr(self.dataset_inst.x, "is_qcd", None):
+        events, qcd_sel_results = self[qcd_spikes](events, **kwargs)
+        results += qcd_sel_results
+
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
     results.main["event"] = event_sel
@@ -401,6 +430,14 @@ def default(
     self[increment_stats](events, results, stats, **kwargs)
 
     return events, results
+
+
+@default.init
+def default_init(self: Selector) -> None:
+
+    if hasattr(self, "dataset_inst") and getattr(self.dataset_inst.x, "is_qcd", None):
+        self.uses |= {qcd_spikes}
+        self.produces |= {qcd_spikes}
 
 
 @selector(

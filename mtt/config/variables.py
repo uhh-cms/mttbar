@@ -362,6 +362,21 @@ def add_variables(config: od.Config) -> None:
         binning=(5, -0.5, 4.5),
         x_title=r"Number of top-tagged AK8 jets",
     )
+    config.add_variable(
+        name="cf_lhe_ht",
+        expression="cutflow.lhe_ht",
+        binning=(100, 50., 3000.),
+        unit="GeV",
+        x_title=r"LHE $H_{T}$",
+    )
+    config.add_variable(
+        name=f"cf_jet1_pt_more",
+        expression=f"cutflow.jet1_pt",
+        binning=(100, 0., 5000.),
+        unit="GeV",
+        x_title=r"jet 1 $p_{T}$",
+    )
+
 
 
 def add_variables_ml(config: od.Config) -> None:

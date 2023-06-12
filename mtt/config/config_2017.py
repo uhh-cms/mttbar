@@ -137,13 +137,14 @@ dataset_names = [
     "zz_pythia",
     # SingleTop
     "st_schannel_lep_amcatnlo",
+    "st_schannel_had_amcatnlo",
     "st_tchannel_t_powheg",
     "st_tchannel_tbar_powheg",
     "st_twchannel_t_powheg",
     "st_twchannel_tbar_powheg",
     # QCD
-    "qcd_ht50to100_madgraph",
-    "qcd_ht100to200_madgraph",
+#     "qcd_ht50to100_madgraph",
+#     "qcd_ht100to200_madgraph",
     "qcd_ht200to300_madgraph",
     "qcd_ht300to500_madgraph",
     "qcd_ht500to700_madgraph",
@@ -321,6 +322,17 @@ for dataset_name in dataset_names:
         dataset.x.has_top = True
     if dataset.name.startswith("tt"):
         dataset.x.is_ttbar = True
+    if dataset.name.startswith("qcd"):
+        dataset.x.is_qcd = True
+    if any(
+        dataset.name.startswith(prefix)
+        for prefix in [
+            "ww",
+            "wz",
+            "zz",
+        ]
+    ):
+        dataset.x.is_diboson = True
 
     # mark mttbar signal samples
     if any(
