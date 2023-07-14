@@ -474,7 +474,6 @@ class TTbarSimpleDNN(MLModel):
         optimizer = keras.optimizers.Adam(
             learning_rate=self.learning_rate,
             beta_1=0.9, beta_2=0.999,
-            decay=0.0,
             epsilon=1e-6,
             amsgrad=False,
         )
