@@ -318,24 +318,38 @@ for dataset_name in dataset_names:
     dataset = config_2017.add_dataset(campaign_run2_2017.get_dataset(dataset_name))
 
     # add aux info to datasets
-    if dataset.name.startswith(("st", "tt")):
-        dataset.x.has_top = True
-    if dataset.name.startswith("tt"):
-        dataset.x.is_ttbar = True
-    if dataset.name.startswith("qcd"):
-        dataset.x.is_qcd = True
-    if any(
+    dataset.x.has_top = any(
+        dataset.name.startswith(prefix)
+        for prefix in [
+            "st",
+            "tt",
+        ]
+    )
+    dataset.x.is_ttbar = dataset.name.startswith("tt")
+    dataset.x.is_qcd = dataset.name.startswith("qcd")
+
+    dataset.x.is_egamma_data = any(
+        dataset.name.startswith(prefix)
+        for prefix in [
+            "data_e",
+            "data_pho",
+        ]
+    )
+    dataset.x.is_e_data = dataset.name.startswith("data_e")
+    dataset.x.is_pho_data = dataset.name.startswith("data_pho")
+    dataset.x.is_mu_data = dataset.name.startswith("data_mu")
+    dataset.x.is_data = dataset.name.startswith("data")
+    dataset.x.is_diboson = any(
         dataset.name.startswith(prefix)
         for prefix in [
             "ww",
             "wz",
             "zz",
         ]
-    ):
-        dataset.x.is_diboson = True
+    )
 
     # mark mttbar signal samples
-    if any(
+    dataset.x.is_mtt_signal = any(
         dataset.name.startswith(prefix)
         for prefix in [
             "zprime_tt",
@@ -343,10 +357,7 @@ for dataset_name in dataset_names:
             "hscalar_tt",
             "rsgluon_tt",
         ]
-    ):
-        dataset.x.is_mtt_signal = True
-    else:
-        dataset.x.is_mtt_signal = False
+    )
 
     # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
     for k in dataset.info.keys():
