@@ -389,6 +389,8 @@ config_2017.set_aux("triggers", DotDict.wrap({
                 },
                 "electron": {
                     "Ele35_WPTight_Gsf",
+                },
+                "photon": {
                     "Photon200",
                 },
             },
@@ -404,6 +406,8 @@ config_2017.set_aux("triggers", DotDict.wrap({
                 },
                 "electron": {
                     "Ele115_CaloIdVT_GsfTrkIdT",
+                },
+                "photon": {
                     "Photon200",
                 },
             },
