@@ -386,6 +386,18 @@ def add_variables_ml(config: od.Config) -> None:
     # namespace/field under which ML input features are stored
     ns = "MLInput"
 
+    pt_binning_jets = (150//2, 0, 3000)
+    pt_binning_leptons = (50//2, 0, 1000)
+    pt_binning_met = (150//2, 0, 1500)
+    energy_binning_jets = (100//2, 0, 5000)
+    energy_binning_leptons = (144//2, 0, 3000)
+    mass_binning_jets = (50//2, 0, 300)
+    eta_binning = (50//2, -2.5, 2.5)
+    phi_binning = (30//2, -(np.pi+0.2), (np.pi+0.2))
+    btag_binning = (50//2, 0, 1)
+    msoftdrop_binning = (50//2, 0, 500)
+    tau_binning = (24//2, 0, 1.2)
+
     variables = {
         "pt": [(100, 0, 3000), "$p_{T}$", "GeV"],
         "energy": [(100, 0, 5000), "$E$", "GeV"],
@@ -401,7 +413,7 @@ def add_variables_ml(config: od.Config) -> None:
         "jet": "AK4 jet",
         "fatjet": "AK8 jet",
         "lepton": "Lepton",
-        "met": "Missing energy",
+        "met": "Missing transverse energy",
     }
 
     config.add_variable(
@@ -417,6 +429,144 @@ def add_variables_ml(config: od.Config) -> None:
         binning=(20, -0.5, 19.5),
         x_title="ML input (# of AK8 jets)",
     )
+
+    # binning adjusted variables to better compare with AN
+
+    config.add_variable(
+        name=f"mli_AN_lepton_energy",
+        expression=f"{ns}.lepton_energy",
+        binning=energy_binning_leptons,
+        unit="GeV",
+        x_title=f"ML input (Lepton $E$)",
+    )
+
+    config.add_variable(
+        name=f"mli_AN_lepton_pt",
+        expression=f"{ns}.lepton_pt",
+        binning=pt_binning_leptons,
+        unit="GeV",
+        x_title="ML input (Lepton $p_{T}$)",
+    )
+
+    config.add_variable(
+        name=f"mli_AN_lepton_eta",
+        expression=f"{ns}.lepton_eta",
+        binning=eta_binning,
+        x_title=f"ML input (Lepton $\eta$)",
+    )
+
+    config.add_variable(
+        name=f"mli_AN_lepton_phi",
+        expression=f"{ns}.lepton_phi",
+        binning=phi_binning,
+        x_title=f"ML input (Lepton $\phi$)",
+    )
+
+    config.add_variable(
+        name=f"mli_AN_met_pt",
+        expression=f"{ns}.met_pt",
+        binning=pt_binning_met,
+        unit="GeV",
+        x_title="ML input (Missing transverse $p_{T}$)",
+    )
+
+    config.add_variable(
+        name=f"mli_AN_met_phi",
+        expression=f"{ns}.met_phi",
+        binning=phi_binning,
+        x_title=f"ML input (MET $\phi$)",
+    )
+
+    for i in range(0, 5):
+        config.add_variable(
+                name=f"mli_AN_jet_energy_{i}",
+                expression=f"{ns}.jet_energy_{i}",
+                binning=energy_binning_jets,
+                unit="GeV",
+                x_title=f"ML input (AK4 jet #{i+1} $E$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_jet_pt_{i}",
+                expression=f"{ns}.jet_pt_{i}",
+                binning=pt_binning_jets,
+                unit="GeV",
+                x_title=f"ML input (AK4 jet #{i+1} $p_T$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_jet_eta_{i}",
+                expression=f"{ns}.jet_eta_{i}",
+                binning=eta_binning,
+                x_title=f"ML input (AK4 jet #{i+1} $\eta$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_jet_phi_{i}",
+                expression=f"{ns}.jet_phi_{i}",
+                binning=phi_binning,
+                x_title=f"ML input (AK4 jet #{i+1} $\phi$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_jet_mass_{i}",
+                expression=f"{ns}.jet_mass_{i}",
+                binning=mass_binning_jets,
+                unit="GeV",
+                x_title=f"ML input (AK4 jet #{i+1} $m$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_jet_btag_{i}",
+                expression=f"{ns}.jet_btag_{i}",
+                binning=btag_binning,
+                x_title=f"ML input (AK4 jet #{i+1} b tag score)",
+            )
+
+    for i in range(0, 3):
+        config.add_variable(
+                name=f"mli_AN_fatjet_energy_{i}",
+                expression=f"{ns}.fatjet_energy_{i}",
+                binning=energy_binning_jets,
+                unit="GeV",
+                x_title=f"ML input (AK8 jet #{i+1} $E$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_fatjet_pt_{i}",
+                expression=f"{ns}.fatjet_pt_{i}",
+                binning=pt_binning_jets,
+                unit="GeV",
+                x_title=f"ML input (AK8 jet #{i+1} $p_T$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_fatjet_eta_{i}",
+                expression=f"{ns}.fatjet_eta_{i}",
+                binning=eta_binning,
+                x_title=f"ML input (AK8 jet #{i+1} $\eta$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_fatjet_phi_{i}",
+                expression=f"{ns}.fatjet_phi_{i}",
+                binning=phi_binning,
+                x_title=f"ML input (AK8 jet #{i+1} $\phi$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_fatjet_msoftdrop_{i}",
+                expression=f"{ns}.fatjet_msoftdrop_{i}",
+                binning=msoftdrop_binning,
+                unit="GeV",
+                x_title=f"ML input (AK8 jet #{i+1} $m_{{SD}}$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_fatjet_tau21_{i}",
+                expression=f"{ns}.fatjet_tau21_{i}",
+                binning=tau_binning,
+                x_title=rf"ML input (AK8 jet #{i+1} $\tau_{{21}}$)",
+            )
+        config.add_variable(
+                name=f"mli_AN_fatjet_tau32_{i}",
+                expression=f"{ns}.fatjet_tau32_{i}",
+                binning=tau_binning,
+                x_title=rf"ML input (AK8 jet #{i+1} $\tau_{{32}}$)",
+            )
+
+
+
 
     # -- helper functions
 
