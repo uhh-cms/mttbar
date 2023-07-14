@@ -517,7 +517,8 @@ def default(
     events = self[process_ids](events, **kwargs)
 
     # add mc weights (needed for cutflow plots)
-    events = self[mc_weight](events, **kwargs)
+    if getattr(self.dataset_inst.x, "is_mc", None):
+        events = self[mc_weight](events, **kwargs)
 
     # increment stats
     self[increment_stats](events, results, stats, **kwargs)
