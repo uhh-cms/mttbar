@@ -121,8 +121,12 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         # lepton energy compatible with PF energy fraction (within tolerance)
         lep_energy_pf_compatible = (jet_lepton_lv.energy < (1 + tolerance) * jet_pf_energy)
 
+        # calculate mass of cleaned jet, masking imaginary values
+        jet_lv_cleaned_mass_sq = jet_lv_cleaned.energy**2 - jet_lv_cleaned.rho**2
+        jet_lv_cleaned_mass = ak.mask(np.sqrt(abs(jet_lv_cleaned_mass_sq)), jet_lv_cleaned_mass_sq >= 0)
+
         # cleaning does not result in a negative/imaginary/undefined mass
-        mass_stays_positive = (jet_lv_cleaned.mass >= 0)
+        mass_stays_positive = ~ak.is_none(jet_lv_cleaned_mass, axis=1)
 
         # angle before/after cleaning is similar (delta_r < max_angle_diff)
         #
@@ -135,17 +139,32 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         # calculate the maximum angle difference as a function ~1/pt, reaching the maximum
         # value `np.pi` when extrapolating towards pt = 0.
 
-        # tweakable parameters
-        ref_pt = 30.  # pt below which heuristic is active
-        ref_angle = np.pi / 2  # constant max angle difference at (pt > = ref_pt)
+        #
+        # method 1: fixed threshold
+        #
 
-        # calculate maximum allowed angle difference using heuristic below `ref_pt`
-        pt_scale = (ref_angle * ref_pt) / (np.pi - ref_angle)
-        max_angle_diff = np.pi * pt_scale / (jet_lv_cleaned.pt + pt_scale)
-        max_angle_diff = ak.where(jet_lv_cleaned.pt > ref_pt, ref_angle, max_angle_diff)
+        # clean only if angle difference below fixed threshold OR the cleaned pt is very low
+        # (high probablility that this was a lepton fake)
+        angle_change_small = (
+            (jet_lv.delta_r(jet_lv_cleaned) <= np.pi / 2) |
+            (jet_lv_cleaned.pt < 10)
+        )
 
-        # clean only if angle difference passes the check
-        angle_change_small = jet_lv.delta_r(jet_lv_cleaned) < max_angle_diff
+        #
+        # method 2: heuristic (needs tweaking)
+        #
+
+        # # tweakable parameters
+        # ref_pt = 30.  # pt below which heuristic is active
+        # ref_angle = np.pi / 2  # constant max angle difference at (pt > = ref_pt)
+
+        # # calculate maximum allowed angle difference using heuristic below `ref_pt`
+        # pt_scale = (ref_angle * ref_pt) / (np.pi - ref_angle)
+        # max_angle_diff = np.pi * pt_scale / (jet_lv_cleaned.pt + pt_scale)
+        # max_angle_diff = ak.where(jet_lv_cleaned.pt > ref_pt, ref_angle, max_angle_diff)
+
+        # # clean only if angle difference passes the check
+        # angle_change_small = jet_lv.delta_phi(jet_lv_cleaned) <= max_angle_diff
 
         # AND of cleaning conditions
         do_clean = mass_stays_positive & angle_change_small & lep_energy_pf_compatible
@@ -160,7 +179,7 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         )
 
         # update jet PF energies
-        jet_pf_energy = ak.where(
+        jet_pf_energies[jet_lepton_type] = ak.where(
             do_clean,
             jet_pf_energy_cleaned,
             jet_pf_energy,
@@ -170,7 +189,7 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
     jet_lv = lv_mass(jet_lv)
     for var in ["pt", "eta", "phi", "mass"]:
         # ensure no missing values
-        value = ak.fill_none(getattr(jet_lv, var), 0.0)
+        value = ak.fill_none(ak.nan_to_none(getattr(jet_lv, var)), 0.0)
         events = set_ak_column(events, f"Jet.{var}", value)
 
     return events
