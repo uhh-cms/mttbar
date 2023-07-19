@@ -370,7 +370,7 @@ def data_trigger_veto(
         triggers[object_name] = {
             "lowpt": trigger_config.get("lowpt", {}).get("all", {}).get("triggers", {}).get(object_name, {}),
             "highpt_early": trigger_config.get("highpt", {}).get("early", {}).get("triggers", {}).get(object_name, {}),
-            "highpt_late": trigger_config.get("highpt", {}).get("late", {}).get("triggers", {}).get(object_name, {})
+            "highpt_late": trigger_config.get("highpt", {}).get("late", {}).get("triggers", {}).get(object_name, {}),
         }
         trigger_masks[object_name] = object_trigger_masks = {}
         # get trigger decisions if trigger is available

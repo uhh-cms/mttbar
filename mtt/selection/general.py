@@ -79,7 +79,7 @@ def increment_stats(
         for step, step_mask in results.steps.items():
             step_mask = ak.values_astype(step_mask, bool)
             stats["sum_mc_weight_selected_per_step"][step] += ak.sum(
-                weights[step_mask]
+                weights[step_mask],
             )
 
         # sums per process id

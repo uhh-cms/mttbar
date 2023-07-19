@@ -143,8 +143,8 @@ dataset_names = [
     "st_twchannel_t_powheg",
     "st_twchannel_tbar_powheg",
     # QCD
-#     "qcd_ht50to100_madgraph",
-#     "qcd_ht100to200_madgraph",
+    # "qcd_ht50to100_madgraph",
+    # "qcd_ht100to200_madgraph",
     "qcd_ht200to300_madgraph",
     "qcd_ht300to500_madgraph",
     "qcd_ht500to700_madgraph",

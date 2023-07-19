@@ -105,7 +105,7 @@ def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     jet_lep_delta_r = lepton_closest_jet.delta_r(lepton)
 
     # save as new columns
-    events = set_ak_column(events, "jet_lep_pt_rel",  ak.fill_none(jet_lep_pt_rel, EMPTY_FLOAT))
+    events = set_ak_column(events, "jet_lep_pt_rel", ak.fill_none(jet_lep_pt_rel, EMPTY_FLOAT))
     events = set_ak_column(events, "jet_lep_delta_r", ak.fill_none(jet_lep_delta_r, EMPTY_FLOAT))
 
     return events
