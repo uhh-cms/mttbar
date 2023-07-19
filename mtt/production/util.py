@@ -214,7 +214,7 @@ def delta_r_match(dst_lvs, src_lv, max_dr=None):
     best_match_dst_lv = ak.firsts(dst_lvs[best_match_idx])
 
     # filter dst_lvs to remove the best matches (if any)
-    keep = (ak.local_index(dst_lvs) != ak.firsts(best_match_idx))
+    keep = (ak.local_index(dst_lvs, axis=1) != ak.firsts(best_match_idx))
     keep = ak.fill_none(keep, True)
     dst_lvs = ak.mask(dst_lvs, keep)
     dst_lvs = ak.where(ak.is_none(dst_lvs, axis=0), [[]], dst_lvs)
@@ -231,7 +231,7 @@ def delta_r_match_multiple(dst_lvs, src_lvs, max_dr=None):
     """
 
     # save the index structure of the supplied source array
-    src_lvs_idx = ak.local_index(src_lvs)
+    src_lvs_idx = ak.local_index(src_lvs, axis=1)
 
     # pad sub-lists to the same length (but at least 1)
     max_num = max(1, ak.max(ak.num(src_lvs)))

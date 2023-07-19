@@ -61,10 +61,9 @@ def jj_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 @producer(
     uses={
         attach_coffea_behavior,
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "nElectron",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "nMuon",
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "nJet",
-        "Jet.muonIdx1", "Jet.muonIdx2", "Jet.electronIdx1", "Jet.electronIdx2",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
         choose_lepton,
     },
     produces={

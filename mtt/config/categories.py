@@ -42,11 +42,11 @@ from columnflow.config_util import create_category_combinations
 from mtt.ml.categories import register_ml_selectors
 
 
-def name_fn(**groups):
+def name_fn(categories: dict[str, od.Category]):
     """Naming function for automatically generated combined categories."""
     return "__".join(
-        cat_name for cat_name in groups.values()
-        if cat_name is not None
+        cat.name for cat in categories.values()
+        if cat.name is not None
     )
 
 

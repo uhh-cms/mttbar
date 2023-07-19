@@ -19,9 +19,9 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
     uses={
         "channel_id",
         "Generator.*",
-        "nGenJet", "GenJet.*",
-        "nGenJetAK8", "GenJetAK8.*",
-        "nGenPart", "GenPart.*",
+        "GenJet.*",
+        "GenJetAK8.*",
+        "GenPart.*",
     },
     produces={
         "GenTTbar.*",
@@ -44,7 +44,7 @@ def ttbar_gen(
     # derived gen-particle properties
     gen_part["genPartIdxMotherMasked"] = ak.mask(gen_part.genPartIdxMother, gen_part.genPartIdxMother >= 0)
     gen_part["absPdgId"] = abs(gen_part.pdgId)
-    gen_part["index"] = ak.local_index(gen_part)
+    gen_part["index"] = ak.local_index(gen_part, axis=1)
 
     # -- helper functions
 

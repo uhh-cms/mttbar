@@ -52,9 +52,9 @@ def jet_energy_init(self: Calibrator) -> None:
 
 @calibrator(
     uses={
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "nElectron",
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "nMuon",
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.rawFactor", "nJet",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.rawFactor",
         # index of electrons/muons matched to jets
         "Jet.muonIdx1", "Jet.muonIdx2", "Jet.electronIdx1", "Jet.electronIdx2",
         # PF energy fractions

@@ -101,7 +101,6 @@ def jet_selection(
 @selector(
     uses={
         choose_lepton,
-        "nFatJet",
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
         "FatJet.deepTagMD_TvsQCD", "FatJet.msoftdrop",
     },
