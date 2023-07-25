@@ -476,92 +476,92 @@ def add_variables_ml(config: od.Config) -> None:
         x_title=r"ML input (MET $\phi$)",
     )
 
-    for i in range(0, 5):
+    for i in range(1, 6):
         config.add_variable(
             name=f"mli_AN_jet_energy_{i}",
             expression=f"{ns}.jet_energy_{i}",
             binning=energy_binning_jets,
             unit="GeV",
-            x_title=f"ML input (AK4 jet #{i+1} $E$)",
+            x_title=f"ML input (AK4 jet #{i} $E$)",
         )
         config.add_variable(
             name=f"mli_AN_jet_pt_{i}",
             expression=f"{ns}.jet_pt_{i}",
             binning=pt_binning_jets,
             unit="GeV",
-            x_title=f"ML input (AK4 jet #{i+1} $p_T$)",
+            x_title=f"ML input (AK4 jet #{i} $p_T$)",
         )
         config.add_variable(
             name=f"mli_AN_jet_eta_{i}",
             expression=f"{ns}.jet_eta_{i}",
             binning=eta_binning,
-            x_title=rf"ML input (AK4 jet #{i+1} $\eta$)",
+            x_title=rf"ML input (AK4 jet #{i} $\eta$)",
         )
         config.add_variable(
             name=f"mli_AN_jet_phi_{i}",
             expression=f"{ns}.jet_phi_{i}",
             binning=phi_binning,
-            x_title=rf"ML input (AK4 jet #{i+1} $\phi$)",
+            x_title=rf"ML input (AK4 jet #{i} $\phi$)",
         )
         config.add_variable(
             name=f"mli_AN_jet_mass_{i}",
             expression=f"{ns}.jet_mass_{i}",
             binning=mass_binning_jets,
             unit="GeV",
-            x_title=f"ML input (AK4 jet #{i+1} $m$)",
+            x_title=f"ML input (AK4 jet #{i} $m$)",
         )
         config.add_variable(
             name=f"mli_AN_jet_btag_{i}",
             expression=f"{ns}.jet_btag_{i}",
             binning=btag_binning,
-            x_title=f"ML input (AK4 jet #{i+1} b tag score)",
+            x_title=f"ML input (AK4 jet #{i} b tag score)",
         )
 
-    for i in range(0, 3):
+    for i in range(1, 4):
         config.add_variable(
             name=f"mli_AN_fatjet_energy_{i}",
             expression=f"{ns}.fatjet_energy_{i}",
             binning=energy_binning_jets,
             unit="GeV",
-            x_title=f"ML input (AK8 jet #{i+1} $E$)",
+            x_title=f"ML input (AK8 jet #{i} $E$)",
         )
         config.add_variable(
             name=f"mli_AN_fatjet_pt_{i}",
             expression=f"{ns}.fatjet_pt_{i}",
             binning=pt_binning_jets,
             unit="GeV",
-            x_title=f"ML input (AK8 jet #{i+1} $p_T$)",
+            x_title=f"ML input (AK8 jet #{i} $p_T$)",
         )
         config.add_variable(
             name=f"mli_AN_fatjet_eta_{i}",
             expression=f"{ns}.fatjet_eta_{i}",
             binning=eta_binning,
-            x_title=rf"ML input (AK8 jet #{i+1} $\eta$)",
+            x_title=rf"ML input (AK8 jet #{i} $\eta$)",
         )
         config.add_variable(
             name=f"mli_AN_fatjet_phi_{i}",
             expression=f"{ns}.fatjet_phi_{i}",
             binning=phi_binning,
-            x_title=rf"ML input (AK8 jet #{i+1} $\phi$)",
+            x_title=rf"ML input (AK8 jet #{i} $\phi$)",
         )
         config.add_variable(
             name=f"mli_AN_fatjet_msoftdrop_{i}",
             expression=f"{ns}.fatjet_msoftdrop_{i}",
             binning=msoftdrop_binning,
             unit="GeV",
-            x_title=f"ML input (AK8 jet #{i+1} $m_{{SD}}$)",
+            x_title=f"ML input (AK8 jet #{i} $m_{{SD}}$)",
         )
         config.add_variable(
             name=f"mli_AN_fatjet_tau21_{i}",
             expression=f"{ns}.fatjet_tau21_{i}",
             binning=tau_binning,
-            x_title=rf"ML input (AK8 jet #{i+1} $\tau_{{21}}$)",
+            x_title=rf"ML input (AK8 jet #{i} $\tau_{{21}}$)",
         )
         config.add_variable(
             name=f"mli_AN_fatjet_tau32_{i}",
             expression=f"{ns}.fatjet_tau32_{i}",
             binning=tau_binning,
-            x_title=rf"ML input (AK8 jet #{i+1} $\tau_{{32}}$)",
+            x_title=rf"ML input (AK8 jet #{i} $\tau_{{32}}$)",
         )
 
     # -- helper functions

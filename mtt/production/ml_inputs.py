@@ -76,8 +76,8 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         # pad to miminal length
         arr = ak.pad_none(arr, n_max)
         # extract fields
-        for i, attr in itertools.product(range(n_max), attrs):
-            value = ak.nan_to_none(getattr(arr[:, i], attr))
+        for i, attr in itertools.product(range(1, n_max + 1), attrs):
+            value = ak.nan_to_none(getattr(arr[:, i - 1], attr))
             value = ak.fill_none(value, default)
             events = set_ak_column_f32(events, f"{self.ml_namespace}.{name}_{attr}_{i}", value)
         return events
@@ -129,11 +129,11 @@ def ml_inputs_init(self: Producer) -> None:
         "n_jet",
         "n_fatjet",
     } | {
-        f"jet_{var}_{i}"
+        f"jet_{var}_{i + 1}"
         for var in ("energy", "pt", "eta", "phi", "mass", "btag")
         for i in range(5)
     } | {
-        f"fatjet_{var}_{i}"
+        f"fatjet_{var}_{i + 1}"
         for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
         for i in range(3)
     } | {

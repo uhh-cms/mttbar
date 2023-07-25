@@ -43,77 +43,6 @@ class TTbarSimpleDNN(MLModel):
             for name in self.input_features
         }
 
-        # self.folds = folds or self.__class__.folds
-        # self.layers = [512, 512]
-        # self.learningrate = 0.0005
-        # self.batchsize = 32768
-        # self.epochs = 6  # 500
-        # self.eqweight = 0.5  # keep?
-        # self.validation_fraction = 0.25
-
-        # # dropout: either False (disable) or a value between 0 and 1 (dropout_rate)
-        # self.dropout = 0.5
-
-        # # TODO: externalize
-
-        # self.proc_custom_weights = {
-        #     "tt": 1,
-        #     "st": 1,
-        #     "w_lnu": 1,
-        #     "dy_lep": 1,
-        # }
-
-        # self.processes = {"tt", "st", "w_lnu", "dy_lep"}
-
-        # self.dataset_names = {
-        #     # TTbar
-        #     "tt_sl_powheg",
-        #     "tt_dl_powheg",
-        #     "tt_fh_powheg",
-        #     # SingleTop
-        #     "st_tchannel_t_powheg",
-        #     "st_tchannel_tbar_powheg",
-        #     "st_twchannel_t_powheg",
-        #     "st_twchannel_tbar_powheg",
-        #     "st_schannel_lep_amcatnlo",
-        #     # "st_schannel_had_amcatnlo",
-        #     # WJets
-        #     "w_lnu_ht70To100_madgraph",
-        #     "w_lnu_ht100To200_madgraph",
-        #     "w_lnu_ht200To400_madgraph",
-        #     "w_lnu_ht400To600_madgraph",
-        #     "w_lnu_ht600To800_madgraph",
-        #     "w_lnu_ht800To1200_madgraph",
-        #     "w_lnu_ht1200To2500_madgraph",
-        #     "w_lnu_ht2500_madgraph",
-        #     # DY
-        #     "dy_lep_m50_ht70to100_madgraph",
-        #     "dy_lep_m50_ht100to200_madgraph",
-        #     "dy_lep_m50_ht200to400_madgraph",
-        #     "dy_lep_m50_ht400to600_madgraph",
-        #     "dy_lep_m50_ht600to800_madgraph",
-        #     "dy_lep_m50_ht800to1200_madgraph",
-        #     "dy_lep_m50_ht1200to2500_madgraph",
-        #     "dy_lep_m50_ht2500_madgraph",
-        # }
-
-        # self.input_features = [
-        #     "mli_n_jet",
-        #     "mli_n_fatjet",
-        #     "mli_met_pt", "mli_met_phi",
-        # ] + [
-        #     f"mli_jet_{var}_{i}"
-        #     for var in ("energy", "pt", "eta", "phi", "mass", "deepjet")
-        #     for i in range(5)
-        # ] + [
-        #     f"mli_fatjet_{var}_{i}"
-        #     for var in ("energy", "pt", "eta", "phi", "mass", "msoftdrop", "tau21", "tau32")
-        #     for i in range(3)
-        # ] + [
-        #     f"mli_lepton_{var}"
-        #     for var in ("energy", "pt", "eta", "phi")
-        # ]
-
     # -- methods related to task setup & environment
 
     def sandbox(self, task: law.Task):
@@ -729,11 +658,11 @@ simple_dnn = TTbarSimpleDNN.derive("simple", cls_dict={
         "n_jet",
         "n_fatjet",
     ] + [
-        f"jet_{var}_{i}"
+        f"jet_{var}_{i + 1}"
         for var in ("energy", "pt", "eta", "phi", "mass", "btag")
         for i in range(5)
     ] + [
-        f"fatjet_{var}_{i}"
+        f"fatjet_{var}_{i + 1}"
         for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
         for i in range(3)
     ] + [
