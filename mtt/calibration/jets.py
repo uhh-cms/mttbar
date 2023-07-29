@@ -121,9 +121,15 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         # lepton energy compatible with PF energy fraction (within tolerance)
         lep_energy_pf_compatible = (jet_lepton_lv.energy < (1 + tolerance) * jet_pf_energy)
 
-        # calculate mass of cleaned jet, masking imaginary values
+        # calculate square of cleaned jet mass
         jet_lv_cleaned_mass_sq = jet_lv_cleaned.energy**2 - jet_lv_cleaned.rho**2
-        jet_lv_cleaned_mass = ak.mask(np.sqrt(abs(jet_lv_cleaned_mass_sq)), jet_lv_cleaned_mass_sq >= 0)
+        # mask values that would lead to imaginary masses,
+        # but substitute absolute value if the mass square is only negative within
+        # tolerance (high probablility that this was a lepton fake)
+        jet_lv_cleaned_mass = ak.mask(
+            np.sqrt(abs(jet_lv_cleaned_mass_sq)),
+            jet_lv_cleaned_mass_sq >= -tolerance
+        )
 
         # cleaning does not result in a negative/imaginary/undefined mass
         mass_stays_positive = ~ak.is_none(jet_lv_cleaned_mass, axis=1)
