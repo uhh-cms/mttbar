@@ -311,7 +311,6 @@ def lepton_jet_2d_selection(
     uses={
         attach_coffea_behavior,
         "Jet.pt",
-        "GenJet_pt",
         "LHE.HT",
     },
     exposed=True,
