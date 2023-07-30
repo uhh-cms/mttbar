@@ -76,7 +76,9 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
 @cutflow_features.init
 def cutflow_features_init(self: Selector) -> None:
 
-    for flag in ["is_diboson", "is_data"]:
-        if hasattr(self, "dataset_inst") and not getattr(self.dataset_inst.x, flag, None):
-            self.uses |= {"LHE.HT"}
-            self.produces |= {"cutflow.lhe_ht"}
+    if hasattr(self, "dataset_inst") and not any(
+        getattr(self.dataset_inst.x, flag, None)
+        for flag in ("is_diboson", "is_data")
+    ):
+        self.uses |= {"LHE.HT"}
+        self.produces |= {"cutflow.lhe_ht"}
