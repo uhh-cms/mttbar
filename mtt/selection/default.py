@@ -350,14 +350,13 @@ def data_trigger_veto(
     events: ak.Array,
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
-    results = self[lepton_selection](events, call_force=True, **kwargs)
 
     # get trigger requirements
     trigger_config = self.config_inst.x.triggers
 
     is_early = self[check_early](events, trigger_config=trigger_config)
 
-    pt_regime = results.aux["pt_regime"]
+    pt_regime = events["pt_regime"]
 
     # pt regime booleans for convenience
     is_lowpt = (pt_regime == 1)
