@@ -31,6 +31,7 @@ analysis_mtt.x.bash_sandboxes = [
     "$CF_BASE/sandboxes/cf.sh",
     "$CF_BASE/sandboxes/venv_columnar.sh",
     # "$MTT_BASE/sandboxes/venv_columnar_tf.sh",
+    "$CF_BASE/sandboxes/venv_ml_tf.sh",
 ]
 
 # cmssw sandboxes that should be bundled for remote jobs in case they are needed
