@@ -471,6 +471,10 @@ config_2017.set_aux("dataset_groups", {
     "hpseudo_tt": ["hpseudo_tt_*"],
     "hscalar_tt": ["hscalar_tt_*"],
     "rsgluon_tt": ["rsgluon_tt_*"],
+    "backgrounds": [
+        "tt_*", "st_*", "w_lnu_*", "dy_*",
+        "qcd_*", "ww_*", "wz_*", "zz_*",
+    ],
 })
 
 # category groups for conveniently looping over certain categories
