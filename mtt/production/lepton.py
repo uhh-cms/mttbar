@@ -43,6 +43,11 @@ def choose_lepton(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # if more than one lepton, choose the first
     lepton = ak.firsts(lepton, axis=1)
 
+    # if no lepton, ensure optional type is on fields
+    # and not on record itself, and fill with zeroes
+    lepton = ak.merge_option_of_records(lepton)
+    lepton = ak.fill_none(lepton, 0)
+
     # attach lorentz vector behavior to lepton
     lepton = ak.with_name(lepton, "PtEtaPhiMLorentzVector")
 

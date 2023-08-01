@@ -456,7 +456,11 @@ def lepton_selection(
     events = set_ak_column(events, "channel_id", channel_id)
 
     # put pt regime in a column
-    events = set_ak_column(events, "pt_regime", merged_aux["pt_regime"])
+    events = set_ak_column(
+        events,
+        "pt_regime",
+        ak.fill_none(merged_aux["pt_regime"], 0),
+    )
 
     # multiplex Muon/Electron to a single Lepton collection
     # based on channel_id

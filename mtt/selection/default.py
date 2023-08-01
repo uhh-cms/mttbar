@@ -353,8 +353,11 @@ def data_trigger_veto(
     # get trigger requirements
     trigger_config = self.config_inst.x.triggers
 
-    is_early = self[check_early](events, trigger_config=trigger_config)
+    # check if event is in early run period
+    is_early = self[check_early](events, trigger_config=trigger_config, **kwargs)
 
+    # ensure lepton selection was run, get lepton pT regime
+    events = self[lepton_selection](events, **kwargs)
     pt_regime = events["pt_regime"]
 
     # pt regime booleans for convenience
