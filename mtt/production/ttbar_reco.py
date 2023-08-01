@@ -9,6 +9,7 @@ import math
 from law.util import human_duration
 
 from columnflow.production import Producer, producer
+from columnflow.production.categories import category_ids
 from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
 
@@ -30,7 +31,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 
 @producer(
     uses={
-        choose_lepton, neutrino_candidates,
+        choose_lepton, neutrino_candidates, category_ids,
         "channel_id",
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
         "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass",
@@ -39,7 +40,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
         "FatJetTopTagDeltaRLepton.msoftdrop",
     },
     produces={
-        choose_lepton, neutrino_candidates,
+        choose_lepton, neutrino_candidates, category_ids,
         "TTbar.*",
     },
 )
@@ -712,6 +713,9 @@ def ttbar(
         events = set_ak_column_ef(events, "TTbar.gen_delta_r", dr_gen_ttbar)
         events = set_ak_column_ef(events, "TTbar.gen_cos_theta_star", gen_cos_theta_star)
         events = set_ak_column_ef(events, "TTbar.gen_abs_cos_theta_star", gen_abs_cos_theta_star)
+
+    # recalculate category ids with ttbar information
+    events = self[category_ids](events, **kwargs)
 
     return events
 

@@ -19,7 +19,7 @@ ak = maybe_import("awkward")
 # -- basic selectors for event categorization
 
 # pass/fail chi2 criterion
-@selector(uses={ttbar})
+@selector(uses={"TTbar.chi2"})
 def sel_chi2pass(
     self: Selector,
     events: ak.Array,
@@ -38,7 +38,7 @@ make_selector_range_acts = partial(
     make_selector_range,
     route="TTbar.cos_theta_star",
     route_func=abs,
-    uses={ttbar},
+    uses={"TTbar.cos_theta_star"},
 )
 # TODO: make configurable
 acts_bins = [0.0, 0.5, 0.7, 0.9, 1.0]
