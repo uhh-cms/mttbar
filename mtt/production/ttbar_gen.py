@@ -125,9 +125,14 @@ def ttbar_gen(
     gen_q_2 = gen_part[is_lquark & is_w_2_decay]
 
     # check if event is semileptonic at gen-level
-    is_lep_1 = ~ak.is_none(ak.firsts(gen_nu_1))
-    is_lep_2 = ~ak.is_none(ak.firsts(gen_nu_2))
-    is_semileptonic = ak.fill_none((is_lep_1 == ~is_lep_2), False)
+    n_gen_q_1, n_gen_q_2 = ak.num(gen_q_1), ak.num(gen_q_2)
+    is_semileptonic = ak.fill_none(
+        (
+            ((n_gen_q_1 == 2) & (n_gen_q_2 == 0)) |
+            ((n_gen_q_1 == 0) & (n_gen_q_2 == 2))
+        ),
+        False,
+    )
 
     # -- match gen jets to quarks
 
