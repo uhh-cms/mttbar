@@ -669,6 +669,18 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     # "max_chunk_size": 10000,
 }))
 
+# L1 prefiring configuration
+config_2017.x.l1_prefiring = DotDict.wrap({
+    "jet": {
+        "value": "l1_prefiring_efficiency_value_jetpt_2017BtoF",
+        "error": "l1_prefiring_efficiency_error_jetpt_2017BtoF",
+    },
+    "photon": {
+        "value": "l1_prefiring_efficiency_value_photonpt_2017BtoF",
+        "error": "l1_prefiring_efficiency_error_photonpt_2017BtoF",
+    },
+})
+
 # V+jets reweighting
 config_2017.x.vjets_reweighting = DotDict.wrap({
     "w": {
@@ -800,6 +812,15 @@ config_2017.add_shift(name="vjets_up", id=201, type="shape")
 config_2017.add_shift(name="vjets_down", id=202, type="shape")
 add_shift_aliases(config_2017, "vjets", {"vjets_weight": "vjets_weight_{direction}"})
 
+# prefiring weights
+config_2017.add_shift(name="l1_ecal_prefiring_up", id=301, type="shape")
+config_2017.add_shift(name="l1_ecal_prefiring_down", id=302, type="shape")
+add_shift_aliases(
+    config_2017,
+    "l1_ecal_prefiring",
+    {"l1_ecal_prefiring_weight": "l1_ecal_prefiring_weight_{direction}"},
+)
+
 for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
     add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"})
 
@@ -856,6 +877,9 @@ config_2017.x.external_files = DotDict.wrap({
 
     # muon scale factors
     "muon_sf": (f"{sources['json_mirror']}/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
+
+    # L1 prefiring corrections
+    "l1_prefiring": f"{os.getenv('MTT_ORIG_BASE')}/data/json/l1_prefiring.json",
 
     # V+jets reweighting
     "vjets_reweighting": f"{os.getenv('MTT_ORIG_BASE')}/data/json/vjets_reweighting.json",
@@ -973,6 +997,9 @@ for dataset in config_2017.datasets:
     if dataset.has_tag("is_v_jets"):
         # V+jets QCD NLO reweighting
         dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
+    if not dataset.is_data:
+        # prefiring weights (all datasets except real data)
+        dataset.x.event_weights["l1_ecal_prefiring_weight"] = get_shifts("l1_ecal_prefiring")
 
 # names of electron correction sets and working points
 # (used in the electron_sf producer)
