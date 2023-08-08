@@ -84,6 +84,8 @@ setup_mtt() {
                 export_and_save CF_SCHEDULER_PORT "8082"
             fi
             query MTT_BUNDLE_CMSSW "Install and bundle CMSSW sandboxes for job submission?" "True"
+            # store directory the setup was run in for the first time
+            export_and_save MTT_ORIG_BASE "${MTT_BASE}"
         }
         cf_setup_interactive "${CF_SETUP_NAME}" "${MTT_BASE}/.setups/${CF_SETUP_NAME}.sh" || return "$?"
     fi

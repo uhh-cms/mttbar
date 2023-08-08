@@ -321,7 +321,7 @@ for dataset_name in dataset_names:
     #     has_top: any dataset containing top quarks
     #     has_ttbar: any dataset containing a ttbar pair
     #     is_mtt_signal: m(ttbar) search signal datasets
-    #     is_v: single W or Z boson (including Drell-Yan)
+    #     is_v_jets: W/Z+jets (including Drell-Yan)
     #     is_diboson: diboson datasets
     #     is_qcd: QCD multijet datasets
     #     is_*_data: various data-related tags
@@ -341,15 +341,11 @@ for dataset_name in dataset_names:
     ):
         dataset.add_tag({"has_top", "has_ttbar", "is_mtt_signal"})
 
-    # single-V datasets
-    if any(
-        dataset.name.startswith(prefix)
-        for prefix in [
-            "dy_lep",
-            "w_lnu",
-        ]
-    ):
-        dataset.add_tag("is_v")
+    # W/Z+jets datasets
+    if dataset.name.startswith("dy_lep"):
+        dataset.add_tag({"is_v_jets", "is_z_jets"})
+    if dataset.name.startswith("w_lnu"):
+        dataset.add_tag({"is_v_jets", "is_w_jets"})
 
     # diboson datasets
     if any(
@@ -673,6 +669,18 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     # "max_chunk_size": 10000,
 }))
 
+# V+jets reweighting
+config_2017.x.vjets_reweighting = DotDict.wrap({
+    "w": {
+        "value": "wjets_kfactor_value",
+        "error": "wjets_kfactor_error",
+    },
+    "z": {
+        "value": "zjets_kfactor_value",
+        "error": "zjets_kfactor_error",
+    },
+})
+
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
     "campaign": "Summer19UL17",
@@ -787,6 +795,11 @@ config_2017.add_shift(name="electron_up", id=113, type="shape")
 config_2017.add_shift(name="electron_down", id=114, type="shape")
 add_shift_aliases(config_2017, "electron", {"electron_weight": "electron_weight_{direction}"})
 
+# V+jets reweighting
+config_2017.add_shift(name="vjets_up", id=201, type="shape")
+config_2017.add_shift(name="vjets_down", id=202, type="shape")
+add_shift_aliases(config_2017, "vjets", {"vjets_weight": "vjets_weight_{direction}"})
+
 for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
     add_shift_aliases(config_2017, unc, {f"{unc}_weight": unc + "_weight_{direction}"})
 
@@ -843,6 +856,9 @@ config_2017.x.external_files = DotDict.wrap({
 
     # muon scale factors
     "muon_sf": (f"{sources['json_mirror']}/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
+
+    # V+jets reweighting
+    "vjets_reweighting": f"{os.getenv('MTT_ORIG_BASE')}/data/json/vjets_reweighting.json",
 
     # lumi files
     "lumi": {
@@ -954,6 +970,9 @@ for dataset in config_2017.datasets:
     if dataset.has_tag("is_ttbar"):
         # top pt reweighting
         dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
+    if dataset.has_tag("is_v_jets"):
+        # V+jets QCD NLO reweighting
+        dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
 
 # names of electron correction sets and working points
 # (used in the electron_sf producer)
