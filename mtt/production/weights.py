@@ -13,6 +13,8 @@ from columnflow.production.normalization import normalization_weights
 from columnflow.production.cms.pileup import pu_weight
 from columnflow.util import maybe_import
 
+from mtt.production.gen_top import top_pt_weight
+
 ak = maybe_import("awkward")
 
 
@@ -34,6 +36,10 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         jet_mask = (events.Jet.pt >= 100) & (abs(events.Jet.eta) < 2.5)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
+        # compute top pT weights
+        if self.dataset_inst.has_tag("is_ttbar"):
+            events = self[top_pt_weight](events, **kwargs)
+
         # compute normalization weights
         events = self[normalization_weights](events, **kwargs)
 
@@ -52,9 +58,11 @@ def weights_init(self: Producer) -> None:
         # dynamically add dependencies if running on MC
         self.uses |= {
             electron_weights, muon_weights, btag_weights,
+            top_pt_weight,
             normalization_weights, pu_weight, mc_weight,
         }
         self.produces |= {
             electron_weights, muon_weights, btag_weights,
+            top_pt_weight,
             normalization_weights, pu_weight, mc_weight,
         }

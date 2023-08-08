@@ -929,6 +929,13 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
     },
 }))
 
+# top pt reweighting parameters
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat?rev=31
+config_2017.x.top_pt_reweighting_params = {
+    "a": 0.0615,
+    "b": -0.0005,
+}
+
 # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 get_shifts = functools.partial(get_shifts_from_sources, config_2017)
 config_2017.x.event_weights = DotDict({
@@ -940,6 +947,13 @@ config_2017.x.event_weights = DotDict({
     # "scale_weight": ???,
     # "pdf_weight": ???,
 })
+
+# event weights only present in certain datasets
+for dataset in config_2017.datasets:
+    dataset.x.event_weights = DotDict()
+    if dataset.has_tag("is_ttbar"):
+        # top pt reweighting
+        dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
 
 # names of electron correction sets and working points
 # (used in the electron_sf producer)
