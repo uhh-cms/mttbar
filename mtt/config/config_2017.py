@@ -929,14 +929,17 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
     },
 }))
 
-# event weight columns
+# event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
 get_shifts = functools.partial(get_shifts_from_sources, config_2017)
-config_2017.x.event_weights = DotDict()
-config_2017.x.event_weights["normalization_weight"] = []
-config_2017.x.event_weights["pu_weight"] = get_shifts("minbias_xs")
-# TODO: enable different cases for number of pdf/scale weights
-# config_2017.x.event_weights["scale_weight"])
-# config_2017.x.event_weights["pdf_weight"])
+config_2017.x.event_weights = DotDict({
+    "normalization_weight": [],
+    "pu_weight": get_shifts("minbias_xs"),
+    "muon_weight": get_shifts("muon"),
+    "electron_weight": get_shifts("electron"),
+    # TODO: add scale and PDF weights, where available
+    # "scale_weight": ???,
+    # "pdf_weight": ???,
+})
 
 # names of electron correction sets and working points
 # (used in the electron_sf producer)
