@@ -406,11 +406,11 @@ def data_trigger_veto(
         )
         pass_trigger[object_name] = pass_object_trigger
 
-    if getattr(self.dataset_inst.x, "is_e_data", None):
+    if self.dataset_inst.has_tag("is_e_data"):
         sel_veto = ak.fill_none(pass_trigger["electron"], False)
-    if getattr(self.dataset_inst.x, "is_pho_data", None):
+    if self.dataset_inst.has_tag("is_pho_data"):
         sel_veto = ak.fill_none(pass_trigger["photon"] & ~pass_trigger["electron"], False)
-    if getattr(self.dataset_inst.x, "is_mu_data", None):
+    if self.dataset_inst.has_tag("is_mu_data"):
         sel_veto = ak.fill_none(pass_trigger["muon"] & ~pass_trigger["electron"] & ~pass_trigger["photon"], False)
 
     # build and return selection results plus new columns
@@ -488,11 +488,11 @@ def default(
     events, top_tagged_jets_results = self[top_tagged_jets](events, **kwargs)
     results += top_tagged_jets_results
 
-    if getattr(self.dataset_inst.x, "is_qcd", None):
+    if self.dataset_inst.has_tag("is_qcd"):
         events, qcd_sel_results = self[qcd_spikes](events, **kwargs)
         results += qcd_sel_results
 
-    if getattr(self.dataset_inst.x, "is_data", None):
+    if not self.dataset_inst.is_mc:
         events, trigger_veto_results = self[data_trigger_veto](events, **kwargs)
         results += trigger_veto_results
 
@@ -517,7 +517,7 @@ def default(
     events = self[process_ids](events, **kwargs)
 
     # add mc weights (needed for cutflow plots)
-    if getattr(self.dataset_inst.x, "is_mc", None):
+    if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
 
     # increment stats
@@ -529,11 +529,11 @@ def default(
 @default.init
 def default_init(self: Selector) -> None:
 
-    if hasattr(self, "dataset_inst") and getattr(self.dataset_inst.x, "is_qcd", None):
+    if hasattr(self, "dataset_inst") and self.dataset_inst.has_tag("is_qcd"):
         self.uses |= {qcd_spikes}
         self.produces |= {qcd_spikes}
 
-    if hasattr(self, "dataset_inst") and getattr(self.dataset_inst.x, "is_data", None):
+    if hasattr(self, "dataset_inst") and not self.dataset_inst.is_mc:
         self.uses |= {data_trigger_veto}
         self.produces |= {data_trigger_veto}
 

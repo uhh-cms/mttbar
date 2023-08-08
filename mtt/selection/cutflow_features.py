@@ -67,7 +67,7 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
     events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
 
-    if not self.dataset_inst.x.is_data and not self.dataset_inst.x.is_diboson:
+    if self.dataset_inst.is_mc and not self.dataset_inst.has_tag("is_diboson"):
         events = set_ak_column(events, "cutflow.lhe_ht", events.LHE.HT)
 
     return events
@@ -76,9 +76,10 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
 @cutflow_features.init
 def cutflow_features_init(self: Selector) -> None:
 
-    if hasattr(self, "dataset_inst") and not any(
-        getattr(self.dataset_inst.x, flag, None)
-        for flag in ("is_diboson", "is_data")
+    if (
+        hasattr(self, "dataset_inst") and
+        self.dataset_inst.is_mc and
+        not self.dataset_inst.has_tag("is_diboson")
     ):
         self.uses |= {"LHE.HT"}
         self.produces |= {"cutflow.lhe_ht"}

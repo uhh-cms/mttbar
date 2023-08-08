@@ -317,47 +317,64 @@ dataset_names = [
 for dataset_name in dataset_names:
     dataset = config_2017.add_dataset(campaign_run2_2017.get_dataset(dataset_name))
 
-    # add aux info to datasets
-    dataset.x.has_top = any(
-        dataset.name.startswith(prefix)
-        for prefix in [
-            "st",
-            "tt",
-        ]
-    )
-    dataset.x.is_ttbar = dataset.name.startswith("tt")
-    dataset.x.is_qcd = dataset.name.startswith("qcd")
+    # add tags to datasets:
+    #     has_top: any dataset containing top quarks
+    #     has_ttbar: any dataset containing a ttbar pair
+    #     is_mtt_signal: m(ttbar) search signal datasets
+    #     is_v: single W or Z boson (including Drell-Yan)
+    #     is_diboson: diboson datasets
+    #     is_qcd: QCD multijet datasets
+    #     is_*_data: various data-related tags
 
-    dataset.x.is_egamma_data = any(
+    # standard model ttbar
+    if dataset.name.startswith("tt"):
+        dataset.add_tag({"has_top", "has_ttbar"})
+
+    # single top
+    if dataset.name.startswith("st"):
+        dataset.add_tag("has_top")
+
+    # signal datasets
+    if any(
+        dataset.name.startswith(prefix)
+        for prefix in ("zprime_tt", "hscalar_tt", "hpseudo_tt", "rsgluon_tt")
+    ):
+        dataset.add_tag({"has_top", "has_ttbar", "is_mtt_signal"})
+
+    # single-V datasets
+    if any(
         dataset.name.startswith(prefix)
         for prefix in [
-            "data_e",
-            "data_pho",
+            "dy_lep",
+            "w_lnu",
         ]
-    )
-    dataset.x.is_e_data = dataset.name.startswith("data_e")
-    dataset.x.is_pho_data = dataset.name.startswith("data_pho")
-    dataset.x.is_mu_data = dataset.name.startswith("data_mu")
-    dataset.x.is_data = dataset.name.startswith("data")
-    dataset.x.is_diboson = any(
+    ):
+        dataset.add_tag("is_v")
+
+    # diboson datasets
+    if any(
         dataset.name.startswith(prefix)
         for prefix in [
             "ww",
             "wz",
             "zz",
         ]
-    )
+    ):
+        dataset.add_tag("is_diboson")
 
-    # mark mttbar signal samples
-    dataset.x.is_mtt_signal = any(
-        dataset.name.startswith(prefix)
-        for prefix in [
-            "zprime_tt",
-            "hpseudo_tt",
-            "hscalar_tt",
-            "rsgluon_tt",
-        ]
-    )
+    # qcd datasets
+    if dataset.name.startswith("qcd"):
+        dataset.add_tag("is_qcd")
+
+    # various data-related tags
+    if dataset.name.startswith("data_mu"):
+        dataset.add_tag("is_mu_data")
+    if dataset.name.startswith("data_e"):
+        dataset.add_tag({"is_e_data", "is_egamma_data"})
+    if dataset.name.startswith("data_pho"):
+        dataset.add_tag({"is_pho_data", "is_egamma_data"})
+    if dataset.name.startswith("data_pho"):
+        dataset.add_tag({"is_pho_data", "is_egamma_data"})
 
     # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
     for k in dataset.info.keys():
