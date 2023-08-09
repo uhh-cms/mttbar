@@ -222,7 +222,7 @@ dataset_names = [
     "zprime_tt_m7000_w70_madgraph",
     "zprime_tt_m8000_w80_madgraph",
     "zprime_tt_m9000_w90_madgraph",
-    # §pseudoscalar heavy higgs (width/mass = 25%)
+    # pseudoscalar heavy higgs (width/mass = 25%)
     "hpseudo_tt_sl_m365_w91p25_res_madgraph",
     "hpseudo_tt_sl_m365_w91p25_int_madgraph",
     "hpseudo_tt_sl_m400_w100p0_res_madgraph",
@@ -903,33 +903,46 @@ config_2017.x.external_files = DotDict.wrap({
 })
 
 # columns to keep after certain steps
-config_2017.set_aux("keep_columns", DotDict.wrap({
+config_2017.x.keep_columns = DotDict.wrap({
     "cf.MergeSelectionMasks": {
         "mc_weight", "normalization_weight", "process_id", "category_ids", "cutflow.*",
     },
     "cf.ReduceEvents": {
-        # -- general event information
+        #
+        # NanoAOD columns
+        #
+
+        # general event info
         "run", "luminosityBlock", "event",
 
-        # -- weights
+        # weights
         "genWeight",
         "LHEWeight.*",
         "LHEPdfWeight", "LHEScaleWeight",
 
-        # -- leptons
-        # generic
-        "Lepton.pt", "Lepton.eta", "Lepton.phi", "Lepton.mass",
         # muons
-        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass", "Muon.pfRelIso04_all",
+        "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
+        "Muon.pfRelIso04_all",
         # electrons
-        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass", "Electron.deltaEtaSC",
+        "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
+        "Electron.deltaEtaSC",
         "Electron.pfRelIso03_all",
 
+        # photons (for L1 prefiring)
+        "Photon.pt", "Photon.eta", "Photon.phi", "Photon.mass",
+        "Photon.jetIdx",
+
         # -- AK4 jets
+
         # all
-        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass", "Jet.btagDeepFlavB", "Jet.hadronFlavour",
+        "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
+        "Jet.rawFactor",
+        "Jet.btagDeepFlavB", "Jet.hadronFlavour",
+
         # with b-tag
-        "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass", "BJet.btagDeepFlavB", "BJet.hadronFlavour",
+        "BJet.pt", "BJet.eta", "BJet.phi", "BJet.mass",
+        "BJet.btagDeepFlavB", "BJet.hadronFlavour",
+
         # without b-tag
         "LightJet.pt", "LightJet.eta", "LightJet.phi", "LightJet.mass",
         "LightJet.btagDeepFlavB", "LightJet.hadronFlavour",
@@ -937,37 +950,63 @@ config_2017.set_aux("keep_columns", DotDict.wrap({
         # -- AK8 jets
         # all
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
+        "FatJet.rawFactor",
         "FatJet.msoftdrop", "FatJet.deepTagMD_TvsQCD",
         "FatJet.tau1", "FatJet.tau2", "FatJet.tau3",
+
         # with top tag
         "FatJetTopTag.pt", "FatJetTopTag.eta", "FatJetTopTag.phi", "FatJetTopTag.mass",
+        "FatJetTopTag.rawFactor",
         "FatJetTopTag.msoftdrop", "FatJetTopTag.deepTagMD_TvsQCD",
         "FatJetTopTag.tau1", "FatJetTopTag.tau2", "FatJetTopTag.tau3",
+
         # with top tag and well-separated from lepton
         "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",
         "FatJetTopTagDeltaRLepton.phi", "FatJetTopTagDeltaRLepton.mass",
+        "FatJetTopTagDeltaRLepton.rawFactor",
         "FatJetTopTagDeltaRLepton.msoftdrop", "FatJetTopTagDeltaRLepton.deepTagDeltaRLeptonMD_TvsQCD",
         "FatJetTopTagDeltaRLepton.tau1", "FatJetTopTagDeltaRLepton.tau2", "FatJetTopTagDeltaRLepton.tau3",
 
-        # -- Gen quantities
+        # generator quantities
         "Generator.*",
+
+        # generator particles
+        "GenPart.*",
+
+        # generator objects
         "GenMET.*",
         "GenJet.*",
         "GenJetAK8.*",
-        "GenPart.*",
 
-        # -- missing transverse momentum
+        # missing transverse momentum
         "MET.pt", "MET.phi", "MET.significance", "MET.covXX", "MET.covXY", "MET.covYY",
 
-        # -- number of primary vertices
+        # number of primary vertices
         "PV.npvs",
 
-        # columns added during selection, required in general
-        "mc_weight", "channel_id", "category_ids", "deterministic_seed", "process_id",
+        #
+        # columns added during selection
+        #
+
+        # generator particle info
+        "GenTopDecay.*",
+        "GenPartonTop.*",
+        "GenVBoson.*",
+
+        # generic leptons (merger of Muon/Electron)
+        "Lepton.*",
+
+        # columns for PlotCutflowVariables
+        "cutflow.*",
+
+        # other columns, required by various tasks
+        "channel_id", "category_ids", "process_id",
+        "deterministic_seed",
+        "mc_weight",
         "pt_regime",
-        "pu_weight*", "cutflow.*",
+        "pu_weight*",
     },
-}))
+})
 
 # top pt reweighting parameters
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat?rev=31
