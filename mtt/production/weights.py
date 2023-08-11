@@ -16,6 +16,7 @@ from columnflow.util import maybe_import
 from mtt.production.gen_top import top_pt_weight
 from mtt.production.gen_v import vjets_weight
 from mtt.production.l1_prefiring import l1_prefiring_weights
+from mtt.production.toptag import toptag_weights
 
 ak = maybe_import("awkward")
 
@@ -49,6 +50,10 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         if self.dataset_inst.has_tag("is_v_jets"):
             events = self[vjets_weight](events, **kwargs)
 
+        # compute top-tagging scale factor weights
+        if self.dataset_inst.has_tag("has_top"):
+            events = self[toptag_weights](events, **kwargs)
+
         # compute normalization weights
         events = self[normalization_weights](events, **kwargs)
 
@@ -70,6 +75,7 @@ def weights_init(self: Producer) -> None:
             normalization_weights, pu_weight, mc_weight,
             l1_prefiring_weights,
             top_pt_weight,
+            toptag_weights,
             vjets_weight,
         }
         self.produces |= {
@@ -77,5 +83,6 @@ def weights_init(self: Producer) -> None:
             normalization_weights, pu_weight, mc_weight,
             l1_prefiring_weights,
             top_pt_weight,
+            toptag_weights,
             vjets_weight,
         }

@@ -615,6 +615,7 @@ config_2017.x.btag_working_points = DotDict.wrap({
 
 # 2017 top-tagging working pointsi (DeepAK8, 1% mistagging rate, )
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
+# TODO (?): unify with `toptag_sf_config`?
 config_2017.x.toptag_working_points = DotDict.wrap({
     "deepak8": {
         # regular tagger
@@ -864,10 +865,14 @@ sources = {
     "cert": "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV",
     "local_repo": os.getenv("MTT_ORIG_BASE"),
     "json_mirror": "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-dfd90038",
+    "jet": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/cms-jet-JSON_Format-54860a23",
 }
 config_2017.x.external_files = DotDict.wrap({
     # jet energy corrections
     "jet_jerc": (f"{sources['json_mirror']}/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
+
+    # top-tagging scale factors
+    "toptag_sf": (f"{sources['jet']}/JMAR/DeepAK8/2017_DeepAK8_Top.json", "v1"),  # noqa
 
     # btag scale factors
     "btag_sf_corr": (f"{sources['json_mirror']}/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
@@ -1095,6 +1100,13 @@ config_2017.x.btag_sf_jec_sources = [
 
 # name of the btag_sf correction set and jec uncertainties to propagate through
 config_2017.x.btag_sf = ("deepJet_shape", config_2017.x.btag_sf_jec_sources)
+
+# name of the top tagging scale factors correction set and working point
+# TODO (?): unify with `toptag_working_points`?
+config_2017.x.toptag_sf_config = DotDict.wrap({
+    "name": "DeepAK8_Top_MassDecorr",
+    "wp": "1p0",
+})
 
 # versions per task family and optionally also dataset and shift
 # None can be used as a key to define a default value
