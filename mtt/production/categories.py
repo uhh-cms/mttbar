@@ -10,7 +10,6 @@ from columnflow.util import maybe_import
 from columnflow.selection import Selector, selector
 
 from mtt.selection.util import make_selector_not, make_selector_range
-from mtt.production.ttbar_reco import ttbar
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

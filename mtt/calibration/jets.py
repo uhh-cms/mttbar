@@ -128,7 +128,7 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         # tolerance (high probablility that this was a lepton fake)
         jet_lv_cleaned_mass = ak.mask(
             np.sqrt(abs(jet_lv_cleaned_mass_sq)),
-            jet_lv_cleaned_mass_sq >= -tolerance
+            jet_lv_cleaned_mass_sq >= -tolerance,
         )
 
         # cleaning does not result in a negative/imaginary/undefined mass
