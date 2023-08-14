@@ -7,6 +7,7 @@ action () {
     source ${this_dir}/common.sh
 
     args=(
+        --config $my_config
         --version $my_version
         --processes $my_process
         #--processes $all_processes

@@ -4,6 +4,7 @@
 #
 
 # -- version tag
+export my_config="run2_2017_nano_v9_limited"
 export my_version="test"
 
 # -- background process & dataset

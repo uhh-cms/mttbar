@@ -7,6 +7,7 @@ action () {
     source ${this_dir}/common.sh
 
     args=(
+        --config $my_config
         --version $my_version
         --processes $my_process
         --datasets $my_dataset
