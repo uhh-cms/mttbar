@@ -17,7 +17,7 @@ np = maybe_import("numpy")
 
 @producer(
     uses={
-        "Muon.pt", "Muon.eta",
+        "FatJetTopTagDeltaRLepton.pt", "FatJetTopTagDeltaRLepton.eta",
     },
     produces={
         "toptag_weight", "toptag_weight_up", "toptag_weight_down",
