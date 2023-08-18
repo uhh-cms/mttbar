@@ -989,6 +989,9 @@ config_2017.x.keep_columns = DotDict.wrap({
         # number of primary vertices
         "PV.npvs",
 
+        # average number of pileup interactions
+        "Pileup.nTrueInt",
+
         #
         # columns added during selection
         #
