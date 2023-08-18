@@ -1039,9 +1039,9 @@ config_2017.x.event_weights = DotDict({
 # event weights only present in certain datasets
 for dataset in config_2017.datasets:
     dataset.x.event_weights = DotDict()
-    if dataset.has_tag("is_sm_ttbar"):
-        # top pt reweighting (disable for now)
-        # dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
+    # if dataset.has_tag("is_sm_ttbar"):
+    #     # top pt reweighting (disable for now)
+    #     dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
     if dataset.has_tag("is_v_jets"):
         # V+jets QCD NLO reweighting
         dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
