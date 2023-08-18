@@ -71,9 +71,8 @@ def jet_selection(
 
     # MISSING: match AK4 PUPPI jets to AK4 CHS jets for b-tagging
 
-    # b-tagged jets, DeepCSV medium working point
-    # TODO: update to DeepJet
-    wp_med = self.config_inst.x.btag_working_points.deepcsv.medium
+    # b-tagged jets, DeepJet medium working point
+    wp_med = self.config_inst.x.btag_working_points.deepjet.medium
     bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_med)
     lightjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB < wp_med)
     sel_bjet = ak.sum(bjet_mask, axis=-1) >= 1
