@@ -175,7 +175,7 @@ def top_pt_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
 
     # fail if not run in ttbar simulation
-    if not self.dataset_inst.has_tag("is_ttbar"):
+    if not self.dataset_inst.has_tag("is_sm_ttbar"):
         raise Exception(f"gen_top_pt_weight should only run for ttbar dataset, got {self.dataset_inst}")
 
     # get SF function parameters from config
@@ -205,4 +205,4 @@ def top_pt_weight_skip(self: Producer) -> bool:
     if not getattr(self, "dataset_inst", None):
         return False
 
-    return self.dataset_inst.is_data or not self.dataset_inst.has_tag("is_ttbar")
+    return self.dataset_inst.is_data or not self.dataset_inst.has_tag("is_sm_ttbar")

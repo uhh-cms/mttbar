@@ -625,7 +625,7 @@ def default_without_2d_selection(
     print(f"__all__: {n_sel}")
 
     # produce features relevant for selection and event weights
-    if self.dataset_inst.has_tag("is_ttbar"):
+    if self.dataset_inst.has_tag("is_sm_ttbar"):
         events = self[gen_parton_top](events, **kwargs)
 
     if self.dataset_inst.has_tag("is_v_jets"):

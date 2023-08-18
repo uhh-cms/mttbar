@@ -40,7 +40,7 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
         # compute top pT weights
-        if self.dataset_inst.has_tag("is_ttbar"):
+        if self.dataset_inst.has_tag("is_sm_ttbar"):
             events = self[top_pt_weight](events, **kwargs)
 
         # compute L1 prefiring weights

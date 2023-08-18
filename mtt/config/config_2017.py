@@ -320,6 +320,7 @@ for dataset_name in dataset_names:
     # add tags to datasets:
     #     has_top: any dataset containing top quarks
     #     has_ttbar: any dataset containing a ttbar pair
+    #     is_sm_ttbar: standard model ttbar datasets
     #     is_mtt_signal: m(ttbar) search signal datasets
     #     is_v_jets: W/Z+jets (including Drell-Yan)
     #     is_diboson: diboson datasets
@@ -328,7 +329,7 @@ for dataset_name in dataset_names:
 
     # standard model ttbar
     if dataset.name.startswith("tt"):
-        dataset.add_tag({"has_top", "has_ttbar"})
+        dataset.add_tag({"has_top", "has_ttbar", "is_sm_ttbar"})
 
     # single top
     if dataset.name.startswith("st"):
@@ -1038,7 +1039,7 @@ config_2017.x.event_weights = DotDict({
 # event weights only present in certain datasets
 for dataset in config_2017.datasets:
     dataset.x.event_weights = DotDict()
-    if dataset.has_tag("is_ttbar"):
+    if dataset.has_tag("is_sm_ttbar"):
         # top pt reweighting (disable for now)
         # dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
     if dataset.has_tag("is_v_jets"):
