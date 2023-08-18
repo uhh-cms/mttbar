@@ -25,6 +25,8 @@ from mtt.selection.cutflow_features import cutflow_features
 from mtt.selection.early import check_early
 
 from mtt.production.lepton import choose_lepton
+from mtt.production.gen_top import gen_parton_top
+from mtt.production.gen_v import gen_v_boson
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -428,6 +430,8 @@ def data_trigger_veto(
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
         met_filters,
+        gen_parton_top,
+        gen_v_boson,
         json_filter,
     },
     produces={
@@ -437,6 +441,8 @@ def data_trigger_veto(
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
         met_filters,
+        gen_parton_top,
+        gen_v_boson,
         json_filter,
     },
     shifts={
@@ -506,6 +512,13 @@ def default(
     n_sel = ak.sum(event_sel, axis=-1)
     print(f"__all__: {n_sel}")
 
+    # produce features relevant for selection and event weights
+    if self.dataset_inst.has_tag("is_sm_ttbar"):
+        events = self[gen_parton_top](events, **kwargs)
+
+    if self.dataset_inst.has_tag("is_v_jets"):
+        events = self[gen_v_boson](events, **kwargs)
+
     # add cutflow features
     events = self[cutflow_features](events, results=results, **kwargs)
 
@@ -545,6 +558,8 @@ def default_init(self: Selector) -> None:
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
         met_filters,
+        gen_parton_top,
+        gen_v_boson,
         json_filter,
     },
     produces={
@@ -554,6 +569,8 @@ def default_init(self: Selector) -> None:
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
         met_filters,
+        gen_parton_top,
+        gen_v_boson,
         json_filter,
     },
     shifts={
@@ -606,6 +623,13 @@ def default_without_2d_selection(
 
     n_sel = ak.sum(event_sel, axis=-1)
     print(f"__all__: {n_sel}")
+
+    # produce features relevant for selection and event weights
+    if self.dataset_inst.has_tag("is_ttbar"):
+        events = self[gen_parton_top](events, **kwargs)
+
+    if self.dataset_inst.has_tag("is_v_jets"):
+        events = self[gen_v_boson](events, **kwargs)
 
     # add cutflow features
     events = self[cutflow_features](events, results=results, **kwargs)
