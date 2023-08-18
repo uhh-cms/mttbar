@@ -16,7 +16,10 @@ ak = maybe_import("awkward")
 
 
 @producer(
-    uses={"GenPart.genPartIdxMother", "GenPart.pdgId", "GenPart.statusFlags"},
+    uses={
+        "GenPart.pt", "GenPart.eta", "GenPart.phi", "GenPart.mass",
+        "GenPart.genPartIdxMother", "GenPart.pdgId", "GenPart.statusFlags",
+    },
     produces={
         "GenVBoson.pt", "GenVBoson.eta", "GenVBoson.phi", "GenVBoson.mass",
         "GenVBoson.pdgId",
