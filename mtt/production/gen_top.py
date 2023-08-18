@@ -113,7 +113,14 @@ def gen_top_decay_products_skip(self: Producer) -> bool:
 
 
 @producer(
-    uses={"GenPart.pdgId", "GenPart.statusFlags"},
+    uses={
+        "GenPart.pt",
+        "GenPart.eta",
+        "GenPart.phi",
+        "GenPart.mass",
+        "GenPart.pdgId",
+        "GenPart.statusFlags",
+    },
     produces={
         "GenPartonTop.pt",
         "GenPartonTop.eta",
