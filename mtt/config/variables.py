@@ -118,7 +118,7 @@ def add_variables(config: od.Config) -> None:
     # MET
     config.add_variable(
         name="met_pt",
-        expression="MET.pt[:,0]",
+        expression="MET.pt",
         null_value=EMPTY_FLOAT,
         binning=(40, 0., 400.),
         unit="GeV",
@@ -126,7 +126,7 @@ def add_variables(config: od.Config) -> None:
     )
     config.add_variable(
         name="met_phi",
-        expression="MET.phi[:,0]",
+        expression="MET.phi",
         null_value=EMPTY_FLOAT,
         binning=(40, -3.2, 3.2),
         x_title=r"MET $\phi$",

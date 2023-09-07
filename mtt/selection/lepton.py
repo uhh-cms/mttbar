@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Selection methods for m(ttbar).
+Selection involving leptons.
 """
 
 from typing import Tuple

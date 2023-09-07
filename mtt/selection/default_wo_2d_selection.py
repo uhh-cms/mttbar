@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Default selection for m(ttbar).
+Default selection without jet lepton 2D selection.
 """
 
 from operator import and_
@@ -18,14 +18,13 @@ from columnflow.production.categories import category_ids
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
 
+from mtt.selection.util import masked_sorted_indices
 from mtt.selection.general import increment_stats, jet_energy_shifts
 from mtt.selection.lepton import lepton_selection
 from mtt.selection.cutflow_features import cutflow_features
-from mtt.selection.jets import jet_selection, top_tagged_jets, lepton_jet_2d_selection
-from mtt.selection.jets import met_selection
-from mtt.selection.qcd_spikes import qcd_spikes
-from mtt.selection.data_trigger_veto import data_trigger_veto
+from mtt.selection.early import check_early
 
+from mtt.production.lepton import choose_lepton
 from mtt.production.gen_top import gen_parton_top
 from mtt.production.gen_v import gen_v_boson
 
@@ -35,9 +34,7 @@ ak = maybe_import("awkward")
 
 @selector(
     uses={
-        jet_selection, lepton_selection, met_selection, top_tagged_jets, lepton_jet_2d_selection,
-        qcd_spikes,
-        data_trigger_veto,
+        jet_selection, lepton_selection, met_selection, top_tagged_jets,
         cutflow_features,
         category_ids,
         process_ids, increment_stats, attach_coffea_behavior,
@@ -48,9 +45,7 @@ ak = maybe_import("awkward")
         json_filter,
     },
     produces={
-        jet_selection, lepton_selection, met_selection, top_tagged_jets, lepton_jet_2d_selection,
-        qcd_spikes,
-        data_trigger_veto,
+        jet_selection, lepton_selection, met_selection, top_tagged_jets,
         cutflow_features,
         category_ids,
         process_ids, increment_stats, attach_coffea_behavior,
@@ -65,7 +60,7 @@ ak = maybe_import("awkward")
     },
     exposed=True,
 )
-def default(
+def default_without_2d_selection(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
@@ -84,37 +79,21 @@ def default(
     if self.dataset_inst.is_data:
         results.steps.JSON = self[json_filter](events, **kwargs)
 
-    # lepton selection
-    events, lepton_results = self[lepton_selection](events, **kwargs)
-    results += lepton_results
-
     # jet selection
     events, jet_results = self[jet_selection](events, **kwargs)
     results += jet_results
+
+    # lepton selection
+    events, lepton_results = self[lepton_selection](events, **kwargs)
+    results += lepton_results
 
     # met selection
     events, met_results = self[met_selection](events, **kwargs)
     results += met_results
 
-    # jet-lepton 2D cut
-    events, lepton_jet_2d_results = self[lepton_jet_2d_selection](
-        events,
-        lepton_results,
-        **kwargs,
-    )
-    results += lepton_jet_2d_results
-
     # all-hadronic veto
     events, top_tagged_jets_results = self[top_tagged_jets](events, **kwargs)
     results += top_tagged_jets_results
-
-    if self.dataset_inst.has_tag("is_qcd"):
-        events, qcd_sel_results = self[qcd_spikes](events, **kwargs)
-        results += qcd_sel_results
-
-    if not self.dataset_inst.is_mc:
-        events, trigger_veto_results = self[data_trigger_veto](events, **kwargs)
-        results += trigger_veto_results
 
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
@@ -144,24 +123,9 @@ def default(
     events = self[process_ids](events, **kwargs)
 
     # add mc weights (needed for cutflow plots)
-    if self.dataset_inst.is_mc:
-        events = self[mc_weight](events, **kwargs)
+    events = self[mc_weight](events, **kwargs)
 
     # increment stats
     self[increment_stats](events, results, stats, **kwargs)
 
     return events, results
-
-
-@default.init
-def default_init(self: Selector) -> None:
-
-    if hasattr(self, "dataset_inst") and self.dataset_inst.has_tag("is_qcd"):
-        self.uses |= {qcd_spikes}
-        self.produces |= {qcd_spikes}
-
-    if hasattr(self, "dataset_inst") and not self.dataset_inst.is_mc:
-        self.uses |= {data_trigger_veto}
-        self.produces |= {data_trigger_veto}
-
-
