@@ -629,11 +629,17 @@ def ttbar(
     cos_theta_star = ttbar.pvec.dot(top_lep_ttrest.pvec) / (ttbar.pvec.p * top_lep_ttrest.pvec.p)
     abs_cos_theta_star = abs(cos_theta_star)
 
+    # -- calculate energy of hadronic and leptonic top
+    top_had_energy = np.sqrt((top_had.mass) ** 2 + (top_had.pt) ** 2)
+    top_lep_energy = np.sqrt((top_lep.mass) ** 2 + (top_lep.pt) ** 2)
+
     # write out columns
     for var in ("pt", "eta", "phi", "mass"):
         events = set_ak_column(events, f"TTbar.top_had_{var}", ak.fill_none(getattr(top_had, var), EMPTY_FLOAT))
         events = set_ak_column(events, f"TTbar.top_lep_{var}", ak.fill_none(getattr(top_lep, var), EMPTY_FLOAT))
         events = set_ak_column(events, f"TTbar.{var}", ak.fill_none(getattr(ttbar, var), EMPTY_FLOAT))
+    events = set_ak_column(events, f"TTbar.top_had_energy", ak.fill_none(top_had_energy, EMPTY_FLOAT))
+    events = set_ak_column(events, f"TTbar.top_lep_energy", ak.fill_none(top_lep_energy, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.n_jet_had", ak.fill_none(n_jet_had, -1))
     events = set_ak_column(events, "TTbar.n_jet_lep", ak.fill_none(n_jet_lep, -1))
     events = set_ak_column(events, "TTbar.n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, -1))

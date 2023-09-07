@@ -227,6 +227,7 @@ def add_variables(config: od.Config) -> None:
             ("pt", "p_{T}", "GeV", (50, 0, 800)),
             ("eta", r"\eta", None, (50, -5, 5)),
             ("phi", r"\phi", None, (50, -np.pi, np.pi)),
+            ("energy", "E", "GeV", (100, 0, 5000)),
         ]:
             config.add_variable(
                 name=f"top_{decay}_{var}",
