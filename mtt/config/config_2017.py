@@ -489,6 +489,13 @@ config_2017.set_aux("dataset_groups", {
         "tt_*", "st_*", "w_lnu_*", "dy_*",
         "qcd_*", "ww_*", "wz_*", "zz_*",
     ],
+    "zprime_default": [
+        "zprime_tt_m500_w50_madgraph",
+        "zprime_tt_m1000_w100_madgraph",
+        "zprime_tt_m3000_w300_madgraph",
+    ],
+    "dy_lep": ["dy_lep_*"],
+    "w_lnu": ["w_lnu_*"],
 })
 
 # category groups for conveniently looping over certain categories
@@ -556,6 +563,19 @@ config_2017.set_aux("variable_groups", {
         "cf_muon_pt", "cf_muon_eta",
         "cf_electron_pt", "cf_electron_eta",
     ],
+    "new_version_test":[
+        "n_jet", "n_electron", "n_muon",
+        "met_pt", "met_phi",
+        "electron_pt", "electron_phi",
+        "muon_pt", "muon_phi",
+        "jet1_pt", "jet1_phi",
+        "fatjet1_pt", "fatjet1_phi",
+        "chi2_lt100",
+        "top_had_mass", "gen_top_had_mass",
+        "top_lep_mass", "gen_lep_mass",
+        "ttbar_mass_narrow", "gen_ttbar_mass_narrow",
+        "cos_theta_star", "gen_cos_theta_star",
+    ]
 })
 
 # shift groups for conveniently looping over certain shifts
