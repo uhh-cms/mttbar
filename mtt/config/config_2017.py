@@ -715,6 +715,51 @@ config_2017.x.vjets_reweighting = DotDict.wrap({
     },
 })
 
+# overwrite crosssections from cmsdb to adapt to UHH2 crosssections
+# https://github.com/UHH2/UHH2-datasets/blob/master/CrossSectionHelper.py#L1804C22-L1804C35
+dy_xsecs = {
+    "dy_lep_m50_ht70to100": 140.1,
+    "dy_lep_m50_ht100to200": 140.2,
+    "dy_lep_m50_ht200to400": 38.399,
+    "dy_lep_m50_ht400to600": 5.21278,
+    "dy_lep_m50_ht600to800": 1.26567,
+    "dy_lep_m50_ht800to1200": 0.5684304,
+    "dy_lep_m50_ht1200to2500": 0.1331514,
+    "dy_lep_m50_ht2500": 0.00297803565,
+}
+
+for ds in dy_xsecs:
+    procs.n(ds).set_xsec(13, dy_xsecs[ds])
+
+w_lnu_xsecs = {
+    "w_lnu_ht70To100": 1271,
+    "w_lnu_ht100To200": 1253,
+    "w_lnu_ht200To400": 335.9,
+    "w_lnu_ht400To600": 45.21,
+    "w_lnu_ht600To800": 10.99,
+    "w_lnu_ht800To1200": 4.936,
+    "w_lnu_ht1200To2500": 1.156,
+    "w_lnu_ht2500": 0.02623,
+}
+
+for ds in w_lnu_xsecs:
+    procs.n(ds).set_xsec(13, w_lnu_xsecs[ds])
+
+# cross sections for diboson samples; taken from:
+# - ww (NNLO): https://arxiv.org/abs/1408.5243
+# - wz (NLO): https://arxiv.org/abs/1105.0020
+# - zz (NNLO): https://www.sciencedirect.com/science/article/pii/S0370269314004614?via%3Dihub
+diboson_xsecs = {
+    "ww": Number(118.7, {"scale": (0.025j, 0.022j)}),
+    "wz": Number(46.74, {"scale": (0.041j, 0.033j)}),
+#     "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)})  # (W+Z) + (W-Z)
+    "zz": Number(16.99, {"scale": (0.032j, 0.024j)}),
+}
+
+for ds in diboson_xsecs:
+    procs.n(ds).set_xsec(13, diboson_xsecs[ds])
+
+
 # location of JEC txt files
 config_2017.set_aux("jec", DotDict.wrap({
     "campaign": "Summer19UL17",
