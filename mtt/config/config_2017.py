@@ -376,12 +376,6 @@ for dataset_name in dataset_names:
     if dataset.name.startswith("data_pho"):
         dataset.add_tag({"is_pho_data", "is_egamma_data"})
 
-    # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
-    for k in dataset.info.keys():
-        if dataset[k].n_files > 10:
-            dataset[k].n_files = 10
-
-
 # trigger paths for muon/electron channels
 config_2017.set_aux("triggers", DotDict.wrap({
     "lowpt": {
@@ -1199,9 +1193,9 @@ add_categories_selection(config_2017)
 # add variables
 add_variables(config_2017)
 
-# limited config with only 1 file per dataset
+# limited config with only 10 file per dataset
 config_2017_limited = config_2017.copy(name=f"{config_2017.name}_limited", id="+")
 for dataset in config_2017_limited.datasets:
     for k in dataset.info.keys():
-        if dataset[k].n_files > 1:
-            dataset[k].n_files = 1
+        if dataset[k].n_files > 10:
+            dataset[k].n_files = 10
