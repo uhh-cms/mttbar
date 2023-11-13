@@ -604,6 +604,16 @@ config_2017.set_aux("process_settings_groups", {
     ],
 })
 
+zprime_labels = {
+    "zprime_tt_m500_w50": "Z'$\\rightarrow t\\bar{t}$ ($m = 0.5$ TeV)",
+    "zprime_tt_m1000_w100": "Z'$\\rightarrow t\\bar{t}$ ($m = 1$ TeV)",
+    "zprime_tt_m3000_w300": "Z'$\\rightarrow t\\bar{t}$ ($m = 3$ TeV)",
+}
+
+for proc in zprime_labels:
+    zprime_proc = config_2017.get_process(proc)
+    zprime_proc.label = zprime_labels[proc]
+
 # 2017 luminosity with values in inverse pb and uncertainties taken from
 # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM?rev=176#LumiComb
 config_2017.set_aux("luminosity", Number(41480, {

@@ -63,6 +63,7 @@ class TTbarSimpleDNN(MLModel):
                     null_value=-1,
                     binning=(40, 0., 1.),
                     x_title=f"DNN output score, {self.config_inst.get_process(proc).label}",
+                    y_title="Events",
                 )
 
         # # truth label (TODO: implement)
