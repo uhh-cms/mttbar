@@ -249,8 +249,8 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
 
         # determine name of parent category
         name_cat_no_dnn = name_fn(
-            **{
-                group: category.name
+            {
+                group: category
                 for group, category in categories.items()
                 if group != "dnn"
             },
@@ -259,8 +259,8 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
         # raise if parent category has not been added yet
         if not config.has_category(name_cat_no_dnn):
             name_cat = name_fn(
-                **{
-                    group: category.name
+                {
+                    group: category
                     for group, category in categories.items()
                 },
             )
