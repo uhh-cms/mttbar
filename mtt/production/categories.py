@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Selectors related to defining category masks following the froduction step.
+Selectors related to defining category masks following the production step.
 """
 from functools import partial
 

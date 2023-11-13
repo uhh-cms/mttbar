@@ -94,7 +94,10 @@ def ttbar(
     n_jet_ttbar_range = settings["n_jet_ttbar_range"]
     n_jet_lep_range = settings["n_jet_lep_range"]
     n_jet_had_range = settings["n_jet_had_range"]
-    max_chunk_size = settings["max_chunk_size"]
+    if self.dataset_inst.has_tag("has_memory_intensive_reco"):
+        max_chunk_size = settings["max_chunk_size"][0]
+    else:
+        max_chunk_size = settings["max_chunk_size"][1]
 
     # infer missing settings
     if n_jet_ttbar_range is None:
@@ -574,6 +577,7 @@ def ttbar(
 
     # apply main loop in both regimes
     comb_results = {}
+
     for regime in ("resolved", "boosted"):
         comb_results[regime] = apply_chunked(
             main_loop,

@@ -331,6 +331,9 @@ for dataset_name in dataset_names:
     if dataset.name.startswith("tt"):
         dataset.add_tag({"has_top", "has_ttbar", "is_sm_ttbar"})
 
+    if dataset.name == "tt_sl_powheg":
+        dataset.add_tag("has_memory_intensive_reco")
+
     # single top
     if dataset.name.startswith("st"):
         dataset.add_tag("has_top")
@@ -681,7 +684,7 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     "n_jet_lep_range": (1, 2),
     "n_jet_had_range": (1, 6),
     "n_jet_ttbar_range": (2, 6),
-    "max_chunk_size": 8000,
+    "max_chunk_size": (10000, 30000),
 
     # -- "maxed out" settings (very slow)
     # "n_jet_max": 10,
