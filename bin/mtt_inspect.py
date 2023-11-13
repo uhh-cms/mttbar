@@ -50,6 +50,8 @@ def load(fname):
     basename, ext = os.path.splitext(fname)
     if ext == ".pickle":
         return _load_pickle(fname)
+    elif ext == ".pkl":
+        return _load_pickle(fname)
     elif ext == ".parquet":
         return _load_parquet(fname)
     elif ext == ".root":
