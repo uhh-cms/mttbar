@@ -277,10 +277,8 @@ def lepton_jet_2d_selection(
       pt_rel = |cross(p_l, p_jet)| / |p_jet|
     """
 
-    # note: returns only 'events' if lepton_selection has been called before
-    #       and is cached (we assume this here), otherwise returns a tuple
-    #       (events, SelectionResult)
-    events = self[lepton_selection](events, **kwargs)
+    # ensure lepton selection was run
+    events, _ = self[lepton_selection](events, **kwargs)
 
     # select jets
     jets_mask = (events.Jet.pt > 15)
@@ -404,7 +402,7 @@ def data_trigger_veto(
     is_early = self[check_early](events, trigger_config=trigger_config, **kwargs)
 
     # ensure lepton selection was run, get lepton pT regime
-    events = self[lepton_selection](events, **kwargs)
+    events, _ = self[lepton_selection](events, **kwargs)
     pt_regime = events["pt_regime"]
 
     # pt regime booleans for convenience
