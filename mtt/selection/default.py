@@ -78,11 +78,13 @@ def default(
     results = SelectionResult()
 
     # MET filters
-    results.steps.METFilters = self[met_filters](events, **kwargs)
+    events, met_filters_results = self[met_filters](events, **kwargs)
+    results.steps.METFilters = met_filters_results.steps.met_filter
 
     # JSON filter (data-only)
     if self.dataset_inst.is_data:
-        results.steps.JSON = self[json_filter](events, **kwargs)
+        events, json_filter_results = self[json_filter](events, **kwargs)
+        results.steps.JSON = json_filter_results.steps.json
 
     # lepton selection
     events, lepton_results = self[lepton_selection](events, **kwargs)
