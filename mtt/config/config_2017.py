@@ -8,7 +8,7 @@ import functools
 import os
 
 import yaml
-from scinum import Number, REL
+from scinum import Number
 import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
@@ -610,14 +610,14 @@ config_2017.set_aux("process_settings_groups", {
 # 2017 luminosity with values in inverse pb and uncertainties taken from
 # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM?rev=176#LumiComb
 config_2017.set_aux("luminosity", Number(41480, {
-    "lumi_13TeV_2017": (REL, 0.02),
-    "lumi_13TeV_1718": (REL, 0.006),
-    "lumi_13TeV_correlated": (REL, 0.009),
+    "lumi_13TeV_2017": 0.02j,
+    "lumi_13TeV_1718": 0.006j,
+    "lumi_13TeV_correlated": 0.009j,
 }))
 
 # 2017 minimum bias cross section in mb (milli) for creating PU weights, values from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
-config_2017.set_aux("minbiasxs", Number(69.2, (REL, 0.046)))
+config_2017.set_aux("minbiasxs", Number(69.2, 0.046j))
 
 # 2017 b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
