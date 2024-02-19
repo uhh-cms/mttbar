@@ -930,7 +930,7 @@ def make_jme_filename(jme_aux, sample_type, name, era=None):
 sources = {
     "cert": "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV",
     "local_repo": os.getenv("MTT_ORIG_BASE"),
-    "json_mirror": "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-dfd90038",
+    "json_mirror": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/jsonpog-integration-a81953b1",
     "jet": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/cms-jet-JSON_Format-54860a23",
 }
 config_2017.x.external_files = DotDict.wrap({
