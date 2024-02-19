@@ -13,20 +13,6 @@ np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 
-def masked_sorted_indices(
-    mask: ak.Array,
-    sort_var: ak.Array,
-    ascending: bool = False,
-) -> ak.Array:
-    """
-    Return the indices that would sort *sort_var*, dropping the ones for which the
-    corresponding *mask* is False.
-    """
-    # get indices that would sort the `sort_var` array
-    indices = ak.argsort(sort_var, axis=-1, ascending=ascending)
-    return indices[mask[indices]]
-
-
 # -- helper functions for constructing categorizers
 
 def make_categorizer_not(name: str, input_categorizer: Categorizer):
@@ -65,7 +51,7 @@ def make_categorizer_and(name: str, categorizers: set[Categorizer]):
 
         input_masks = [
             self[input_categorizer](events, **kwargs)[1]
-            for input_categorizer in uses
+            for input_categorizer in self.uses
         ]
 
         # return logical AND of all input categorizer masks
