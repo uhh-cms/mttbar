@@ -7,7 +7,7 @@ from typing import Optional
 
 from columnflow.columnar_util import Route, TaskArrayFunction
 from columnflow.util import maybe_import
-from columnflow.selection import Categorizer, categorizer
+from columnflow.categorization import Categorizer, categorizer
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
