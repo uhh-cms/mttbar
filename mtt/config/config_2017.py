@@ -617,7 +617,8 @@ config_2017.set_aux("luminosity", Number(41480, {
 
 # 2017 minimum bias cross section in mb (milli) for creating PU weights, values from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
-config_2017.set_aux("minbiasxs", Number(69.2, 0.046j))
+# Note: not used by updated JSON based pileup weights producer
+# config_2017.set_aux("minbias_xs", Number(69.2, 0.046j))
 
 # 2017 b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
@@ -971,6 +972,9 @@ config_2017.x.external_files = DotDict.wrap({
             "minbias_xs_down": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root", "v1"),  # noqa
         },
     },
+
+    # pileup weight file
+    "pu_sf": f"{sources['json_mirror']}/POG/LUM/2017_UL/puWeights.json.gz",
 })
 
 # columns to keep after certain steps
