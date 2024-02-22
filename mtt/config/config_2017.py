@@ -563,7 +563,7 @@ config_2017.set_aux("variable_groups", {
         "cf_muon_pt", "cf_muon_eta",
         "cf_electron_pt", "cf_electron_eta",
     ],
-    "new_version_test":[
+    "new_version_test": [
         "n_jet", "n_electron", "n_muon",
         "met_pt", "met_phi",
         "electron_pt", "electron_phi",
@@ -575,7 +575,7 @@ config_2017.set_aux("variable_groups", {
         "top_lep_mass", "gen_lep_mass",
         "ttbar_mass_narrow", "gen_ttbar_mass_narrow",
         "cos_theta_star", "gen_cos_theta_star",
-    ]
+    ],
 })
 
 # shift groups for conveniently looping over certain shifts
@@ -753,7 +753,7 @@ for ds in w_lnu_xsecs:
 diboson_xsecs = {
     "ww": Number(118.7, {"scale": (0.025j, 0.022j)}),
     "wz": Number(46.74, {"scale": (0.041j, 0.033j)}),
-#     "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)})  # (W+Z) + (W-Z)
+    # "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)})  # (W+Z) + (W-Z)
     "zz": Number(16.99, {"scale": (0.032j, 0.024j)}),
 }
 

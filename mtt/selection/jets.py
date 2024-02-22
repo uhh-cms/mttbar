@@ -18,6 +18,7 @@ from mtt.production.lepton import choose_lepton
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
+
 @selector(
     uses={
         "Jet.pt", "Jet.eta", "Jet.btagDeepFlavB",
@@ -45,7 +46,7 @@ def jet_selection(
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
-    ch_mu = self.config_inst.get_channel("mu") 
+    ch_mu = self.config_inst.get_channel("mu")
 
     el_id = (ch_ids == ch_e.id)
     mu_id = (ch_ids == ch_mu.id)
@@ -200,7 +201,7 @@ def met_selection(
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
-    ch_mu = self.config_inst.get_channel("mu") 
+    ch_mu = self.config_inst.get_channel("mu")
 
     el_id = (ch_ids == ch_e.id)
     mu_id = (ch_ids == ch_mu.id)

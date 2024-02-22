@@ -31,6 +31,7 @@ from mtt.production.gen_v import gen_v_boson
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
+
 @selector(
     uses={
         attach_coffea_behavior,
