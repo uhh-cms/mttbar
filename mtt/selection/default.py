@@ -78,11 +78,13 @@ def default(
     results = SelectionResult()
 
     # MET filters
-    results.steps.METFilters = self[met_filters](events, **kwargs)
+    events, met_filters_results = self[met_filters](events, **kwargs)
+    results.steps.METFilters = met_filters_results.steps.met_filter
 
     # JSON filter (data-only)
     if self.dataset_inst.is_data:
-        results.steps.JSON = self[json_filter](events, **kwargs)
+        events, json_filter_results = self[json_filter](events, **kwargs)
+        results.steps.JSON = json_filter_results.steps.json
 
     # lepton selection
     events, lepton_results = self[lepton_selection](events, **kwargs)
@@ -118,7 +120,7 @@ def default(
 
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
-    results.main["event"] = event_sel
+    results.event = event_sel
 
     for step, sel in results.steps.items():
         n_sel = ak.sum(sel, axis=-1)
@@ -163,5 +165,3 @@ def default_init(self: Selector) -> None:
     if hasattr(self, "dataset_inst") and not self.dataset_inst.is_mc:
         self.uses |= {data_trigger_veto}
         self.produces |= {data_trigger_veto}
-
-

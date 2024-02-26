@@ -59,7 +59,7 @@ def jet_selection(
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
-    ch_mu = self.config_inst.get_channel("mu") 
+    ch_mu = self.config_inst.get_channel("mu")
 
     el_id = (ch_ids == ch_e.id)
     mu_id = (ch_ids == ch_mu.id)
@@ -214,7 +214,7 @@ def met_selection(
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
-    ch_mu = self.config_inst.get_channel("mu") 
+    ch_mu = self.config_inst.get_channel("mu")
 
     el_id = (ch_ids == ch_e.id)
     mu_id = (ch_ids == ch_mu.id)
@@ -277,10 +277,8 @@ def lepton_jet_2d_selection(
       pt_rel = |cross(p_l, p_jet)| / |p_jet|
     """
 
-    # note: returns only 'events' if lepton_selection has been called before
-    #       and is cached (we assume this here), otherwise returns a tuple
-    #       (events, SelectionResult)
-    events = self[lepton_selection](events, **kwargs)
+    # ensure lepton selection was run
+    events, _ = self[lepton_selection](events, **kwargs)
 
     # select jets
     jets_mask = (events.Jet.pt > 15)
@@ -404,7 +402,7 @@ def data_trigger_veto(
     is_early = self[check_early](events, trigger_config=trigger_config, **kwargs)
 
     # ensure lepton selection was run, get lepton pT regime
-    events = self[lepton_selection](events, **kwargs)
+    events, _ = self[lepton_selection](events, **kwargs)
     pt_regime = events["pt_regime"]
 
     # pt regime booleans for convenience
@@ -549,7 +547,7 @@ def default(
 
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
-    results.main["event"] = event_sel
+    results.event = event_sel
 
     for step, sel in results.steps.items():
         n_sel = ak.sum(sel, axis=-1)
@@ -661,7 +659,7 @@ def default_without_2d_selection(
 
     # combined event selection after all steps
     event_sel = reduce(and_, results.steps.values())
-    results.main["event"] = event_sel
+    results.event = event_sel
 
     for step, sel in results.steps.items():
         n_sel = ak.sum(sel, axis=-1)
