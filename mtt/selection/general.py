@@ -48,7 +48,7 @@ def increment_stats(
     *stats* in-place based on all input *events* and the final selection *results*.
     """
     # use main event mask
-    mask = results.main["event"]
+    mask = results.event
 
     # ensure mask passed is boolean
     mask = ak.values_astype(mask, bool)

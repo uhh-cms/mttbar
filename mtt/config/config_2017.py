@@ -8,7 +8,7 @@ import functools
 import os
 
 import yaml
-from scinum import Number, REL
+from scinum import Number
 import cmsdb
 import cmsdb.campaigns.run2_2017_nano_v9
 
@@ -560,7 +560,7 @@ config_2017.set_aux("variable_groups", {
         "cf_muon_pt", "cf_muon_eta",
         "cf_electron_pt", "cf_electron_eta",
     ],
-    "new_version_test":[
+    "new_version_test": [
         "n_jet", "n_electron", "n_muon",
         "met_pt", "met_phi",
         "electron_pt", "electron_phi",
@@ -572,7 +572,7 @@ config_2017.set_aux("variable_groups", {
         "top_lep_mass", "gen_lep_mass",
         "ttbar_mass_narrow", "gen_ttbar_mass_narrow",
         "cos_theta_star", "gen_cos_theta_star",
-    ]
+    ],
 })
 
 # shift groups for conveniently looping over certain shifts
@@ -617,14 +617,15 @@ for proc in zprime_labels:
 # 2017 luminosity with values in inverse pb and uncertainties taken from
 # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM?rev=176#LumiComb
 config_2017.set_aux("luminosity", Number(41480, {
-    "lumi_13TeV_2017": (REL, 0.02),
-    "lumi_13TeV_1718": (REL, 0.006),
-    "lumi_13TeV_correlated": (REL, 0.009),
+    "lumi_13TeV_2017": 0.02j,
+    "lumi_13TeV_1718": 0.006j,
+    "lumi_13TeV_correlated": 0.009j,
 }))
 
 # 2017 minimum bias cross section in mb (milli) for creating PU weights, values from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
-config_2017.set_aux("minbiasxs", Number(69.2, (REL, 0.046)))
+# Note: not used by updated JSON based pileup weights producer
+# config_2017.set_aux("minbias_xs", Number(69.2, 0.046j))
 
 # 2017 b-tag working points
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
@@ -759,7 +760,7 @@ for ds in w_lnu_xsecs:
 diboson_xsecs = {
     "ww": Number(118.7, {"scale": (0.025j, 0.022j)}),
     "wz": Number(46.74, {"scale": (0.041j, 0.033j)}),
-#     "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)})  # (W+Z) + (W-Z)
+    # "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)})  # (W+Z) + (W-Z)
     "zz": Number(16.99, {"scale": (0.032j, 0.024j)}),
 }
 
@@ -937,7 +938,7 @@ def make_jme_filename(jme_aux, sample_type, name, era=None):
 sources = {
     "cert": "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV",
     "local_repo": os.getenv("MTT_ORIG_BASE"),
-    "json_mirror": "/afs/cern.ch/user/m/mrieger/public/mirrors/jsonpog-integration-dfd90038",
+    "json_mirror": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/jsonpog-integration-a81953b1",
     "jet": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/cms-jet-JSON_Format-54860a23",
 }
 config_2017.x.external_files = DotDict.wrap({
@@ -978,6 +979,9 @@ config_2017.x.external_files = DotDict.wrap({
             "minbias_xs_down": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root", "v1"),  # noqa
         },
     },
+
+    # pileup weight file
+    "pu_sf": f"{sources['json_mirror']}/POG/LUM/2017_UL/puWeights.json.gz",
 })
 
 # columns to keep after certain steps

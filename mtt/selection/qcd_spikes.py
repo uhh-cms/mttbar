@@ -56,4 +56,3 @@ def qcd_spikes(
             "QCDSpikes": sel_jets,
         },
     )
-
