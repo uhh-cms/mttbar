@@ -96,6 +96,10 @@ def ttbar(
     n_jet_had_range = settings["n_jet_had_range"]
     max_chunk_size = settings["max_chunk_size"]
 
+    # resolve max chunk size if dynamic
+    if callable(max_chunk_size):
+        max_chunk_size = max_chunk_size(self.dataset_inst)
+
     # infer missing settings
     if n_jet_ttbar_range is None:
         n_jet_ttbar_range = (
@@ -574,6 +578,7 @@ def ttbar(
 
     # apply main loop in both regimes
     comb_results = {}
+
     for regime in ("resolved", "boosted"):
         comb_results[regime] = apply_chunked(
             main_loop,
@@ -638,8 +643,8 @@ def ttbar(
         events = set_ak_column(events, f"TTbar.top_had_{var}", ak.fill_none(getattr(top_had, var), EMPTY_FLOAT))
         events = set_ak_column(events, f"TTbar.top_lep_{var}", ak.fill_none(getattr(top_lep, var), EMPTY_FLOAT))
         events = set_ak_column(events, f"TTbar.{var}", ak.fill_none(getattr(ttbar, var), EMPTY_FLOAT))
-    events = set_ak_column(events, f"TTbar.top_had_energy", ak.fill_none(top_had_energy, EMPTY_FLOAT))
-    events = set_ak_column(events, f"TTbar.top_lep_energy", ak.fill_none(top_lep_energy, EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.top_had_energy", ak.fill_none(top_had_energy, EMPTY_FLOAT))
+    events = set_ak_column(events, "TTbar.top_lep_energy", ak.fill_none(top_lep_energy, EMPTY_FLOAT))
     events = set_ak_column(events, "TTbar.n_jet_had", ak.fill_none(n_jet_had, -1))
     events = set_ak_column(events, "TTbar.n_jet_lep", ak.fill_none(n_jet_lep, -1))
     events = set_ak_column(events, "TTbar.n_jet_sum", ak.fill_none(n_jet_lep + n_jet_had, -1))

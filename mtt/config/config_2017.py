@@ -331,6 +331,9 @@ for dataset_name in dataset_names:
     if dataset.name.startswith("tt"):
         dataset.add_tag({"has_top", "has_ttbar", "is_sm_ttbar"})
 
+    if dataset.name == "tt_sl_powheg":
+        dataset.add_tag("has_memory_intensive_reco")
+
     # single top
     if dataset.name.startswith("st"):
         dataset.add_tag("has_top")
@@ -372,12 +375,6 @@ for dataset_name in dataset_names:
         dataset.add_tag({"is_pho_data", "is_egamma_data"})
     if dataset.name.startswith("data_pho"):
         dataset.add_tag({"is_pho_data", "is_egamma_data"})
-
-    # reduce n_files to max. 10 for testing purposes (TODO switch to full dataset)
-    for k in dataset.info.keys():
-        if dataset[k].n_files > 10:
-            dataset[k].n_files = 10
-
 
 # trigger paths for muon/electron channels
 config_2017.set_aux("triggers", DotDict.wrap({
@@ -607,6 +604,17 @@ config_2017.set_aux("process_settings_groups", {
     ],
 })
 
+zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
+zprime_mass_labels = {
+    "zprime_tt_m500_w50": "$m$ = 0.5 TeV",
+    "zprime_tt_m1000_w100": "$m$ = 1 TeV",
+    "zprime_tt_m3000_w300": "$m$ = 3 TeV",
+}
+
+for proc, zprime_mass_label in zprime_mass_labels.items():
+    proc_inst = config_2017.get_process(proc)
+    proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
+
 # 2017 luminosity with values in inverse pb and uncertainties taken from
 # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM?rev=176#LumiComb
 config_2017.set_aux("luminosity", Number(41480, {
@@ -682,7 +690,11 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     "n_jet_lep_range": (1, 2),
     "n_jet_had_range": (1, 6),
     "n_jet_ttbar_range": (2, 6),
-    "max_chunk_size": 8000,
+    "max_chunk_size": (
+        lambda dataset_inst:
+            10000 if dataset_inst.has_tag("has_memory_intensive_reco")
+            else 30000
+    ),
 
     # -- "maxed out" settings (very slow)
     # "n_jet_max": 10,
@@ -1200,9 +1212,9 @@ add_categories_selection(config_2017)
 # add variables
 add_variables(config_2017)
 
-# limited config with only 1 file per dataset
+# limited config with only 10 file per dataset
 config_2017_limited = config_2017.copy(name=f"{config_2017.name}_limited", id="+")
 for dataset in config_2017_limited.datasets:
     for k in dataset.info.keys():
-        if dataset[k].n_files > 1:
-            dataset[k].n_files = 1
+        if dataset[k].n_files > 10:
+            dataset[k].n_files = 10

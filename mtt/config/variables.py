@@ -20,6 +20,7 @@ def add_variables(config: od.Config) -> None:
         expression="mc_weight",
         binning=(200, -10, 10),
         x_title="MC weight",
+        y_title="Events",
     )
     config.add_variable(
         name="event",
@@ -122,7 +123,7 @@ def add_variables(config: od.Config) -> None:
         null_value=EMPTY_FLOAT,
         binning=(40, 0., 400.),
         unit="GeV",
-        x_title=r"MET $p_{T}$",
+        x_title=r"MET",
     )
     config.add_variable(
         name="met_phi",
@@ -160,14 +161,14 @@ def add_variables(config: od.Config) -> None:
     config.add_variable(
         name="jet_lep_pt_rel_zoom",
         expression="jet_lep_pt_rel",
-        binning=(10, 0, 50),
+        binning=(40, 0, 200),
         unit="GeV",
         x_title=r"$p_{T}^{rel}$",
     )
     config.add_variable(
         name="jet_lep_delta_r_zoom",
         expression="jet_lep_delta_r",
-        binning=(15, 0, 1.5),
+        binning=(30, 0, 3),
         x_title=r"$\Delta R(jet, lep)$",
     )
 
@@ -177,18 +178,21 @@ def add_variables(config: od.Config) -> None:
         expression="TTbar.chi2",
         binning=(100, 0, 600),
         x_title=r"$\chi^2$",
+        y_title="Events",
     )
     config.add_variable(
         name="chi2_lt30",
         expression="TTbar.chi2",
         binning=(15, 0, 30),
         x_title=r"$\chi^2$",
+        y_title="Events",
     )
     config.add_variable(
         name="chi2_lt100",
         expression="TTbar.chi2",
         binning=(20, 0, 100),
         x_title=r"$\chi^2$",
+        y_title="Events",
     )
     config.add_variable(
         name="ttbar_mass",
@@ -201,6 +205,7 @@ def add_variables(config: od.Config) -> None:
         ],
         unit="GeV",
         x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
     )
     config.add_variable(
         name="ttbar_mass_narrow",
@@ -208,6 +213,7 @@ def add_variables(config: od.Config) -> None:
         binning=(100, 400, 4400),
         unit="GeV",
         x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
     )
     config.add_variable(
         name="cos_theta_star",
@@ -240,7 +246,7 @@ def add_variables(config: od.Config) -> None:
             name=f"n_jet_{decay}",
             expression=f"TTbar.n_jet_{decay}",
             binning=(11, -0.5, 10.5),
-            x_title=rf"$n_{{AK4 jets}}^{decay}$",
+            x_title=rf"$n_{{AK4 jets}}^{{{decay}}}$",
         )
     config.add_variable(
         name="n_jet_sum",
@@ -256,6 +262,7 @@ def add_variables(config: od.Config) -> None:
         binning=config.get_variable("ttbar_mass").binning,
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
+        y_title="Events",
     )
     config.add_variable(
         name="gen_ttbar_mass_narrow",
@@ -263,6 +270,7 @@ def add_variables(config: od.Config) -> None:
         binning=config.get_variable("ttbar_mass_narrow").binning,
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
+        y_title="Events",
     )
     config.add_variable(
         name="gen_cos_theta_star",

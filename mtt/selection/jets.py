@@ -214,11 +214,6 @@ def met_selection(
 
     sel_met = el_sel_mask | mu_sel_mask
     sel_met = ak.fill_none(sel_met, False)
-#     q=__import__("functools").partial(__import__("os")._exit,0)
-#     __import__("IPython").embed()
-
-    # # missing transverse momentum > 50 GeV
-    # sel_met = (events.MET.pt > 50)
 
     # build and return selection results plus new columns
     return events, SelectionResult(

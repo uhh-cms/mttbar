@@ -63,6 +63,7 @@ class TTbarSimpleDNN(MLModel):
                     null_value=-1,
                     binning=(40, 0., 1.),
                     x_title=f"DNN output score, {self.config_inst.get_process(proc).label}",
+                    y_title="Events",
                 )
 
         # # truth label (TODO: implement)
@@ -597,9 +598,9 @@ simple_dnn = TTbarSimpleDNN.derive("simple", cls_dict={
     # hyperparameters
     "batchsize": 32768,
     "dropout": 0.5,
-    "epochs": 20,  # 500
+    "epochs": 500,  # 20/500
     "eqweight": True,  # False?
-    "folds": 2,
+    "folds": 5,  # 2/5
     "layers": [512, 512],
     "learning_rate": 0.0005,
     "validation_fraction": 0.25,
