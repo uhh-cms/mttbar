@@ -144,6 +144,7 @@ def default_without_2d_selection(
 
     return events, results
 
+
 @default_without_2d_selection.init
 def default_init(self: Selector) -> None:
 
@@ -153,4 +154,5 @@ def default_init(self: Selector) -> None:
 
     if hasattr(self, "dataset_inst") and not self.dataset_inst.is_mc:
         self.uses |= {data_trigger_veto}
+
         self.produces |= {data_trigger_veto}
