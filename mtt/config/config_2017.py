@@ -690,7 +690,11 @@ config_2017.set_aux("ttbar_reco_settings", DotDict.wrap({
     "n_jet_lep_range": (1, 2),
     "n_jet_had_range": (1, 6),
     "n_jet_ttbar_range": (2, 6),
-    "max_chunk_size": (10000, 30000),
+    "max_chunk_size": (
+        lambda dataset_inst:
+            10000 if dataset_inst.has_tag("has_memory_intensive_reco")
+            else 30000
+    ),
 
     # -- "maxed out" settings (very slow)
     # "n_jet_max": 10,
