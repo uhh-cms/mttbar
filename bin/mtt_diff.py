@@ -5,11 +5,7 @@ utility script for checking multiple CF output files for equality
 supported formats: 'parquet'
 """
 import awkward as ak
-import hist
 import itertools
-import json
-import os
-import pickle
 import sys
 
 from columnflow.columnar_util import get_ak_routes
@@ -26,7 +22,7 @@ def diff(*arrays):
     others_route_sets = [
         {
             route
-            for other_route_set in itertools.chain(route_sets[:i], route_sets[i+1:])
+            for other_route_set in itertools.chain(route_sets[:i], route_sets[i + 1:])
             for route in other_route_set
         }
         for i in range(len(arrays))
@@ -41,7 +37,7 @@ def diff(*arrays):
         route: [len(route.apply(arr)) for arr in arrays]
         for route in common_routes
     }
-    matching_lengths = {
+    matching_lengths = {  # noqa
         route: len(set(lengths)) <= 1
         for route, lengths in common_route_lengths.items()
     }
@@ -68,7 +64,7 @@ def diff(*arrays):
         if not d["all_outer_lengths_equal"]:
             results["diff_global"] = True
             results["diff_route_outer_lengths"] = True
-        
+
         if not d["all_ravel_lengths_equal"]:
             results["diff_global"] = True
             results["diff_route_ravel_lengths"] = True
@@ -120,17 +116,16 @@ def main(files, objects):
 
     # show diff of common routes lengths
     if diff_results["diff_route_outer_lengths"] or diff_results["diff_route_ravel_lengths"]:
-        print(f"\nOf the routes common to all files, the following have mismatched lengths:")
+        print("\nOf the routes common to all files, the following have mismatched lengths:")
         for route, route_details in sorted(diff_details.items(), key=lambda k_v: k_v[0].column):
             if not route_details["all_outer_lengths_equal"]:
                 print(f"  - {route.column}: {route_details['outer_lengths']}")
             elif not route_details["all_ravel_lengths_equal"]:
                 print(f"  - {route.column}: {route_details['ravel_lengths']} (unraveled)")
 
-
     # show diff of common routes contents
     if diff_results["diff_values"]:
-        print(f"\nThe following common routes have different values at these positions:")
+        print("\nThe following common routes have different values at these positions:")
         for route, route_details in sorted(diff_details.items(), key=lambda k_v: k_v[0].column):
             diff_where = route_details.get("diff_where", None)
             if diff_where is None:
@@ -149,4 +144,3 @@ if __name__ == "__main__":
         load(fname) for fname in files
     ]
     main(files, objects)
-

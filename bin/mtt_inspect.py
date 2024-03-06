@@ -12,7 +12,7 @@ supported formats:
 """
 import awkward as ak
 import coffea.nanoevents
-import hist
+import hist  # noqa
 import json
 import os
 import pickle
