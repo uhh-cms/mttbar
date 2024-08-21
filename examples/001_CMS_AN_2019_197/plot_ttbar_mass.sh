@@ -30,7 +30,7 @@ args=(
 law run cf.PlotVariables1D \
     --variables ttbar_mass,ttbar_mass_wide \
     --processes \
-        tt,w_lnu,dy_lep,st,qcd,vv,zprime_tt_m500_w50,zprime_tt_m1000_w100,zprime_tt_m3000_w300 \
+        tt,w_lnu,dy,st,qcd,vv,zprime_tt_m500_w50,zprime_tt_m1000_w100,zprime_tt_m3000_w300 \
     --yscale log \
     --process-settings \
         "zprime_tt_m500_w50,color1=#000000:zprime_tt_m1000_w100,color1=#cccccc:zprime_tt_m3000_w300,color1=#666666" \

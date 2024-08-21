@@ -15,7 +15,7 @@ action () {
         --selector-steps $all_selector_steps
         --shape-norm
         --process-settings
-            "tt,unstack:w_lnu,unstack:dy_lep,unstack:st,unstack:qcd,unstack:vv,unstack"
+            "tt,unstack:w_lnu,unstack:dy,unstack:st,unstack:qcd,unstack:vv,unstack"
         --hide-errors
         --skip-ratio
         --yscale "log"

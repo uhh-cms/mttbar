@@ -43,7 +43,7 @@ config_2017.add_process(procs.n.data)
 config_2017.add_process(procs.n.tt)
 config_2017.add_process(procs.n.st)
 config_2017.add_process(procs.n.w_lnu)
-config_2017.add_process(procs.n.dy_lep)
+config_2017.add_process(procs.n.dy)
 config_2017.add_process(procs.n.qcd)
 config_2017.add_process(procs.n.vv)
 # ttbar signal processes
@@ -79,7 +79,7 @@ colors = {
     "w_lnu": "#82FF28",  # green
     "higgs": "#984ea3",  # purple
     "st": "#3E00FB",  # dark purple
-    "dy_lep": "#FBFF36",  # yellow
+    "dy": "#FBFF36",  # yellow
     "vv": "#B900FC",  # pink
     "other": "#999999",  # grey
     "zprime_m_500_w_???": "#000000",  # black
@@ -114,32 +114,32 @@ dataset_names = [
     "tt_dl_powheg",
     "tt_fh_powheg",
     # WJets
-    "w_lnu_ht70To100_madgraph",
-    "w_lnu_ht100To200_madgraph",
-    "w_lnu_ht200To400_madgraph",
-    "w_lnu_ht400To600_madgraph",
-    "w_lnu_ht600To800_madgraph",
-    "w_lnu_ht800To1200_madgraph",
-    "w_lnu_ht1200To2500_madgraph",
-    "w_lnu_ht2500_madgraph",
+    "w_lnu_ht70to100_madgraph",
+    "w_lnu_ht100to200_madgraph",
+    "w_lnu_ht200to400_madgraph",
+    "w_lnu_ht400to600_madgraph",
+    "w_lnu_ht600to800_madgraph",
+    "w_lnu_ht800to1200_madgraph",
+    "w_lnu_ht1200to2500_madgraph",
+    "w_lnu_ht2500toinf_madgraph",
     # DY
-    "dy_lep_m50_ht70to100_madgraph",
-    "dy_lep_m50_ht100to200_madgraph",
-    "dy_lep_m50_ht200to400_madgraph",
-    "dy_lep_m50_ht400to600_madgraph",
-    "dy_lep_m50_ht600to800_madgraph",
-    "dy_lep_m50_ht800to1200_madgraph",
-    "dy_lep_m50_ht1200to2500_madgraph",
-    "dy_lep_m50_ht2500_madgraph",
+    "dy_m50toinf_ht70to100_madgraph",
+    "dy_m50toinf_ht100to200_madgraph",
+    "dy_m50toinf_ht200to400_madgraph",
+    "dy_m50toinf_ht400to600_madgraph",
+    "dy_m50toinf_ht600to800_madgraph",
+    "dy_m50toinf_ht800to1200_madgraph",
+    "dy_m50toinf_ht1200to2500_madgraph",
+    "dy_m50toinf_ht2500toinf_madgraph",
     # Diboson
     "ww_pythia",
     "wz_pythia",
     "zz_pythia",
     # SingleTop
-    "st_schannel_lep_amcatnlo",
-    "st_schannel_had_amcatnlo",
-    "st_tchannel_t_powheg",
-    "st_tchannel_tbar_powheg",
+    "st_schannel_lep_4f_amcatnlo",
+    "st_schannel_had_4f_amcatnlo",
+    "st_tchannel_t_4f_powheg",
+    "st_tchannel_tbar_4f_powheg",
     "st_twchannel_t_powheg",
     "st_twchannel_tbar_powheg",
     # QCD
@@ -151,7 +151,7 @@ dataset_names = [
     "qcd_ht700to1000_madgraph",
     "qcd_ht1000to1500_madgraph",
     "qcd_ht1500to2000_madgraph",
-    "qcd_ht2000_madgraph",
+    "qcd_ht2000toinf_madgraph",
     # -- signals
     # Z prime (width/mass = 10%)
     "zprime_tt_m400_w40_madgraph",
@@ -346,7 +346,7 @@ for dataset_name in dataset_names:
         dataset.add_tag({"has_top", "has_ttbar", "is_mtt_signal"})
 
     # W/Z+jets datasets
-    if dataset.name.startswith("dy_lep"):
+    if dataset.name.startswith("dy"):
         dataset.add_tag({"is_v_jets", "is_z_jets"})
     if dataset.name.startswith("w_lnu"):
         dataset.add_tag({"is_v_jets", "is_w_jets"})
@@ -458,9 +458,9 @@ config_2017.set_aux("default_process_settings", [
 # process groups for conveniently looping over certain processs
 # (used in wrapper_factory and during plotting)
 config_2017.set_aux("process_groups", {
-    "default": ["zprime_tt_m400_w40", "tt", "st", "dy_lep", "w_lnu", "qcd", "vv"],
+    "default": ["zprime_tt_m400_w40", "tt", "st", "dy", "w_lnu", "qcd", "vv"],
     "signal": ["zprime_tt_m400_w40"],
-    "bkg": ["tt", "st", "w_lnu", "dy_lep", "qcd", "vv"],
+    "bkg": ["tt", "st", "w_lnu", "dy", "qcd", "vv"],
 })
 
 # dataset groups for conveniently looping over certain datasets
@@ -472,7 +472,7 @@ config_2017.set_aux("dataset_groups", {
     ],
     "default": [
         "zprime_tt_*", "hpseudo_tt_*", "hscalar_tt_*", "rsgluon_tt_*",
-        "tt_*", "st_*", "dy_lep_*", "w_lnu_*",
+        "tt_*", "st_*", "dy_*", "w_lnu_*",
         "qcd_*", "ww_*", "wz_*", "zz_*",
     ],
     "tt": ["tt_*"], "st": ["st_*"], "w": ["w_lnu_*"], "dy": ["dy_*"],
@@ -491,7 +491,7 @@ config_2017.set_aux("dataset_groups", {
         "zprime_tt_m1000_w100_madgraph",
         "zprime_tt_m3000_w300_madgraph",
     ],
-    "dy_lep": ["dy_lep_*"],
+    "dy": ["dy_*"],
     "w_lnu": ["w_lnu_*"],
 })
 
@@ -731,28 +731,28 @@ config_2017.x.vjets_reweighting = DotDict.wrap({
 # overwrite crosssections from cmsdb to adapt to UHH2 crosssections
 # https://github.com/UHH2/UHH2-datasets/blob/master/CrossSectionHelper.py#L1804C22-L1804C35
 dy_xsecs = {
-    "dy_lep_m50_ht70to100": 140.1,
-    "dy_lep_m50_ht100to200": 140.2,
-    "dy_lep_m50_ht200to400": 38.399,
-    "dy_lep_m50_ht400to600": 5.21278,
-    "dy_lep_m50_ht600to800": 1.26567,
-    "dy_lep_m50_ht800to1200": 0.5684304,
-    "dy_lep_m50_ht1200to2500": 0.1331514,
-    "dy_lep_m50_ht2500": 0.00297803565,
+    "dy_m50toinf_ht70to100": 140.1,
+    "dy_m50toinf_ht100to200": 140.2,
+    "dy_m50toinf_ht200to400": 38.399,
+    "dy_m50toinf_ht400to600": 5.21278,
+    "dy_m50toinf_ht600to800": 1.26567,
+    "dy_m50toinf_ht800to1200": 0.5684304,
+    "dy_m50toinf_ht1200to2500": 0.1331514,
+    "dy_m50toinf_ht2500toinf": 0.00297803565,
 }
 
 for ds in dy_xsecs:
     procs.n(ds).set_xsec(13, dy_xsecs[ds])
 
 w_lnu_xsecs = {
-    "w_lnu_ht70To100": 1271,
-    "w_lnu_ht100To200": 1253,
-    "w_lnu_ht200To400": 335.9,
-    "w_lnu_ht400To600": 45.21,
-    "w_lnu_ht600To800": 10.99,
-    "w_lnu_ht800To1200": 4.936,
-    "w_lnu_ht1200To2500": 1.156,
-    "w_lnu_ht2500": 0.02623,
+    "w_lnu_ht70to100": 1271,
+    "w_lnu_ht100to200": 1253,
+    "w_lnu_ht200to400": 335.9,
+    "w_lnu_ht400to600": 45.21,
+    "w_lnu_ht600to800": 10.99,
+    "w_lnu_ht800to1200": 4.936,
+    "w_lnu_ht1200to2500": 1.156,
+    "w_lnu_ht2500toinf": 0.02623,
 }
 
 for ds in w_lnu_xsecs:

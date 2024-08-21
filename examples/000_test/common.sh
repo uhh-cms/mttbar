@@ -14,7 +14,7 @@ export my_version="test"
 
 # single-top t-channel with top quark
 #export my_process="st"
-#export my_dataset="st_tchannel_t_powheg"
+#export my_dataset="st_tchannel_t_4f_powheg"
 
 # diboson
 #export my_process="vv"
@@ -24,7 +24,7 @@ export my_version="test"
 export my_process="zprime_tt_m3000_w300"
 export my_dataset="${my_process}_madgraph"
 
-export all_processes="tt,st,dy_lep,w_lnu,vv,qcd,zprime_tt_m3000_w300"
+export all_processes="tt,st,dy,w_lnu,vv,qcd,zprime_tt_m3000_w300"
 export all_selector_steps="Lepton,MET,Jet,BJet,JetLepton2DCut,AllHadronicVeto,DileptonVeto,METFilters"
 
 export all_variables="jet1_pt"

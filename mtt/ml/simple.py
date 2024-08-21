@@ -628,12 +628,12 @@ simple_dnn = TTbarSimpleDNN.derive("simple", cls_dict={
         "tt_dl_powheg",
         "tt_fh_powheg",
         # SingleTop
-        "st_tchannel_t_powheg",
-        "st_tchannel_tbar_powheg",
+        "st_tchannel_t_4f_powheg",
+        "st_tchannel_tbar_4f_powheg",
         "st_twchannel_t_powheg",
         "st_twchannel_tbar_powheg",
-        "st_schannel_lep_amcatnlo",
-        "st_schannel_had_amcatnlo",
+        "st_schannel_lep_4f_amcatnlo",
+        "st_schannel_had_4f_amcatnlo",
         # WJets
         "w_lnu_ht70To100_madgraph",
         "w_lnu_ht100To200_madgraph",

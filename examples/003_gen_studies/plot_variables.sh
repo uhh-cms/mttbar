@@ -29,7 +29,7 @@ law run cf.PlotVariables1D \
     --skip-ratio \
     --hide-errors \
     --processes \
-        tt,w_lnu,dy_lep,st,qcd,vv,zprime_tt_m500_w50,zprime_tt_m1000_w100,zprime_tt_m3000_w300 \
+        tt,w_lnu,dy,st,qcd,vv,zprime_tt_m500_w50,zprime_tt_m1000_w100,zprime_tt_m3000_w300 \
     --variables \
         gen_ttbar_mass,gen_top_had_eta,gen_top_lep_pt,gen_top_had_pt,deltar_gen_top_had,deltar_gen_top_lep,gen_cos_theta_star,gen_abs_cos_theta_star,deltar_gen_top_had_wide,deltar_gen_top_lep_wide \
     "${args[@]}"
