@@ -39,6 +39,7 @@ setup_mtt() {
 
     # zsh options
     if ${shell_is_zsh}; then
+        emulate -L bash
         setopt globdots
     fi
 
