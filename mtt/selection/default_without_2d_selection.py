@@ -12,13 +12,14 @@ from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
 
 from columnflow.selection import Selector, SelectionResult, selector
+from columnflow.selection.stats import increment_stats
 from columnflow.selection.cms.met_filters import met_filters
 from columnflow.selection.cms.json_filter import json_filter
 from columnflow.production.categories import category_ids
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
 
-from mtt.selection.general import increment_stats, jet_energy_shifts
+from mtt.selection.general import jet_energy_shifts
 from mtt.selection.lepton import lepton_selection
 from mtt.selection.cutflow_features import cutflow_features
 from mtt.selection.jets import jet_selection, top_tagged_jets
@@ -140,7 +141,45 @@ def default_without_2d_selection(
         events = self[mc_weight](events, **kwargs)
 
     # increment stats
-    self[increment_stats](events, results, stats, **kwargs)
+    weight_map = {
+        "num_events": Ellipsis,
+        "num_events_selected": results.event,
+    }
+    group_map = {
+        # per category
+        "category": {
+            "values": events.category_ids,
+            "mask_fn": (lambda v: ak.any(events.category_ids == v, axis=1)),
+        },
+        # per step
+        "step": {
+            "values": list(results.steps),
+            "mask_fn": (lambda v: results.steps[v]),
+        },
+    }
+    if self.dataset_inst.is_mc:
+        weight_map = {
+            **weight_map,
+            # mc weight for all events
+            "sum_mc_weight": (events.mc_weight, Ellipsis),
+            "sum_mc_weight_selected": (events.mc_weight, results.event),
+        }
+        group_map = {
+            **group_map,
+            # per process
+            "process": {
+                "values": events.process_id,
+                "mask_fn": (lambda v: events.process_id == v),
+            },
+        }
+    events, results = self[increment_stats](
+        events,
+        results,
+        stats,
+        weight_map=weight_map,
+        group_map=group_map,
+        **kwargs,
+    )
 
     return events, results
 
