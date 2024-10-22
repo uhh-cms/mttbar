@@ -21,7 +21,7 @@ from columnflow.config_util import (
 from mtt.config.categories import add_categories_selection
 from mtt.config.variables import add_variables
 
-from mtt.config.analysis_mtt import analysis_mtt
+from mtt.config.Run2.analysis_mtt import analysis_mtt
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -93,65 +93,65 @@ for proc in config_2017.processes:
 
 # add datasets we need to study
 dataset_names = [
-    # DATA
-    "data_e_b",
-    "data_e_c",
-    "data_e_d",
-    "data_e_e",
-    "data_e_f",
-    "data_mu_b",
-    "data_mu_c",
-    "data_mu_d",
-    "data_mu_e",
-    "data_mu_f",
-    "data_pho_b",
-    "data_pho_c",
-    "data_pho_d",
-    "data_pho_e",
-    "data_pho_f",
-    # TTbar
+    # # DATA
+    # "data_e_b",
+    # "data_e_c",
+    # "data_e_d",
+    # "data_e_e",
+    # "data_e_f",
+    # "data_mu_b",
+    # "data_mu_c",
+    # "data_mu_d",
+    # "data_mu_e",
+    # "data_mu_f",
+    # "data_pho_b",
+    # "data_pho_c",
+    # "data_pho_d",
+    # "data_pho_e",
+    # "data_pho_f",
+    # # TTbar
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    # WJets
-    "w_lnu_ht70to100_madgraph",
-    "w_lnu_ht100to200_madgraph",
-    "w_lnu_ht200to400_madgraph",
-    "w_lnu_ht400to600_madgraph",
-    "w_lnu_ht600to800_madgraph",
-    "w_lnu_ht800to1200_madgraph",
-    "w_lnu_ht1200to2500_madgraph",
-    "w_lnu_ht2500toinf_madgraph",
-    # DY
-    "dy_m50toinf_ht70to100_madgraph",
-    "dy_m50toinf_ht100to200_madgraph",
-    "dy_m50toinf_ht200to400_madgraph",
-    "dy_m50toinf_ht400to600_madgraph",
-    "dy_m50toinf_ht600to800_madgraph",
-    "dy_m50toinf_ht800to1200_madgraph",
-    "dy_m50toinf_ht1200to2500_madgraph",
-    "dy_m50toinf_ht2500toinf_madgraph",
-    # Diboson
-    "ww_pythia",
-    "wz_pythia",
-    "zz_pythia",
-    # SingleTop
-    "st_schannel_lep_4f_amcatnlo",
-    "st_schannel_had_4f_amcatnlo",
-    "st_tchannel_t_4f_powheg",
-    "st_tchannel_tbar_4f_powheg",
-    "st_twchannel_t_powheg",
-    "st_twchannel_tbar_powheg",
-    # QCD
-    "qcd_ht50to100_madgraph",
-    "qcd_ht100to200_madgraph",
-    "qcd_ht200to300_madgraph",
-    "qcd_ht300to500_madgraph",
-    "qcd_ht500to700_madgraph",
-    "qcd_ht700to1000_madgraph",
-    "qcd_ht1000to1500_madgraph",
-    "qcd_ht1500to2000_madgraph",
-    "qcd_ht2000toinf_madgraph",
+    # # WJets
+    # "w_lnu_ht70to100_madgraph",
+    # "w_lnu_ht100to200_madgraph",
+    # "w_lnu_ht200to400_madgraph",
+    # "w_lnu_ht400to600_madgraph",
+    # "w_lnu_ht600to800_madgraph",
+    # "w_lnu_ht800to1200_madgraph",
+    # "w_lnu_ht1200to2500_madgraph",
+    # "w_lnu_ht2500toinf_madgraph",
+    # # DY
+    # "dy_m50toinf_ht70to100_madgraph",
+    # "dy_m50toinf_ht100to200_madgraph",
+    # "dy_m50toinf_ht200to400_madgraph",
+    # "dy_m50toinf_ht400to600_madgraph",
+    # "dy_m50toinf_ht600to800_madgraph",
+    # "dy_m50toinf_ht800to1200_madgraph",
+    # "dy_m50toinf_ht1200to2500_madgraph",
+    # "dy_m50toinf_ht2500toinf_madgraph",
+    # # Diboson
+    # "ww_pythia",
+    # "wz_pythia",
+    # "zz_pythia",
+    # # SingleTop
+    # "st_schannel_lep_4f_amcatnlo",
+    # "st_schannel_had_4f_amcatnlo",
+    # "st_tchannel_t_4f_powheg",
+    # "st_tchannel_tbar_4f_powheg",
+    # "st_twchannel_t_powheg",
+    # "st_twchannel_tbar_powheg",
+    # # QCD
+    # "qcd_ht50to100_madgraph",
+    # "qcd_ht100to200_madgraph",
+    # "qcd_ht200to300_madgraph",
+    # "qcd_ht300to500_madgraph",
+    # "qcd_ht500to700_madgraph",
+    # "qcd_ht700to1000_madgraph",
+    # "qcd_ht1000to1500_madgraph",
+    # "qcd_ht1500to2000_madgraph",
+    # "qcd_ht2000toinf_madgraph",
     # -- signals
     # Z prime (width/mass = 10%)
     "zprime_tt_m400_w40_madgraph",
@@ -321,6 +321,7 @@ for dataset_name in dataset_names:
     #     has_top: any dataset containing top quarks
     #     has_ttbar: any dataset containing a ttbar pair
     #     is_sm_ttbar: standard model ttbar datasets
+    #     has_memory_intensive_reco: use different settings for ttbar reco
     #     is_mtt_signal: m(ttbar) search signal datasets
     #     is_v_jets: W/Z+jets (including Drell-Yan)
     #     is_diboson: diboson datasets
@@ -371,8 +372,6 @@ for dataset_name in dataset_names:
         dataset.add_tag("is_mu_data")
     if dataset.name.startswith("data_e"):
         dataset.add_tag({"is_e_data", "is_egamma_data"})
-    if dataset.name.startswith("data_pho"):
-        dataset.add_tag({"is_pho_data", "is_egamma_data"})
     if dataset.name.startswith("data_pho"):
         dataset.add_tag({"is_pho_data", "is_egamma_data"})
 
@@ -493,7 +492,6 @@ config_2017.set_aux("dataset_groups", {
         "zprime_tt_m1000_w100_madgraph",
         "zprime_tt_m3000_w300_madgraph",
     ],
-    "dy": ["dy_*"],
     "w_lnu": ["w_lnu_*"],
 })
 
@@ -743,8 +741,8 @@ dy_xsecs = {
     "dy_m50toinf_ht2500toinf": 0.00297803565,
 }
 
-for ds in dy_xsecs:
-    procs.n(ds).set_xsec(13, dy_xsecs[ds])
+# for ds in dy_xsecs:
+#     procs.n(ds).set_xsec(13, dy_xsecs[ds])
 
 w_lnu_xsecs = {
     "w_lnu_ht70to100": 1271,
@@ -757,8 +755,8 @@ w_lnu_xsecs = {
     "w_lnu_ht2500toinf": 0.02623,
 }
 
-for ds in w_lnu_xsecs:
-    procs.n(ds).set_xsec(13, w_lnu_xsecs[ds])
+# for ds in w_lnu_xsecs:
+#     procs.n(ds).set_xsec(13, w_lnu_xsecs[ds])
 
 # cross sections for diboson samples; taken from:
 # - ww (NNLO): https://arxiv.org/abs/1408.5243
@@ -1011,9 +1009,11 @@ config_2017.x.keep_columns = DotDict.wrap({
 
         # muons
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
+        "VetoMuon.pt", "VetoMuon.eta", "VetoMuon.phi", "VetoMuon.mass",
         "Muon.pfRelIso04_all",
         # electrons
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
+        "VetoElectron.pt", "VetoElectron.eta", "VetoElectron.phi", "VetoElecton.mass",
         "Electron.deltaEtaSC",
         "Electron.pfRelIso03_all",
 
@@ -1218,5 +1218,5 @@ add_variables(config_2017)
 config_2017_limited = config_2017.copy(name=f"{config_2017.name}_limited", id="+")
 for dataset in config_2017_limited.datasets:
     for k in dataset.info.keys():
-        if dataset[k].n_files > 10:
-            dataset[k].n_files = 10
+        if dataset[k].n_files > 1:
+            dataset[k].n_files = 1
