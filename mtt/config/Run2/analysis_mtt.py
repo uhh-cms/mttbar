@@ -49,5 +49,4 @@ if not law.util.flag_to_bool(os.getenv("MTT_BUNDLE_CMSSW", "1")):
 analysis_mtt.set_aux("config_groups", {})
 
 # trailing imports for different configs
-import mtt.config.config_2017  # noqa
-#import mtt.config.config_2022  # noqa
+import mtt.config.Run2.config_2017  # noqa
