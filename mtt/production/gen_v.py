@@ -139,7 +139,7 @@ def vjets_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         })
     """
 
-    # fail if not run in ttbar simulation
+    # fail if not run in vector boson simulation
     if not self.dataset_inst.has_tag("is_v_jets"):
         raise Exception(f"vjets_weight should only run for W+Jets and Z+Jets datasets, got {self.dataset_inst}")
 
@@ -215,7 +215,7 @@ def vjets_weight_requires(self: Producer, reqs: dict) -> None:
 def vjets_weight_setup(self: Producer, reqs: dict, inputs: dict, reader_targets: InsertableDict) -> None:
     bundle = reqs["external_files"]
 
-    # create the L1 prefiring weight evaluator
+    # create the v jets weight evaluator
     import correctionlib
     correctionlib.highlevel.Correction.__call__ = correctionlib.highlevel.Correction.evaluate
     correction_set = correctionlib.CorrectionSet.from_string(
