@@ -1275,6 +1275,7 @@ def add_config(
             "genWeight",
             "LHEWeight.*",
             "LHEPdfWeight", "LHEScaleWeight",
+            "PSWeight",
 
             # muons
             "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
@@ -1397,9 +1398,9 @@ def add_config(
         if dataset.has_tag("is_ttbar"):
             # top pt reweighting
             dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
-        if dataset.has_tag("is_v_jets"):
-            # V+jets QCD NLO reweighting
-            dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
+        # if dataset.has_tag("is_v_jets"):
+        #     # V+jets QCD NLO reweighting
+        #     dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
 
     # versions per task family and optionally also dataset and shift
     # None can be used as a key to define a default value
