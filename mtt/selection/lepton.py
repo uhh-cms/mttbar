@@ -26,8 +26,8 @@ ak = maybe_import("awkward")
         "Electron.pt", "Electron.eta",
         "Electron.cutBased",
         "Electron.deltaEtaSC",
-        "Electron.mvaFall17V2Iso_WP80",
-        "Electron.mvaFall17V2noIso_WP80",
+        "Electron.mvaIso_WP80",
+        "Electron.mvaNoIso_WP80",
     },
 )
 def electron_selection(
@@ -64,13 +64,13 @@ def electron_selection(
         (lepton.pt > 35) &
         (lepton.pt <= 120) &
         # MVA electron ID (WP 80, with isolation)
-        (lepton.mvaFall17V2Iso_WP80)
+        (lepton.mvaIso_WP80)
     )
     lepton_mask_highpt = (
         lepton_mask_eta &
         (lepton.pt > 120) &
         # MVA electron ID (WP 80, no isolation)
-        lepton.mvaFall17V2noIso_WP80
+        lepton.mvaNoIso_WP80
     )
     lepton_mask = (
         lepton_mask_lowpt | lepton_mask_highpt

@@ -116,7 +116,7 @@ def jet_selection(
     uses={
         choose_lepton,
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
-        "FatJet.deepTagMD_TvsQCD", "FatJet.msoftdrop",
+        "FatJet.particleNetWithMass_TvsQCD", "FatJet.msoftdrop",
     },
     exposed=True,
 )
@@ -132,7 +132,8 @@ def top_tagged_jets(
     """
 
     # top-tagger working point
-    wp_top_md = self.config_inst.x.toptag_working_points.deepak8.top_md
+    # wp_top_md = self.config_inst.x.toptag_working_points.deepak8.top_md  # FIXME figure out which tagger/wp to use
+    wp_top_pn_tight = 0.858  # taken from https://indico.cern.ch/event/1459087/contributions/6173396/attachments/2951723/5188840/SF_Run3.pdf for now
 
     # top-tagging criteria
     fatjet_mask_toptag = (
@@ -140,7 +141,7 @@ def top_tagged_jets(
         (events.FatJet.pt > 400) &
         (abs(events.FatJet.eta) < 2.5) &
         # 1st topjet requirement: top tagger working point
-        (events.FatJet.deepTagMD_TvsQCD > wp_top_md) &
+        (events.FatJet.particleNetWithMass_TvsQCD > wp_top_pn_tight) &
         # 2nd topjet requirement: softdrop mass window
         (events.FatJet.msoftdrop > 105) &
         (events.FatJet.msoftdrop < 210)

@@ -469,8 +469,8 @@ def add_config(
                 "triggers": {
                     "muon": {
                         "Mu50",
-                        "TkMu100",
-                        "OldMu100",
+                        # "TkMu100",
+                        # "OldMu100",
                     },
                     "electron": {
                         "Ele115_CaloIdVT_GsfTrkIdT",
