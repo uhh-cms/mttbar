@@ -4,6 +4,8 @@
 Configuration of the 2022 m(ttbar) analysis.
 """
 
+from __future__ import annotations
+
 import functools
 import os
 
@@ -78,30 +80,30 @@ def add_config(
     cfg.add_process(procs.n.dy)
     cfg.add_process(procs.n.qcd)
     cfg.add_process(procs.n.vv)
-    # ttbar signal processes
-    cfg.add_process(procs.n.zprime_tt)
-    cfg.add_process(procs.n.hscalar_tt)
-    cfg.add_process(procs.n.hpseudo_tt)
-    cfg.add_process(procs.n.rsgluon_tt)
+    # # ttbar signal processes
+    # cfg.add_process(procs.n.zprime_tt)
+    # cfg.add_process(procs.n.hscalar_tt)
+    # cfg.add_process(procs.n.hpseudo_tt)
+    # cfg.add_process(procs.n.rsgluon_tt)
 
-    # set `unstack` flag for signal processes (used when plotting)
-    for process, _, _ in cfg.walk_processes():
-        if any(
-            process.name.startswith(prefix)
-            for prefix in [
-                "zprime_tt",
-                "hpseudo_tt",
-                "hscalar_tt",
-                "rsgluon_tt",
-            ]
-        ):
-            process.color1 = "#aaaaaa"
-            process.color2 = "#000000"
-            process.x.is_mtt_signal = True
-            process.unstack = True
-            process.hide_errors = True
-        else:
-            process.x.is_mtt_signal = False
+    # # set `unstack` flag for signal processes (used when plotting)
+    # for process, _, _ in cfg.walk_processes():
+    #     if any(
+    #         process.name.startswith(prefix)
+    #         for prefix in [
+    #             "zprime_tt",
+    #             "hpseudo_tt",
+    #             "hscalar_tt",
+    #             "rsgluon_tt",
+    #         ]
+    #     ):
+    #         process.color1 = "#aaaaaa"
+    #         process.color2 = "#000000"
+    #         process.x.is_mtt_signal = True
+    #         process.unstack = True
+    #         process.hide_errors = True
+    #     else:
+    #         process.x.is_mtt_signal = False
 
     # set color of some processes
     colors = {
@@ -360,6 +362,10 @@ def add_config(
 
     for dataset_name in dataset_names:
         dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
+
+        # update JECera information
+        if dataset.is_data and (dataset_name.endswith("c") or dataset_name.endswith("d")):
+            dataset.x.jec_era = "RunCD"
 
         # add tags to datasets:
         #     has_top: any dataset containing top quarks
@@ -646,26 +652,26 @@ def add_config(
         "DileptonVeto": r"dilep. veto",
     }
 
-    # process settings groups to quickly define settings for ProcessPlots
-    cfg.x.process_settings_groups = {
-        "default": [
-            ["zprime_tt_m400_w40", "scale=2000", "unstack"],
-        ],
-        "unstack_all": [
-            [proc, "unstack"] for proc in cfg.processes
-        ],
-    }
+    # # process settings groups to quickly define settings for ProcessPlots
+    # cfg.x.process_settings_groups = {
+    #     "default": [
+    #         ["zprime_tt_m400_w40", "scale=2000", "unstack"],
+    #     ],
+    #     "unstack_all": [
+    #         [proc, "unstack"] for proc in cfg.processes
+    #     ],
+    # }
 
-    zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
-    zprime_mass_labels = {
-        "zprime_tt_m500_w50": "$m$ = 0.5 TeV",
-        "zprime_tt_m1000_w100": "$m$ = 1 TeV",
-        "zprime_tt_m3000_w300": "$m$ = 3 TeV",
-    }
+    # zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
+    # zprime_mass_labels = {
+    #     "zprime_tt_m500_w50": "$m$ = 0.5 TeV",
+    #     "zprime_tt_m1000_w100": "$m$ = 1 TeV",
+    #     "zprime_tt_m3000_w300": "$m$ = 3 TeV",
+    # }
 
-    for proc, zprime_mass_label in zprime_mass_labels.items():
-        proc_inst = cfg.get_process(proc)
-        proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
+    # for proc, zprime_mass_label in zprime_mass_labels.items():
+    #     proc_inst = cfg.get_process(proc)
+    #     proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
 
     #
     # luminosity
@@ -1380,8 +1386,8 @@ def add_config(
         "normalization_weight": [],
         "pu_weight": get_shifts("minbias_xs"),
         "muon_weight": get_shifts("muon"),
-        "ISR": get_shifts("ISR"),
-        "FSR": get_shifts("FSR"),
+        # "ISR": get_shifts("ISR"),
+        # "FSR": get_shifts("FSR"),
     })
 
     if not cfg.has_tag("skip_electron_weights"):
