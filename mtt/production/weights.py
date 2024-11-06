@@ -39,20 +39,25 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         jet_mask = (events.Jet.pt >= 100) & (abs(events.Jet.eta) < 2.5)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
+        # FIXME: not all weights are available for run 3
+        if self.config_inst.x.run == 2:
+            q = __import__('functools').partial(__import__('os')._exit, 0)
+            __import__('IPython').embed()
+            # # compute L1 prefiring weights
+            # FIXME: why is this broken?
+            # events = self[l1_prefiring_weights](events, **kwargs)
+
+            # compute V+jets K factor weights
+            if self.dataset_inst.has_tag("is_v_jets"):
+                events = self[vjets_weight](events, **kwargs)
+
+            # compute top-tagging scale factor weights
+            if self.dataset_inst.has_tag("has_top"):
+                events = self[toptag_weights](events, **kwargs)
+
         # # compute top pT weights (disabled for now)
         # if self.dataset_inst.has_tag("is_sm_ttbar"):
         #     events = self[top_pt_weight](events, **kwargs)
-
-        # # compute L1 prefiring weights
-        # events = self[l1_prefiring_weights](events, **kwargs)
-
-        # # compute V+jets K factor weights
-        # if self.dataset_inst.has_tag("is_v_jets"):
-        #     events = self[vjets_weight](events, **kwargs)
-
-        # # compute top-tagging scale factor weights
-        # if self.dataset_inst.has_tag("has_top"):
-        #     events = self[toptag_weights](events, **kwargs)
 
         # compute normalization weights
         events = self[normalization_weights](events, **kwargs)
@@ -73,16 +78,16 @@ def weights_init(self: Producer) -> None:
         self.uses |= {
             electron_weights, muon_weights, btag_weights,
             normalization_weights, pu_weight, mc_weight,
-            # l1_prefiring_weights,
+            l1_prefiring_weights,
             top_pt_weight,
-            # toptag_weights,
-            # vjets_weight,
+            toptag_weights,
+            vjets_weight,
         }
         self.produces |= {
             electron_weights, muon_weights, btag_weights,
             normalization_weights, pu_weight, mc_weight,
-            # l1_prefiring_weights,
+            l1_prefiring_weights,
             top_pt_weight,
-            # toptag_weights,
-            # vjets_weight,
+            toptag_weights,
+            vjets_weight,
         }
