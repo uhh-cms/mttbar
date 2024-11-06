@@ -65,7 +65,7 @@ campaign_run3_2022_postEE_nano_v12.x.EE = "post"
 # campaign_run3_2023_preBPix_nano_v12 = cmsdb.campaigns.run3_2023_preBPix_nano_v12.campaign_run3_2023_preBPix_nano_v12
 # campaign_run3_2023_preBPix_nano_v12.x.BPix = "pre"
 
-# campaign_run3_2023_postBPix_nano_v12 = cmsdb.campaigns.run3_2023_postBPix_nano_v12.campaign_run3_2023_postBPix_nano_v12
+# campaign_run3_2023_postBPix_nano_v12 = cmsdb.campaigns.run3_2023_postBPix_nano_v12.campaign_run3_2023_postBPix_nano_v12  # noqa
 # campaign_run3_2023_postBPix_nano_v12.x.BPix = "post"
 
 # default config

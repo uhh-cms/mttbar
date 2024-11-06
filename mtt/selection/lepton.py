@@ -111,6 +111,7 @@ def electron_selection(
         },
     )
 
+
 @electron_selection.init
 def electron_selection_init(self: Selector) -> None:
     config_inst = getattr(self, "config_inst", None)
@@ -324,9 +325,9 @@ def lepton_selection(
         trigger_config = self.config_inst.x.triggers
         triggers = {
             "lowpt": trigger_config.lowpt.all.triggers[lepton_name],
-            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if 'early' in trigger_config.highpt else None,
-            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if 'late' in trigger_config.highpt else None,
-            "highpt_all": trigger_config.highpt.all.triggers[lepton_name] if 'all' in trigger_config.highpt else None,
+            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if "early" in trigger_config.highpt else None,  # noqa
+            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if "late" in trigger_config.highpt else None,  # noqa
+            "highpt_all": trigger_config.highpt.all.triggers[lepton_name] if "all" in trigger_config.highpt else None,
         }
 
         # Remove None entries from triggers
@@ -364,7 +365,7 @@ def lepton_selection(
         # determine which high-pt trigger combination to use
         # and whether it was found
         for trigger_arr in (trigger_masks, trigger_found):
-            if 'highpt_early' in trigger_arr and 'highpt_late' in trigger_arr:
+            if "highpt_early" in trigger_arr and "highpt_late" in trigger_arr:
                 # check if early run period
                 is_early = self[check_early](events, trigger_config=trigger_config)
                 trigger_arr["highpt"] = ak.where(
