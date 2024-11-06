@@ -38,6 +38,8 @@ procs = get_root_processes_from_campaign(campaign_run2_2017)
 # create a config by passing the campaign, so id and name will be identical
 config_2017 = analysis_mtt.add_config(campaign_run2_2017)
 
+config_2017.x.run = 2
+
 # add processes we are interested in
 config_2017.add_process(procs.n.data)
 config_2017.add_process(procs.n.tt)
