@@ -1262,7 +1262,7 @@ def add_config(
 
     # external files
     json_mirror = "/afs/cern.ch/user/j/jmatthie/public/mirrors/jsonpog-integration-49ddc547"
-    local_repo = "/nfs/dust/cms/user/matthiej/topsf"  # TODO: avoid hardcoding path
+    local_repo = "/nfs/dust/cms/user/matthiej/mttbar"  # TODO: avoid hardcoding path
 
     if cfg.x.run == 3:
         corr_tag = f"{year}_Summer22{jerc_postfix}"
@@ -1287,7 +1287,7 @@ def add_config(
         "met_phi_corr": (f"{json_mirror}/POG/JME/{corr_tag}/met.json.gz", "v1"),
 
         # V+jets reweighting
-        "vjets_reweighting": f"{local_repo}/data/json/vjets_reweighting.json.gz",
+        "vjets_reweighting": f"{local_repo}/data/json/vjets_reweighting.json",
     })
 
     # temporary fix due to missing corrections in run 3
