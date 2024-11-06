@@ -479,7 +479,7 @@ config_2017.x.jet_selection = DotDict.wrap({
         },
         "btagger": {
             "column": "btagDeepFlavB",
-            "wp": config_2017.x.btag_wp['deepjet']['medium'],
+            "wp": config_2017.x.btag_wp["deepjet"]["medium"],
         },
     },
     "ak8": {
@@ -489,7 +489,7 @@ config_2017.x.jet_selection = DotDict.wrap({
         "msd": [105, 210],
         "toptagger": {
             "column": "deepTagMD_TvsQCD",
-            "wp": config_2017.x.toptag_wp['deepak8']['top_md'],
+            "wp": config_2017.x.toptag_wp["deepak8"]["top_md"],
         },
         "delta_r_lep": 0.8,
     },

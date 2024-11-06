@@ -36,7 +36,6 @@ def data_trigger_veto(
     # get trigger requirements
     trigger_config = self.config_inst.x.triggers
 
-
     # ensure lepton selection was run, get lepton pT regime
     events, _ = self[lepton_selection](events, **kwargs)
     pt_regime = events["pt_regime"]
@@ -70,7 +69,7 @@ def data_trigger_veto(
                 else:
                     object_trigger_masks[key] = (False)
         # check if event is in early run period
-        if 'highpt_early' in triggers[object_name] and 'highpt_late' in triggers[object_name]:
+        if "highpt_early" in triggers[object_name] and "highpt_late" in triggers[object_name]:
             is_early = self[check_early](events, trigger_config=trigger_config, **kwargs)
             object_trigger_masks["highpt"] = ak.where(
                 is_early,
@@ -78,17 +77,17 @@ def data_trigger_veto(
                 object_trigger_masks["highpt_late"],
             )
         else:
-            object_trigger_masks["highpt"] = object_trigger_masks['highpt_all']
+            object_trigger_masks["highpt"] = object_trigger_masks["highpt_all"]
 
         # trigger selection
         pass_object_trigger = ak.zeros_like(events.event, dtype=bool)
-        if 'lowpt' in triggers[object_name]:
+        if "lowpt" in triggers[object_name]:
             pass_object_trigger = ak.where(
                 is_lowpt,
                 object_trigger_masks["lowpt"],
                 pass_object_trigger,
             )
-        if 'highpt' in object_trigger_masks:
+        if "highpt" in object_trigger_masks:
             pass_object_trigger = ak.where(
                 is_highpt,
                 object_trigger_masks["highpt"],

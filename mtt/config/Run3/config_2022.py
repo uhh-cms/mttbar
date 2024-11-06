@@ -563,7 +563,7 @@ def add_config(
             },
             "btagger": {
                 "column": "btagDeepFlavB",
-                "wp": cfg.x.btag_wp['deepjet']['medium'],
+                "wp": cfg.x.btag_wp["deepjet"]["medium"],
             },
         },
         "ak8": {
@@ -573,7 +573,7 @@ def add_config(
             "msd": [105, 210],
             "toptagger": {
                 "column": "particleNetWithMass_TvsQCD",
-                "wp": cfg.x.toptag_wp['particle_net']['tight'],
+                "wp": cfg.x.toptag_wp["particle_net"]["tight"],
             },
             "delta_r_lep": 0.8,
         },

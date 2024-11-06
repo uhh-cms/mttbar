@@ -149,7 +149,7 @@ def top_tagged_jets(
 
     # top-tagger working point
     wp_top_md = sel_params.toptagger.wp
-    
+
     # top-tagging criteria
     fatjet_mask_toptag = (
         # kinematic cuts

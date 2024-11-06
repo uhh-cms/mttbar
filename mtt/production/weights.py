@@ -41,8 +41,6 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         # FIXME: not all weights are available for run 3
         if self.config_inst.x.run == 2:
-            q = __import__('functools').partial(__import__('os')._exit, 0)
-            __import__('IPython').embed()
             # # compute L1 prefiring weights
             # FIXME: why is this broken?
             # events = self[l1_prefiring_weights](events, **kwargs)
