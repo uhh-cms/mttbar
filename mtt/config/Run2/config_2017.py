@@ -377,6 +377,140 @@ for dataset_name in dataset_names:
     if dataset.name.startswith("data_pho"):
         dataset.add_tag({"is_pho_data", "is_egamma_data"})
 
+#
+# tagger configuration
+# (b/top taggers)
+#
+
+# 2017 b-tagging working points
+# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
+config_2017.x.btag_wp = {
+    "deepjet": {
+        "loose": 0.0532,
+        "medium": 0.3040,
+        "tight": 0.7476,
+    },
+    "deepcsv": {
+        "loose": 0.1355,
+        "medium": 0.4506,
+        "tight": 0.7738,
+    },
+}
+
+# 2017 top tagging working points (DeepAK8, 1% mistagging rate, )
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
+config_2017.x.toptag_wp = {
+    "deepak8": {
+        # regular tagger
+        "top": 0.344,
+        "w": 0.739,
+        # mass-decorrelated tagger
+        "top_md": 0.725,
+        "w_md": 0.925,
+    },
+}
+
+#
+# selector configuration
+#
+
+# lepton selection parameters
+config_2017.x.lepton_selection = DotDict.wrap({
+    "mu": {
+        "column": "Muon",
+        "min_pt": {
+            "low_pt": 30,
+            "high_pt": 55,
+        },
+        "max_abseta": 2.4,
+        "iso": {
+            "column": "pfIsoId",
+            "value": 4,
+        },
+        "id": {
+            "low_pt": {
+                "column": "tightId",
+                "value": True,
+            },
+            "high_pt": {
+                "column": "highPtId",
+                "value": 2,
+            },
+        },
+        # veto events with additional leptons passing looser cuts
+        "min_pt_addveto": 25,
+        "id_addveto": {
+            "column": "tightId",
+            "value": True,
+        },
+        "max_abseta_addveto": 2.4,
+    },
+    "e": {
+        "column": "Electron",
+        "min_pt": {
+            "low_pt": 35,
+            "high_pt": 120,
+        },
+        "max_abseta": 2.5,
+        "barrel_veto": [1.44, 1.57],
+        "mva_id": {
+            "low_pt": "mvaFall17V2Iso_WP80",
+            "high_pt": "mvaFall17V2noIso_WP80",
+        },
+        # veto events with additional leptons passing looser cuts
+        "min_pt_addveto": 25,
+        "id_addveto": {
+            "column": "cutBased",
+            "value": 3,
+        },
+        "max_abseta_addveto": 2.5,
+    },
+})
+
+# jet selection parameters
+config_2017.x.jet_selection = DotDict.wrap({
+    "ak4": {
+        "column": "Jet",
+        "max_abseta": 2.5,
+        "min_pt": {
+            "baseline": 30,
+            "e": [50, 40],
+            "mu": [50, 50],
+        },
+        "btagger": {
+            "column": "btagDeepFlavB",
+            "wp": config_2017.x.btag_wp['deepjet']['medium'],
+        },
+    },
+    "ak8": {
+        "column": "FatJet",
+        "max_abseta": 2.5,
+        "min_pt": 400,
+        "msd": [105, 210],
+        "toptagger": {
+            "column": "deepTagMD_TvsQCD",
+            "wp": config_2017.x.toptag_wp['deepak8']['top_md'],
+        },
+        "delta_r_lep": 0.8,
+    },
+})
+
+# MET selection parameters
+config_2017.x.met_selection = DotDict.wrap({
+    "column": "MET",
+    "min_pt": {
+        "e": 60,
+        "mu": 70,
+    },
+})
+
+# lepton jet 2D isolation parameters
+config_2017.x.lepton_jet_iso = DotDict.wrap({
+    "min_pt": 15,
+    "delta_r": 0.4,
+    "pt_rel": 25,
+})
+
 # trigger paths for muon/electron channels
 config_2017.set_aux("triggers", DotDict.wrap({
     "lowpt": {
@@ -629,35 +763,6 @@ config_2017.set_aux("luminosity", Number(41480, {
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
 # Note: not used by updated JSON based pileup weights producer
 # config_2017.set_aux("minbias_xs", Number(69.2, 0.046j))
-
-# 2017 b-tag working points
-# https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL17?rev=15
-config_2017.x.btag_working_points = DotDict.wrap({
-    "deepjet": {
-        "loose": 0.0532,
-        "medium": 0.3040,
-        "tight": 0.7476,
-    },
-    "deepcsv": {
-        "loose": 0.1355,
-        "medium": 0.4506,
-        "tight": 0.7738,
-    },
-})
-
-# 2017 top-tagging working pointsi (DeepAK8, 1% mistagging rate, )
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
-# TODO (?): unify with `toptag_sf_config`?
-config_2017.x.toptag_working_points = DotDict.wrap({
-    "deepak8": {
-        # regular tagger
-        "top": 0.344,
-        "w": 0.739,
-        # mass-decorrelated tagger
-        "top_md": 0.725,
-        "w_md": 0.925,
-    },
-})
 
 # chi2 tuning parameters (mean masses/widths of top quarks
 # with hadronically/leptonically decaying W bosons)
