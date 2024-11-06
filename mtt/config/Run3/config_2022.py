@@ -432,6 +432,169 @@ def add_config(
     # ancestor processes) are registered in the config
     verify_config_processes(cfg, warn=True)
 
+    #
+    # tagger configuration
+    # (b/top taggers)
+    tag_key = f"2022{campaign.x.EE}EE" if year == 2022 else year
+    #
+
+    # b-tagging working points
+    # https://btv-wiki.docs.cern.ch/ScaleFactors/Run3Summer22/
+    # https://btv-wiki.docs.cern.ch/ScaleFactors/Run3Summer22EE/
+    # TODO: add correct 2022 + 2022preEE WP for deepcsv if needed
+    cfg.x.btag_wp = DotDict.wrap({
+        "deepjet": {
+            "loose": {
+                "2022preEE": 0.0583, "2022postEE": 0.0614,
+            }[tag_key],
+            "medium": {
+                "2022preEE": 0.3086, "2022postEE": 0.3196,
+            }[tag_key],
+            "tight": {
+                "2022preEE": 0.7183, "2022postEE": 0.7300,
+            }[tag_key],
+        },
+        "deepcsv": {
+            "loose": {
+                "2022preEE": 0.1208, "2022postEE": 0.1208,
+            }[tag_key],
+            "medium": {
+                "2022preEE": 0.4168, "2022postEE": 0.4168,
+            }[tag_key],
+            "tight": {
+                "2022preEE": 0.7665, "2022postEE": 0.7665,
+            }[tag_key],
+        },
+    })
+
+    # deepak8: 2017 top tagging working points (DeepAK8, 1% mistagging rate, )
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
+    # particle_net: 2022 from JMAR presentation 21.10.24 (slide 10)
+    # https://indico.cern.ch/event/1459087/contributions/6173396/attachments/2951723/5188840/SF_Run3.pdf
+    cfg.x.toptag_wp = {
+        "deepak8": {
+            # regular tagger
+            "top": 0.344,
+            "w": 0.739,
+            # mass-decorrelated tagger
+            "top_md": 0.725,
+            "w_md": 0.925,
+        },
+        "particle_net": {
+            "medium": {
+                "2022preEE": 0.683, "2022postEE": 0.698,
+            }[tag_key],
+            "tight": {
+                "2022preEE": 0.858, "2022postEE": 0.866,
+            }[tag_key],
+            "very tight": {
+                "2022preEE": 0.979, "2022postEE": 0.980,
+            }[tag_key],
+        },
+    }
+
+    #
+    # selector configuration
+    # FIXME
+    #
+
+    # lepton selection parameters
+    cfg.x.lepton_selection = DotDict.wrap({
+        "mu": {
+            "column": "Muon",
+            "min_pt": {
+                "low_pt": 30,
+                "high_pt": 55,
+            },
+            "max_abseta": 2.4,
+            "iso": {
+                "column": "pfIsoId",
+                "value": 4,
+            },
+            "id": {
+                "low_pt": {
+                    "column": "tightId",
+                    "value": True,
+                },
+                "high_pt": {
+                    "column": "highPtId",
+                    "value": 2,
+                },
+            },
+            # veto events with additional leptons passing looser cuts
+            "min_pt_addveto": 25,
+            "id_addveto": {
+                "column": "tightId",
+                "value": True,
+            },
+            "max_abseta_addveto": 2.4,
+        },
+        "e": {
+            "column": "Electron",
+            "min_pt": {
+                "low_pt": 35,
+                "high_pt": 120,
+            },
+            "max_abseta": 2.5,
+            "barrel_veto": [1.44, 1.57],
+            "mva_id": {
+                "low_pt": "mvaIso_WP80",
+                "high_pt": "mvaNoIso_WP80",
+            },
+            # veto events with additional leptons passing looser cuts
+            "min_pt_addveto": 25,
+            "id_addveto": {
+                "column": "cutBased",
+                "value": 3,
+            },
+            "max_abseta_addveto": 2.5,
+        },
+    })
+
+    # jet selection parameters
+    cfg.x.jet_selection = DotDict.wrap({
+        "ak4": {
+            "column": "Jet",
+            "max_abseta": 2.5,
+            "min_pt": {
+                "baseline": 30,
+                "e": [50, 40],
+                "mu": [50, 50],
+            },
+            "btagger": {
+                "column": "btagDeepFlavB",
+                "wp": cfg.x.btag_wp['deepjet']['medium'],
+            },
+        },
+        "ak8": {
+            "column": "FatJet",
+            "max_abseta": 2.5,
+            "min_pt": 400,
+            "msd": [105, 210],
+            "toptagger": {
+                "column": "particleNetWithMass_TvsQCD",
+                "wp": cfg.x.toptag_wp['particle_net']['tight'],
+            },
+            "delta_r_lep": 0.8,
+        },
+    })
+
+    # MET selection parameters
+    cfg.x.met_selection = DotDict.wrap({
+        "column": "MET",
+        "min_pt": {
+            "e": 60,
+            "mu": 70,
+        },
+    })
+
+    # lepton jet 2D isolation parameters
+    cfg.x.lepton_jet_iso = DotDict.wrap({
+        "min_pt": 15,
+        "delta_r": 0.4,
+        "pt_rel": 25,
+    })
+
     # trigger paths for muon/electron channels
     # TODO update to relevant Run 3 triggers
     cfg.set_aux("triggers", DotDict.wrap({
@@ -448,28 +611,11 @@ def add_config(
             },
         },
         "highpt": {
-            # split by run range
-            # (some triggers inactive active for early runs)
-            "early": {
+            "all": {
                 "triggers": {
                     "muon": {
                         "Mu50",
-                    },
-                    "electron": {
-                        "Ele35_WPTight_Gsf",
-                    },
-                    "photon": {
-                        "Photon200",
-                    },
-                },
-                "run_range_max": 299329,
-                "mc_trigger_percent": 11.58,
-            },
-            "late": {
-                "triggers": {
-                    "muon": {
-                        "Mu50",
-                        # "TkMu100",
+                        "HighPtTkMu100",
                         # "OldMu100",
                     },
                     "electron": {
@@ -482,10 +628,6 @@ def add_config(
             },
         },
     }))
-    # ensure mc trigger fraction add up to 100%
-    cfg.x.triggers.highpt.late.mc_trigger_percent = (
-        100. - cfg.x.triggers.highpt.early.mc_trigger_percent
-    )
 
     #
     # MET filters
@@ -701,66 +843,6 @@ def add_config(
     # # https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData?rev=45#Recommended_cross_section
     # not used after moving to correctionlib based PU weights
     # cfg.x.minbias_xs = Number(69.2, 0.046j)
-
-    #
-    # tagger working points
-    #
-
-    # b-tag working points
-    # https://btv-wiki.docs.cern.ch/ScaleFactors/Run3Summer22/
-    # https://btv-wiki.docs.cern.ch/ScaleFactors/Run3Summer22EE/
-    # TODO: add correct 2022 + 2022preEE WP for deepcsv if needed
-    btag_key = f"2022{campaign.x.EE}EE" if year == 2022 else year
-    cfg.x.btag_working_points = DotDict.wrap({
-        "deepjet": {
-            "loose": {
-                "2022preEE": 0.0583, "2022postEE": 0.0614,
-            }[btag_key],
-            "medium": {
-                "2022preEE": 0.3086, "2022postEE": 0.3196,
-            }[btag_key],
-            "tight": {
-                "2022preEE": 0.7183, "2022postEE": 0.7300,
-            }[btag_key],
-        },
-        "deepcsv": {
-            "loose": {
-                "2022preEE": 0.1208, "2022postEE": 0.1208,
-            }[btag_key],
-            "medium": {
-                "2022preEE": 0.4168, "2022postEE": 0.4168,
-            }[btag_key],
-            "tight": {
-                "2022preEE": 0.7665, "2022postEE": 0.7665,
-            }[btag_key],
-        },
-    })
-
-    # # top-tag working points  #FIXME which wp were used in Run 2?
-    # # https://twiki.cern.ch/twiki/bin/view/CMS/JetTopTagging?rev=41
-    # # FIXME use my own WPs here?
-    # cfg.x.toptag_working_points = DotDict.wrap({
-    #     "tau32": {
-    #         "very_loose": 0.69,
-    #         "loose": 0.61,
-    #         "medium": 0.52,
-    #         "tight": 0.47,
-    #         "very_tight": 0.38,
-    #     },
-    # })
-    # # 2017 top-tagging working pointsi (DeepAK8, 1% mistagging rate, )
-    # # https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
-    # # TODO (?): unify with `toptag_sf_config`?
-    # config_2017.x.toptag_working_points = DotDict.wrap({
-    #     "deepak8": {
-    #         # regular tagger
-    #         "top": 0.344,
-    #         "w": 0.739,
-    #         # mass-decorrelated tagger
-    #         "top_md": 0.725,
-    #         "w_md": 0.925,
-    #     },
-    # })
 
     # chi2 tuning parameters (mean masses/widths of top quarks
     # with hadronically/leptonically decaying W bosons)

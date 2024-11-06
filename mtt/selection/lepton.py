@@ -23,11 +23,6 @@ ak = maybe_import("awkward")
     uses={
         "event",
         check_early,
-        "Electron.pt", "Electron.eta",
-        "Electron.cutBased",
-        "Electron.deltaEtaSC",
-        "Electron.mvaIso_WP80",
-        "Electron.mvaNoIso_WP80",
     },
 )
 def electron_selection(
@@ -49,28 +44,29 @@ def electron_selection(
       separate selector.
     """
 
-    lepton = events.Electron
+    sel_params = self.config_inst.x.lepton_selection.e
+    lepton = events[sel_params.column]
 
     # general lepton kinematics
     lepton_mask_eta = (
-        (abs(lepton.eta + lepton.deltaEtaSC) < 2.5) &
+        (abs(lepton.eta + lepton.deltaEtaSC) < sel_params.max_abseta) &
         # filter out electrons in barrel-endcap transition region
-        ((abs(lepton.eta) < 1.44) | (abs(lepton.eta) > 1.57))
+        ((abs(lepton.eta) < sel_params.barrel_veto[0]) | (abs(lepton.eta) > sel_params.barrel_veto[1]))
     )
 
     # different criteria for low- and high-pt lepton
     lepton_mask_lowpt = (
         lepton_mask_eta &
-        (lepton.pt > 35) &
-        (lepton.pt <= 120) &
+        (lepton.pt > sel_params.min_pt.low_pt) &
+        (lepton.pt <= sel_params.min_pt.high_pt) &
         # MVA electron ID (WP 80, with isolation)
-        (lepton.mvaIso_WP80)
+        (lepton[sel_params.mva_id.low_pt])
     )
     lepton_mask_highpt = (
         lepton_mask_eta &
-        (lepton.pt > 120) &
+        (lepton.pt > sel_params.min_pt.high_pt) &
         # MVA electron ID (WP 80, no isolation)
-        lepton.mvaNoIso_WP80
+        lepton[sel_params.mva_id.high_pt]
     )
     lepton_mask = (
         lepton_mask_lowpt | lepton_mask_highpt
@@ -80,10 +76,10 @@ def electron_selection(
     # veto events if additional leptons present
     # (note the looser cuts)
     add_leptons = (
-        (abs(lepton.eta + lepton.deltaEtaSC) < 2.5) &
-        (lepton.pt > 25) &
+        (abs(lepton.eta + lepton.deltaEtaSC) < sel_params.max_abseta_addveto) &
+        (lepton.pt > sel_params.min_pt_addveto) &
         # cut-based electron ID (3: tight working point)
-        (lepton.cutBased == 3) &
+        (lepton[sel_params.id_addveto.column] == sel_params.id_addveto.value) &
         ~lepton_mask
     )
     dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
@@ -115,12 +111,28 @@ def electron_selection(
         },
     )
 
+@electron_selection.init
+def electron_selection_init(self: Selector) -> None:
+    config_inst = getattr(self, "config_inst", None)
+    if not config_inst:
+        return
+    params = config_inst.x.lepton_selection.e
+    column = params.get("column")
+    if column:
+        self.uses |= {
+            f"{column}.pt",
+            f"{column}.eta",
+            f"{column}.deltaEtaSC",
+            f"{column}.{params.id_addveto.column}",
+            f"{column}.{params.mva_id.low_pt}",
+            f"{column}.{params.mva_id.high_pt}",
+        }
+
 
 @selector(
     uses={
         "event",
         check_early,
-        "Muon.pt", "Muon.eta", "Muon.tightId", "Muon.highPtId", "Muon.pfIsoId",
     },
 )
 def muon_selection(
@@ -141,26 +153,27 @@ def muon_selection(
       separate selector.
     """
 
-    lepton = events.Muon
+    sel_params = self.config_inst.x.lepton_selection.mu
+    lepton = events[sel_params.column]
 
     # general lepton kinematics
-    lepton_mask_eta = (abs(lepton.eta) < 2.4)
+    lepton_mask_eta = (abs(lepton.eta) < sel_params.max_abseta)
 
     # different criteria for low- and high-pt lepton
     lepton_mask_lowpt = (
         lepton_mask_eta &
-        (lepton.pt > 30) &
-        (lepton.pt <= 55) &
+        (lepton.pt > sel_params.min_pt.low_pt) &
+        (lepton.pt <= sel_params.min_pt.high_pt) &
         # 4 == PFIsoTight
-        (lepton.pfIsoId == 4) &
+        (lepton[sel_params.iso.column] == sel_params.iso.value) &
         # CutBasedIdTight
-        (lepton.tightId)
+        (lepton[sel_params.id.low_pt.column])
     )
     lepton_mask_highpt = (
         lepton_mask_eta &
-        (lepton.pt > 55) &
+        (lepton.pt > sel_params.min_pt.high_pt) &
         # CutBasedIdGlobalHighPt
-        (lepton.highPtId == 2)
+        (lepton[sel_params.id.high_pt.column] == sel_params.id.high_pt.value)
     )
     lepton_mask = (
         lepton_mask_lowpt | lepton_mask_highpt
@@ -170,10 +183,10 @@ def muon_selection(
     # veto events if additional leptons present
     # (note the looser cuts)
     add_leptons = (
-        (abs(lepton.eta) < 2.4) &
-        (lepton.pt > 25) &
+        (abs(lepton.eta) < sel_params.max_abseta_addveto) &
+        (lepton.pt > sel_params.min_pt_addveto) &
         # CutBasedIdTight
-        (lepton.tightId) &
+        (lepton[sel_params.id_addveto.column]) &
         ~lepton_mask
     )
     dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
@@ -204,6 +217,24 @@ def muon_selection(
             "pt_regime": pt_regime,
         },
     )
+
+
+@muon_selection.init
+def muon_selection_init(self: Selector) -> None:
+    config_inst = getattr(self, "config_inst", None)
+    if not config_inst:
+        return
+    params = config_inst.x.lepton_selection.mu
+    column = params.get("column")
+    if column:
+        self.uses |= {
+            f"{column}.pt",
+            f"{column}.eta",
+            f"{column}.{params.id_addveto.column}",
+            f"{column}.{params.id.low_pt.column}",
+            f"{column}.{params.id.high_pt.column}",
+            f"{column}.{params.iso.column}",
+        }
 
 
 def merge_selection_steps(step_dicts):
@@ -293,12 +324,13 @@ def lepton_selection(
         trigger_config = self.config_inst.x.triggers
         triggers = {
             "lowpt": trigger_config.lowpt.all.triggers[lepton_name],
-            "highpt_early": trigger_config.highpt.early.triggers[lepton_name],
-            "highpt_late": trigger_config.highpt.late.triggers[lepton_name],
+            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if 'early' in trigger_config.highpt else None,
+            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if 'late' in trigger_config.highpt else None,
+            "highpt_all": trigger_config.highpt.all.triggers[lepton_name] if 'all' in trigger_config.highpt else None,
         }
 
-        # check if early run period
-        is_early = self[check_early](events, trigger_config=trigger_config)
+        # Remove None entries from triggers
+        triggers = {k: v for k, v in triggers.items() if v is not None}
 
         # compute trigger masks
         trigger_masks = {}
@@ -332,11 +364,16 @@ def lepton_selection(
         # determine which high-pt trigger combination to use
         # and whether it was found
         for trigger_arr in (trigger_masks, trigger_found):
-            trigger_arr["highpt"] = ak.where(
-                is_early,
-                trigger_arr["highpt_early"],
-                trigger_arr["highpt_late"],
-            )
+            if 'highpt_early' in trigger_arr and 'highpt_late' in trigger_arr:
+                # check if early run period
+                is_early = self[check_early](events, trigger_config=trigger_config)
+                trigger_arr["highpt"] = ak.where(
+                    is_early,
+                    trigger_arr["highpt_early"],
+                    trigger_arr["highpt_late"],
+                )
+            else:
+                trigger_arr["highpt"] = trigger_arr.get("highpt_all", ak.zeros_like(events.event, dtype=bool))
 
         # sanity check: make sure that at least one of the
         # required triggers was found (catch misspellings, etc.)

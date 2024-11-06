@@ -21,7 +21,6 @@ ak = maybe_import("awkward")
 
 @selector(
     uses={
-        "Jet.pt", "Jet.eta", "Jet.btagDeepFlavB",
         "Jet.electronIdx1", "Jet.electronIdx2",
         "Jet.muonIdx1", "Jet.muonIdx2",
         "channel_id",
@@ -43,6 +42,9 @@ def jet_selection(
     # - require a second AK4 jet with pt>50 and abseta<2.5
     # both channels:
     # - require that at least one AK4 jet (pt>50 and abseta<2.5) is b-tagged
+    sel_params = self.config_inst.x.jet_selection.ak4
+    jet = events[sel_params.column]
+
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
@@ -52,30 +54,30 @@ def jet_selection(
     mu_id = (ch_ids == ch_mu.id)
 
     # loose jets (pt>0.1) - to filter out cleaned jets etc.
-    loose_jet_mask = (events.Jet.pt > 0.1)
-    loose_jet_indices = masked_sorted_indices(loose_jet_mask, events.Jet.pt)
+    loose_jet_mask = (jet.pt > 0.1)
+    loose_jet_indices = masked_sorted_indices(loose_jet_mask, jet.pt)
 
     # jets (pt>30)
     jet_mask = (
-        (abs(events.Jet.eta) < 2.5) &
-        (events.Jet.pt > 30)
+        (abs(jet.eta) < sel_params.max_abseta) &
+        (jet.pt > sel_params.min_pt.baseline)
     )
-    jet_indices = masked_sorted_indices(jet_mask, events.Jet.pt)
+    jet_indices = masked_sorted_indices(jet_mask, jet.pt)
 
     # at least two jets, leading jet pt > 50,
     # subleading jet pt > 40
-    jet = ak.pad_none(events.Jet[jet_indices], 2)
+    leading_jets = ak.pad_none(jet[jet_indices], 2)
     el_jet_sel = (
-        (jet[:, 0].pt > 50) &
-        (jet[:, 1].pt > 40)
+        (leading_jets[:, 0].pt > sel_params.min_pt.e[0]) &
+        (leading_jets[:, 1].pt > sel_params.min_pt.e[1])
     )
     el_jet_sel = ak.fill_none(el_jet_sel, False)
 
     # at least two jets, leading jet pt > 50,
     # subleading jet pt > 50
     mu_jet_sel = (
-        (jet[:, 0].pt > 50) &
-        (jet[:, 1].pt > 50)
+        (leading_jets[:, 0].pt > sel_params.min_pt.mu[0]) &
+        (leading_jets[:, 1].pt > sel_params.min_pt.mu[1])
     )
     mu_jet_sel = ak.fill_none(mu_jet_sel, False)
 
@@ -87,14 +89,13 @@ def jet_selection(
     # MISSING: match AK4 PUPPI jets to AK4 CHS jets for b-tagging
 
     # b-tagged jets, DeepJet medium working point
-    wp_med = self.config_inst.x.btag_working_points.deepjet.medium
-    bjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB >= wp_med)
-    lightjet_mask = (jet_mask) & (events.Jet.btagDeepFlavB < wp_med)
+    bjet_mask = (jet_mask) & (jet[sel_params.btagger.column] >= sel_params.btagger.wp)
+    lightjet_mask = (jet_mask) & (jet[sel_params.btagger.column] < sel_params.btagger.wp)
     sel_bjet = ak.sum(bjet_mask, axis=-1) >= 1
 
     # indices of the b-tagged and non-b-tagged (light) jets
-    bjet_indices = masked_sorted_indices(bjet_mask, events.Jet.pt)
-    lightjet_indices = masked_sorted_indices(lightjet_mask, events.Jet.pt)
+    bjet_indices = masked_sorted_indices(bjet_mask, jet.pt)
+    lightjet_indices = masked_sorted_indices(lightjet_mask, jet.pt)
 
     # build and return selection results plus new columns
     return events, SelectionResult(
@@ -112,11 +113,24 @@ def jet_selection(
     )
 
 
+@jet_selection.init
+def jet_selection_init(self: Selector) -> None:
+    config_inst = getattr(self, "config_inst", None)
+    if not config_inst:
+        return
+    params = config_inst.x.jet_selection.ak4
+    column = params.get("column")
+    if column:
+        self.uses |= {
+            f"{column}.pt",
+            f"{column}.eta",
+            f"{column}.{params.btagger.column}",
+        }
+
+
 @selector(
     uses={
         choose_lepton,
-        "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
-        "FatJet.particleNetWithMass_TvsQCD", "FatJet.msoftdrop",
     },
     exposed=True,
 )
@@ -130,25 +144,26 @@ def top_tagged_jets(
 
     Veto events with more than one top-tagged AK8 jet with pT>400 GeV and |eta|<2.5.
     """
+    sel_params = self.config_inst.x.jet_selection.ak8
+    fatjet = events[sel_params.column]
 
     # top-tagger working point
-    # wp_top_md = self.config_inst.x.toptag_working_points.deepak8.top_md  # FIXME figure out which tagger/wp to use
-    wp_top_pn_tight = 0.858  # taken from https://indico.cern.ch/event/1459087/contributions/6173396/attachments/2951723/5188840/SF_Run3.pdf for now
-
+    wp_top_md = sel_params.toptagger.wp
+    
     # top-tagging criteria
     fatjet_mask_toptag = (
         # kinematic cuts
-        (events.FatJet.pt > 400) &
-        (abs(events.FatJet.eta) < 2.5) &
+        (fatjet.pt > sel_params.min_pt) &
+        (abs(fatjet.eta) < sel_params.max_abseta) &
         # 1st topjet requirement: top tagger working point
-        (events.FatJet.particleNetWithMass_TvsQCD > wp_top_pn_tight) &
+        (fatjet[sel_params.toptagger.column] > wp_top_md) &
         # 2nd topjet requirement: softdrop mass window
-        (events.FatJet.msoftdrop > 105) &
-        (events.FatJet.msoftdrop < 210)
+        (fatjet.msoftdrop > sel_params.msd[0]) &
+        (fatjet.msoftdrop < sel_params.msd[1])
     )
     fatjet_indices_toptag = masked_sorted_indices(
         fatjet_mask_toptag,
-        events.FatJet.pt,
+        fatjet.pt,
     )
 
     # veto events with more than one top-tagged AK8 jet
@@ -159,15 +174,15 @@ def top_tagged_jets(
     lepton = events["Lepton"]
 
     # separation from main lepton
-    delta_r_fatjet_lepton = ak.firsts(events.FatJet.metric_table(lepton), axis=-1)
+    delta_r_fatjet_lepton = ak.firsts(fatjet.metric_table(lepton), axis=-1)
     fatjet_mask_toptag_delta_r_lepton = (
         fatjet_mask_toptag &
         # pass if no main lepton exists
-        ak.fill_none(delta_r_fatjet_lepton > 0.8, True)
+        ak.fill_none(delta_r_fatjet_lepton > sel_params.delta_r_lep, True)
     )
     fatjet_indices_toptag_delta_r_lepton = masked_sorted_indices(
         fatjet_mask_toptag_delta_r_lepton,
-        events.FatJet.pt,
+        fatjet.pt,
     )
 
     # build and return selection results plus new columns
@@ -184,6 +199,24 @@ def top_tagged_jets(
     )
 
 
+@top_tagged_jets.init
+def top_tagged_jets_init(self: Selector) -> None:
+    config_inst = getattr(self, "config_inst", None)
+    if not config_inst:
+        return
+    params = config_inst.x.jet_selection.ak8
+    column = params.get("column")
+    if column:
+        self.uses |= {
+            f"{column}.pt",
+            f"{column}.eta",
+            f"{column}.phi",
+            f"{column}.mass",
+            f"{column}.msoftdrop",
+            f"{column}.{params.toptagger.column}",
+        }
+
+
 @selector(
     uses={
         "event",
@@ -198,7 +231,10 @@ def met_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """Missing transverse momentum (MET) selection."""
-    MET_pt = events.MET.pt
+    sel_params = self.config_inst.x.met_selection
+    met = events[sel_params.column]
+
+    MET_pt = met.pt
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
@@ -207,8 +243,8 @@ def met_selection(
     el_id = (ch_ids == ch_e.id)
     mu_id = (ch_ids == ch_mu.id)
 
-    el_sel = MET_pt > 60
-    mu_sel = MET_pt > 70
+    el_sel = MET_pt > sel_params.min_pt.e
+    mu_sel = MET_pt > sel_params.min_pt.mu
 
     el_sel_mask = el_id & el_sel
     mu_sel_mask = mu_id & mu_sel
@@ -259,12 +295,13 @@ def lepton_jet_2d_selection(
 
       pt_rel = |cross(p_l, p_jet)| / |p_jet|
     """
+    sel_params = self.config_inst.x.lepton_jet_iso
 
     # ensure lepton selection was run
     events, _ = self[lepton_selection](events, **kwargs)
 
     # select jets
-    jets_mask = (events.Jet.pt > 15)
+    jets_mask = (events.Jet.pt > sel_params.min_pt)
     jets = events.Jet[jets_mask]
 
     ch_e = self.config_inst.get_channel("e")
@@ -292,13 +329,13 @@ def lepton_jet_2d_selection(
         )
 
         # veto events where there is a jet too close to the lepton
-        sel = ak.all(lepton_jet_deltar > 0.4, axis=-1)
+        sel = ak.all(lepton_jet_deltar > sel_params.delta_r, axis=-1)
 
         # but keep events where the perpendicular lepton momentum relative
         # to the jet is sufficiently large
         pt_rel = leptons.cross(lepton_closest_jet).p / lepton_closest_jet.p
         sel = ak.where(
-            pt_rel > 25,
+            pt_rel > sel_params.pt_rel,
             True,
             sel,
         )
