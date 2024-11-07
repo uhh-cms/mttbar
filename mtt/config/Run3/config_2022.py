@@ -158,7 +158,7 @@ def add_config(
         "dy_m50to120_ht100to400_madgraph",
         "dy_m50to120_ht400to800_madgraph",
         # WJets 2022 v12 preEE datasets
-        "w_lnu_mlnu0to120_ht40to100_madgraph",  # FIXME cramjam.DecompressionError: lzma data error in preEE (full stat.)  # noqa
+        "w_lnu_mlnu0to120_ht40to100_madgraph",
         "w_lnu_mlnu0to120_ht100to400_madgraph",
         "w_lnu_mlnu0to120_ht400to800_madgraph",
         "w_lnu_mlnu0to120_ht800to1500_madgraph",
@@ -343,8 +343,6 @@ def add_config(
     ]
     if campaign.x.EE == "pre":
         dataset_names += [
-            # "data_egamma_a",  # FIXME JEC setup fails
-            # "data_egamma_b",  # FIXME JEC setup fails
             "data_egamma_c",
             "data_egamma_d",
             "data_mu_c",
@@ -435,8 +433,8 @@ def add_config(
     #
     # tagger configuration
     # (b/top taggers)
-    tag_key = f"2022{campaign.x.EE}EE" if year == 2022 else year
     #
+    tag_key = f"2022{campaign.x.EE}EE" if year == 2022 else year
 
     # b-tagging working points
     # https://btv-wiki.docs.cern.ch/ScaleFactors/Run3Summer22/
@@ -495,7 +493,6 @@ def add_config(
 
     #
     # selector configuration
-    # FIXME
     #
 
     # lepton selection parameters
