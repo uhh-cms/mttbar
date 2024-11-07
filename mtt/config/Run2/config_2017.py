@@ -125,8 +125,8 @@ dataset_names = [
     "w_lnu_ht1200to2500_madgraph",
     "w_lnu_ht2500toinf_madgraph",
     # DY
-    "dy_m50toinf_ht100to200_madgraph",
     "dy_m50toinf_ht70to100_madgraph",
+    "dy_m50toinf_ht100to200_madgraph",
     "dy_m50toinf_ht200to400_madgraph",
     "dy_m50toinf_ht400to600_madgraph",
     "dy_m50toinf_ht600to800_madgraph",
@@ -848,8 +848,8 @@ dy_xsecs = {
     "dy_m50toinf_ht2500toinf": 0.00297803565,
 }
 
-# for ds in dy_xsecs:
-#     procs.n(ds).set_xsec(13, dy_xsecs[ds])
+for ds in dy_xsecs:
+    procs.n(ds).set_xsec(13, dy_xsecs[ds])
 
 w_lnu_xsecs = {
     "w_lnu_ht70to100": 1271,
@@ -862,8 +862,8 @@ w_lnu_xsecs = {
     "w_lnu_ht2500toinf": 0.02623,
 }
 
-# for ds in w_lnu_xsecs:
-#     procs.n(ds).set_xsec(13, w_lnu_xsecs[ds])
+for ds in w_lnu_xsecs:
+    procs.n(ds).set_xsec(13, w_lnu_xsecs[ds])
 
 # cross sections for diboson samples; taken from:
 # - ww (NNLO): https://arxiv.org/abs/1408.5243
