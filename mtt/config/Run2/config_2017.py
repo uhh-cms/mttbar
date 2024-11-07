@@ -111,11 +111,11 @@ dataset_names = [
     "data_pho_d",
     "data_pho_e",
     "data_pho_f",
-    # # TTbar
+    # TTbar
     "tt_sl_powheg",
     "tt_dl_powheg",
     "tt_fh_powheg",
-    # # WJets
+    # WJets
     "w_lnu_ht70to100_madgraph",
     "w_lnu_ht100to200_madgraph",
     "w_lnu_ht200to400_madgraph",
@@ -1116,11 +1116,9 @@ config_2017.x.keep_columns = DotDict.wrap({
 
         # muons
         "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
-        "VetoMuon.pt", "VetoMuon.eta", "VetoMuon.phi", "VetoMuon.mass",
         "Muon.pfRelIso04_all",
         # electrons
         "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
-        "VetoElectron.pt", "VetoElectron.eta", "VetoElectron.phi", "VetoElecton.mass",
         "Electron.deltaEtaSC",
         "Electron.pfRelIso03_all",
 
