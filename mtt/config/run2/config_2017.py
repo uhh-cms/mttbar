@@ -397,16 +397,16 @@ config_2017.x.btag_wp = {
     },
 }
 
-# 2017 top tagging working points (DeepAK8, 1% mistagging rate, )
+# 2017 top tagging working points (DeepAK8, 1% mistagging rate)
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/DeepAK8Tagging2018WPsSFs?rev=4
 config_2017.x.toptag_wp = {
     "deepak8": {
         # regular tagger
-        "top": 0.344,
-        "w": 0.739,
+        "top": 0.725,
+        "w": 0.925,
         # mass-decorrelated tagger
-        "top_md": 0.725,
-        "w_md": 0.925,
+        "top_md": 0.344,
+        "w_md": 0.739,
     },
 }
 
