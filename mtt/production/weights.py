@@ -78,18 +78,17 @@ def weights_init(self: Producer) -> None:
             normalization_weights, pu_weight, mc_weight,
             top_pt_weight,
         }
-        if self.config_inst.x.run == 2:
-            self.uses |= {
-                # l1_prefiring_weights,
-                vjets_weight,
-                toptag_weights,
-            }
         self.produces |= {
             electron_weights, muon_weights, btag_weights,
             normalization_weights, pu_weight, mc_weight,
             top_pt_weight,
         }
         if self.config_inst.x.run == 2:
+            self.uses |= {
+                # l1_prefiring_weights,
+                vjets_weight,
+                toptag_weights,
+            }
             self.produces |= {
                 # l1_prefiring_weights,
                 vjets_weight,
