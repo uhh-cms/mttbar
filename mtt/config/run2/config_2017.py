@@ -507,8 +507,8 @@ config_2017.x.met_selection = DotDict.wrap({
 # lepton jet 2D isolation parameters
 config_2017.x.lepton_jet_iso = DotDict.wrap({
     "min_pt": 15,
-    "delta_r": 0.4,
-    "pt_rel": 25,
+    "min_delta_r": 0.4,
+    "min_pt_rel": 25,
 })
 
 # trigger paths for muon/electron channels
