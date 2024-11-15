@@ -887,19 +887,6 @@ def add_config(
         # "max_chunk_size": 10000,
     })
 
-    # L1 prefiring configuration
-    # FIXME not needed any more? Update to 2022 if needed
-    cfg.x.l1_prefiring = DotDict.wrap({
-        "jet": {
-            "value": "l1_prefiring_efficiency_value_jetpt_2017BtoF",
-            "error": "l1_prefiring_efficiency_error_jetpt_2017BtoF",
-        },
-        "photon": {
-            "value": "l1_prefiring_efficiency_value_photonpt_2017BtoF",
-            "error": "l1_prefiring_efficiency_error_photonpt_2017BtoF",
-        },
-    })
-
     # V+jets reweighting
     # FIXME update to Run 3 k-factors
     cfg.x.vjets_reweighting = DotDict.wrap({
