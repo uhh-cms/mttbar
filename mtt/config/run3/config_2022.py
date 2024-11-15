@@ -613,7 +613,6 @@ def add_config(
                     "muon": {
                         "Mu50",
                         "HighPtTkMu100",
-                        # "OldMu100",
                     },
                     "electron": {
                         "Ele115_CaloIdVT_GsfTrkIdT",
