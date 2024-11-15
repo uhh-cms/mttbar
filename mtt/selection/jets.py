@@ -329,13 +329,13 @@ def lepton_jet_2d_selection(
         )
 
         # veto events where there is a jet too close to the lepton
-        sel = ak.all(lepton_jet_deltar > sel_params.delta_r, axis=-1)
+        sel = ak.all(lepton_jet_deltar > sel_params.min_delta_r, axis=-1)
 
         # but keep events where the perpendicular lepton momentum relative
         # to the jet is sufficiently large
         pt_rel = leptons.cross(lepton_closest_jet).p / lepton_closest_jet.p
         sel = ak.where(
-            pt_rel > sel_params.pt_rel,
+            pt_rel > sel_params.min_pt_rel,
             True,
             sel,
         )
