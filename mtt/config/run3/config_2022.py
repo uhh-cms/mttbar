@@ -567,7 +567,7 @@ def add_config(
             "column": "FatJet",
             "max_abseta": 2.5,
             "min_pt": 400,
-            "msd": [105, 210],
+            "msoftdrop": [105, 210],
             "toptagger": {
                 "column": "particleNetWithMass_TvsQCD",
                 "wp": cfg.x.toptag_wp["particle_net"]["tight"],
