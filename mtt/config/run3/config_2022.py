@@ -1084,35 +1084,34 @@ def add_config(
     # producer configurations
     #
 
-    if cfg.x.run == 3:
-        # TODO: check that everyting is setup as intended
+    # TODO: check that everyting is setup as intended
 
-        # btag weight configuration
-        cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
+    # btag weight configuration
+    cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
 
-        # name of the top tagging scale factors correction set and working point
-        # TODO (?): unify with `toptag_working_points`?
-        cfg.x.toptag_sf_config = DotDict.wrap({
-            "name": "DeepAK8_Top_MassDecorr",
-            "wp": "1p0",
-        })
+    # name of the top tagging scale factors correction set and working point
+    # TODO (?): unify with `toptag_working_points`?
+    cfg.x.toptag_sf_config = DotDict.wrap({
+        "name": "DeepAK8_Top_MassDecorr",
+        "wp": "1p0",
+    })
 
-        # lepton sf taken from
-        # https://github.com/uhh-cms/hh2bbww/blob/master/hbw/config/config_run2.py#L338C1-L352C85
-        # names of electron correction sets and working points
-        # (used in the electron_sf producer)
-        if cfg.x.cpn_tag == "2022postEE":
-            # TODO: we need to use different SFs for control regions
-            cfg.x.electron_sf_names = ("Electron-ID-SF", "2022Re-recoE+PromptFG", "Tight")
-        elif cfg.x.cpn_tag == "2022preEE":
-            cfg.x.electron_sf_names = ("Electron-ID-SF", "2022Re-recoBCD", "Tight")
-
-        # names of muon correction sets and working points
-        # (used in the muon producer)
+    # lepton sf taken from
+    # https://github.com/uhh-cms/hh2bbww/blob/master/hbw/config/config_run2.py#L338C1-L352C85
+    # names of electron correction sets and working points
+    # (used in the electron_sf producer)
+    if cfg.x.cpn_tag == "2022postEE":
         # TODO: we need to use different SFs for control regions
-        cfg.x.muon_sf_names = ("NUM_TightPFIso_DEN_TightID", f"{cfg.x.cpn_tag}")
-        cfg.x.muon_id_sf_names = ("NUM_TightID_DEN_TrackerMuons", f"{cfg.x.cpn_tag}")
-        cfg.x.muon_iso_sf_names = ("NUM_TightPFIso_DEN_TightID", f"{cfg.x.cpn_tag}")
+        cfg.x.electron_sf_names = ("Electron-ID-SF", "2022Re-recoE+PromptFG", "Tight")
+    elif cfg.x.cpn_tag == "2022preEE":
+        cfg.x.electron_sf_names = ("Electron-ID-SF", "2022Re-recoBCD", "Tight")
+
+    # names of muon correction sets and working points
+    # (used in the muon producer)
+    # TODO: we need to use different SFs for control regions
+    cfg.x.muon_sf_names = ("NUM_TightPFIso_DEN_TightID", f"{cfg.x.cpn_tag}")
+    cfg.x.muon_id_sf_names = ("NUM_TightID_DEN_TrackerMuons", f"{cfg.x.cpn_tag}")
+    cfg.x.muon_iso_sf_names = ("NUM_TightPFIso_DEN_TightID", f"{cfg.x.cpn_tag}")
 
     #
     # systematic shifts
@@ -1261,8 +1260,7 @@ def add_config(
     json_mirror = "/afs/cern.ch/user/j/jmatthie/public/mirrors/jsonpog-integration-49ddc547"
     local_repo = "/nfs/dust/cms/user/matthiej/mttbar"  # TODO: avoid hardcoding path
 
-    if cfg.x.run == 3:
-        corr_tag = f"{year}_Summer22{jerc_postfix}"
+    corr_tag = f"{year}_Summer22{jerc_postfix}"
 
     cfg.x.external_files = DotDict.wrap({
         # pileup weight corrections
@@ -1288,8 +1286,7 @@ def add_config(
     })
 
     # temporary fix due to missing corrections in run 3
-    if cfg.x.run == 3:
-        cfg.x.external_files.pop("met_phi_corr")
+    cfg.x.external_files.pop("met_phi_corr")
 
     if year == 2022 and campaign.x.EE == "pre":
         cfg.x.external_files.update(DotDict.wrap({
