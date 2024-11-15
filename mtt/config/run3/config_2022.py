@@ -472,11 +472,11 @@ def add_config(
     cfg.x.toptag_wp = {
         "deepak8": {
             # regular tagger
-            "top": 0.344,
-            "w": 0.739,
+            "top": 0.725,
+            "w": 0.925,
             # mass-decorrelated tagger
-            "top_md": 0.725,
-            "w_md": 0.925,
+            "top_md": 0.344,
+            "w_md": 0.739,
         },
         "particle_net": {
             "medium": {
