@@ -158,8 +158,8 @@ def top_tagged_jets(
         # 1st topjet requirement: top tagger working point
         (fatjet[sel_params.toptagger.column] > wp_top_md) &
         # 2nd topjet requirement: softdrop mass window
-        (fatjet.msoftdrop > sel_params.msd[0]) &
-        (fatjet.msoftdrop < sel_params.msd[1])
+        (fatjet.msoftdrop > sel_params.msoftdrop[0]) &
+        (fatjet.msoftdrop < sel_params.msoftdrop[1])
     )
     fatjet_indices_toptag = masked_sorted_indices(
         fatjet_mask_toptag,

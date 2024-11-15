@@ -486,7 +486,7 @@ config_2017.x.jet_selection = DotDict.wrap({
         "column": "FatJet",
         "max_abseta": 2.5,
         "min_pt": 400,
-        "msd": [105, 210],
+        "msoftdrop": [105, 210],
         "toptagger": {
             "column": "deepTagMD_TvsQCD",
             "wp": config_2017.x.toptag_wp["deepak8"]["top_md"],
