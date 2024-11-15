@@ -146,8 +146,8 @@ def add_config(
         "st_twchannel_t_fh_powheg",
         "st_twchannel_tbar_fh_powheg",
         # DY 2022 v12 preEE datasets
-        "dy_m4to50_ht40to70_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        "dy_m4to50_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        # "dy_m4to50_ht40to70_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        # "dy_m4to50_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
         "dy_m4to50_ht100to400_madgraph",
         "dy_m4to50_ht400to800_madgraph",
         "dy_m4to50_ht800to1500_madgraph",
@@ -162,18 +162,18 @@ def add_config(
         "w_lnu_mlnu0to120_ht100to400_madgraph",
         "w_lnu_mlnu0to120_ht400to800_madgraph",
         "w_lnu_mlnu0to120_ht800to1500_madgraph",
-        "w_lnu_mlnu0to120_ht1500to2500_madgraph",
+        # "w_lnu_mlnu0to120_ht1500to2500_madgraph",
         "w_lnu_mlnu0to120_ht2500toinf_madgraph",
         # Diboson
         "ww_pythia",
         "wz_pythia",
         "zz_pythia",
         # QCD 2022 v12 preEE datasets
-        "qcd_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        "qcd_ht100to200_madgraph",  # FIXME no xs for 13.6 in https://xsdb-temp.app.cern.ch/xsdb/?columns=67108863&currentPage=0&pageSize=10&searchQuery=DAS%3DQCD-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8  # noqa
-        "qcd_ht200to400_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        "qcd_ht400to600_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        "qcd_ht600to800_madgraph",
+        # "qcd_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        # "qcd_ht100to200_madgraph",  # FIXME no xs for 13.6 in https://xsdb-temp.app.cern.ch/xsdb/?columns=67108863&currentPage=0&pageSize=10&searchQuery=DAS%3DQCD-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8  # noqa
+        # "qcd_ht200to400_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        # "qcd_ht400to600_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        # "qcd_ht600to800_madgraph",
         "qcd_ht800to1000_madgraph",
         "qcd_ht1000to1200_madgraph",
         "qcd_ht1200to1500_madgraph",
