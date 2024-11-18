@@ -49,10 +49,9 @@ ana.x.config_groups = {}
 # set up configs
 #
 
-from mtt.config.Run3.config_2022 import add_config
-import cmsdb.campaigns.run3_2022_preEE_nano_v12 as campaign_run3_2022_preEE_nano_v12
-import cmsdb.campaigns.run3_2022_postEE_nano_v12 as campaign_run3_2022_postEE_nano_v12
-
+from mtt.config.run3.config_mtt import add_config
+from cmsdb.campaigns.run3_2022_preEE_nano_v12 import campaign_run3_2022_preEE_nano_v12 as campaign_run3_2022_preEE_nano_v12  # noqa
+from cmsdb.campaigns.run3_2022_postEE_nano_v12 import campaign_run3_2022_postEE_nano_v12 as campaign_run3_2022_postEE_nano_v12  # noqa
 # import cmsdb.campaigns.run3_2023_preBPix_nano_v12
 # import cmsdb.campaigns.run3_2023_postBPix_nano_v12
 
