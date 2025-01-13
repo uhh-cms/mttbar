@@ -447,7 +447,7 @@ def add_config(
             "max_abseta": 2.4,
             "iso": {
                 "column": "pfIsoId",
-                "value": 4,
+                "min_value": 4,
             },
             "id": {
                 "low_pt": {
@@ -483,7 +483,7 @@ def add_config(
             "min_pt_addveto": 25,
             "id_addveto": {
                 "column": "cutBased",
-                "value": 3,
+                "min_value": 3,
             },
             "max_abseta_addveto": 2.5,
         },
