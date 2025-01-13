@@ -15,7 +15,7 @@ from columnflow.util import maybe_import
 
 from mtt.production.gen_top import top_pt_weight
 from mtt.production.gen_v import vjets_weight
-from mtt.production.l1_prefiring import l1_prefiring_weights
+# from mtt.production.l1_prefiring import l1_prefiring_weights
 from mtt.production.toptag import toptag_weights
 
 ak = maybe_import("awkward")
