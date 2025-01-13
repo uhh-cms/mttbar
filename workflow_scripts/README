@@ -1,0 +1,5 @@
+The scripts found under this directory contain commands for running
+specific workflows within the present analysis, for example producing
+a particular set of plots or simply testing the execution of certain tasks.
+These scripts are meant to be edited and won't work all the time as they 
+written during different states of the analysis.
