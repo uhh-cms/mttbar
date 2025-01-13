@@ -79,7 +79,7 @@ def electron_selection(
         (abs(lepton.eta + lepton.deltaEtaSC) < sel_params.max_abseta_addveto) &
         (lepton.pt > sel_params.min_pt_addveto) &
         # cut-based electron ID (3: tight working point)
-        (lepton[sel_params.id_addveto.column] == sel_params.id_addveto.value) &
+        (lepton[sel_params.id_addveto.column] >= sel_params.id_addveto.value) &
         ~lepton_mask
     )
     dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
@@ -165,8 +165,8 @@ def muon_selection(
         lepton_mask_eta &
         (lepton.pt > sel_params.min_pt.low_pt) &
         (lepton.pt <= sel_params.min_pt.high_pt) &
-        # 4 == PFIsoTight
-        (lepton[sel_params.iso.column] == sel_params.iso.value) &
+        # pfIsoId at least 4 == PFIsoTight
+        (lepton[sel_params.iso.column] >= sel_params.iso.min_value) &
         # CutBasedIdTight
         (lepton[sel_params.id.low_pt.column])
     )
