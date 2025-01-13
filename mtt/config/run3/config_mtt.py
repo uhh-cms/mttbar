@@ -506,7 +506,7 @@ def add_config(
             "max_abseta": 2.4,
             "iso": {
                 "column": "pfIsoId",
-                "min_value": 4,
+                "min_value": 4,  # 1 = PFIsoVeryLoose, 2 = PFIsoLoose, 3 = PFIsoMedium, 4 = PFIsoTight, 5 = PFIsoVeryTight, 6 = PFIsoVeryVeryTight  # noqa
             },
             "id": {
                 "low_pt": {
@@ -515,7 +515,7 @@ def add_config(
                 },
                 "high_pt": {
                     "column": "highPtId",
-                    "value": 2,
+                    "value": 2,  # 2 = global high pT, which includes tracker high pT
                 },
             },
             # veto events with additional leptons passing looser cuts
@@ -542,7 +542,7 @@ def add_config(
             "min_pt_addveto": 25,
             "id_addveto": {
                 "column": "cutBased",
-                "min_value": 3,
+                "min_value": 3,  # 0 = fail, 1 = veto, 2 = loose, 3 = medium, 4 = tight
             },
             "max_abseta_addveto": 2.5,
         },
