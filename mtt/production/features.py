@@ -31,7 +31,7 @@ def jet_energy_shifts_init(self: Producer) -> None:
     """
     self.shifts |= {
         f"jec_{junc_name}_{junc_dir}"
-        for junc_name in self.config_inst.x.jec.uncertainty_sources
+        for junc_name in self.config_inst.x.jec.Jet.uncertainty_sources
         for junc_dir in ("up", "down")
     } | {"jer_up", "jer_down"}
 
