@@ -101,7 +101,11 @@ def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     )
 
     # calculate pTrel and deltaR
-    jet_lep_pt_rel = lepton.cross(lepton_closest_jet).pt / lepton_closest_jet.p
+    # convert vectors to 3D vectors (due to bug in 'vector' library?)
+    # jet_lep_pt_rel = lepton.cross(lepton_closest_jet).pt / lepton_closest_jet.p  # FIXME pt or p?
+    lepton_3d = lepton.to_Vector3D()
+    lepton_closest_jet_3d = lepton_closest_jet.to_Vector3D()
+    jet_lep_pt_rel = lepton_3d.cross(lepton_closest_jet_3d).p / lepton_closest_jet.p
     jet_lep_delta_r = lepton_closest_jet.delta_r(lepton)
 
     # save as new columns

@@ -234,7 +234,7 @@ def met_selection(
     sel_params = self.config_inst.x.met_selection
     met = events[sel_params.column]
 
-    MET_pt = met.pt
+    MET_pt = met['pt']
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
@@ -333,7 +333,11 @@ def lepton_jet_2d_selection(
 
         # but keep events where the perpendicular lepton momentum relative
         # to the jet is sufficiently large
-        pt_rel = leptons.cross(lepton_closest_jet).p / lepton_closest_jet.p
+        # convert vectors to 3D vectors (due to bug in 'vector' library?)
+        # pt_rel = leptons.cross(lepton_closest_jet).p / lepton_closest_jet.p
+        lepton_3d = leptons.to_Vector3D()
+        jet_3d = lepton_closest_jet.to_Vector3D()
+        pt_rel = lepton_3d.cross(jet_3d).p / jet_3d.p
         sel = ak.where(
             pt_rel > sel_params.min_pt_rel,
             True,

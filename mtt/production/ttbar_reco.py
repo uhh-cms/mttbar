@@ -11,7 +11,7 @@ from law.util import human_duration
 from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
+from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT, attach_coffea_behavior
 
 from mtt.config.categories import add_categories_production
 from mtt.util import iter_chunks
@@ -121,6 +121,7 @@ def ttbar(
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Jet"] = ak.with_name(events.Jet, "PtEtaPhiMLorentzVector")
     events["FatJetTopTagDeltaRLepton"] = ak.with_name(events.FatJetTopTagDeltaRLepton, "PtEtaPhiMLorentzVector")
+    events = attach_coffea_behavior(events, collections={"GenPart": {"type_name": "GenParticle", "skip_fields": "*Idx*G"}})
 
     # reconstruct neutrino candidates
     events = self[neutrino_candidates](events, **kwargs)
