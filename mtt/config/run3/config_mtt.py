@@ -1025,7 +1025,7 @@ def add_config(
             "campaign": jerc_campaign,
             "version": {2022: "JRV1"}[year],
             "jet_type": jet_type,
-        }
+        },
     })
 
     # JEC uncertainty sources propagated to btag scale factors
