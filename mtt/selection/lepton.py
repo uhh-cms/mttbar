@@ -79,7 +79,7 @@ def electron_selection(
         (abs(lepton.eta + lepton.deltaEtaSC) < sel_params.max_abseta_addveto) &
         (lepton.pt > sel_params.min_pt_addveto) &
         # cut-based electron ID (3: tight working point)
-        (lepton[sel_params.id_addveto.column] >= sel_params.id_addveto.value) &
+        (lepton[sel_params.id_addveto.column] >= sel_params.id_addveto.min_value) &
         ~lepton_mask
     )
     dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
