@@ -121,7 +121,10 @@ def ttbar(
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
     events["Jet"] = ak.with_name(events.Jet, "PtEtaPhiMLorentzVector")
     events["FatJetTopTagDeltaRLepton"] = ak.with_name(events.FatJetTopTagDeltaRLepton, "PtEtaPhiMLorentzVector")
-    events = attach_coffea_behavior(events, collections={"GenPart": {"type_name": "GenParticle", "skip_fields": "*Idx*G"}})
+    events = attach_coffea_behavior(
+        events,
+        collections={"GenPart": {"type_name": "GenParticle", "skip_fields": "*Idx*G"}},
+    )
 
     # reconstruct neutrino candidates
     events = self[neutrino_candidates](events, **kwargs)

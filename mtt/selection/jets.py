@@ -234,7 +234,7 @@ def met_selection(
     sel_params = self.config_inst.x.met_selection
     met = events[sel_params.column]
 
-    MET_pt = met['pt']
+    MET_pt = met["pt"]
     ch_ids = events.channel_id
 
     ch_e = self.config_inst.get_channel("e")
