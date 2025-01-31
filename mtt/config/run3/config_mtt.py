@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Configuration of the 2022 m(ttbar) analysis.
+Configuration for the Run 3 m(ttbar) analysis.
 """
 
 from __future__ import annotations
@@ -65,9 +65,8 @@ def add_config(
     cfg = analysis.add_config(campaign, name=config_name, id=config_id)
 
     # add some important tags to the config
-    cfg.x.cpn_tag = f"{year}{corr_postfix}"
-
     cfg.x.run = 3
+    cfg.x.cpn_tag = f"{year}{corr_postfix}"
 
     # get all root processes
     procs = get_root_processes_from_campaign(campaign)
@@ -80,13 +79,13 @@ def add_config(
     cfg.add_process(procs.n.dy)
     cfg.add_process(procs.n.qcd)
     cfg.add_process(procs.n.vv)
-    # # ttbar signal processes
+    # ttbar signal processes
     # cfg.add_process(procs.n.zprime_tt)
     # cfg.add_process(procs.n.hscalar_tt)
     # cfg.add_process(procs.n.hpseudo_tt)
     # cfg.add_process(procs.n.rsgluon_tt)
 
-    # # set `unstack` flag for signal processes (used when plotting)
+    # set `unstack` flag for signal processes (used when plotting)
     # for process, _, _ in cfg.walk_processes():
     #     if any(
     #         process.name.startswith(prefix)
@@ -132,19 +131,6 @@ def add_config(
     # add datasets we need to study
     # errors taken over from top sf analysis, might work in this analysis
     dataset_names = [
-        # TTbar
-        "tt_sl_powheg",
-        "tt_dl_powheg",
-        "tt_fh_powheg",
-        # SingleTop 2022 v12 preEE datasets
-        "st_tchannel_t_4f_powheg",
-        "st_tchannel_tbar_4f_powheg",
-        "st_twchannel_t_sl_powheg",
-        "st_twchannel_tbar_sl_powheg",
-        "st_twchannel_t_dl_powheg",
-        "st_twchannel_tbar_dl_powheg",
-        "st_twchannel_t_fh_powheg",
-        "st_twchannel_tbar_fh_powheg",
         # DY 2022 v12 preEE datasets
         # "dy_m4to50_ht40to70_madgraph",  # FIXME AssertionError in preEE (full stat.)
         # "dy_m4to50_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
@@ -168,6 +154,19 @@ def add_config(
         "ww_pythia",
         "wz_pythia",
         "zz_pythia",
+        # TTbar
+        "tt_sl_powheg",
+        "tt_dl_powheg",
+        "tt_fh_powheg",
+        # SingleTop 2022 v12 preEE datasets
+        "st_tchannel_t_4f_powheg",
+        "st_tchannel_tbar_4f_powheg",
+        "st_twchannel_t_sl_powheg",
+        "st_twchannel_tbar_sl_powheg",
+        "st_twchannel_t_dl_powheg",
+        "st_twchannel_tbar_dl_powheg",
+        "st_twchannel_t_fh_powheg",
+        "st_twchannel_tbar_fh_powheg",
         # QCD 2022 v12 preEE datasets
         # "qcd_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
         # "qcd_ht100to200_madgraph",  # FIXME no xs for 13.6 in https://xsdb-temp.app.cern.ch/xsdb/?columns=67108863&currentPage=0&pageSize=10&searchQuery=DAS%3DQCD-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8  # noqa
@@ -341,22 +340,24 @@ def add_config(
         # "rsgluon_tt_m5500_pythia",
         # "rsgluon_tt_m6000_pythia",
     ]
+
+    # DATA
     if campaign.x.EE == "pre":
-        dataset_names += [
+        dataset_names.extend([
             "data_egamma_c",
             "data_egamma_d",
             "data_mu_c",
             "data_mu_d",
-        ]
+        ])
     if campaign.x.EE == "post":
-        dataset_names += [
+        dataset_names.extend([
             "data_egamma_e",
             "data_egamma_f",
             "data_egamma_g",
             "data_mu_e",
             "data_mu_f",
             "data_mu_g",
-        ]
+        ])
 
     for dataset_name in dataset_names:
         dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
@@ -594,7 +595,7 @@ def add_config(
 
     # trigger paths for muon/electron channels
     # TODO update to relevant Run 3 triggers
-    cfg.set_aux("triggers", DotDict.wrap({
+    cfg.x.triggers = DotDict.wrap({
         "lowpt": {
             "all": {
                 "triggers": {
@@ -623,7 +624,7 @@ def add_config(
                 },
             },
         },
-    }))
+    })
 
     #
     # MET filters
@@ -641,17 +642,17 @@ def add_config(
     }
 
     # default calibrator, selector, producer, ml model and inference model
-    cfg.set_aux("default_calibrator", "skip_jecunc")
-    cfg.set_aux("default_selector", "default")
-    cfg.set_aux("default_producer", "default")
-    cfg.set_aux("default_weight_producer", "all_weights")
-    cfg.set_aux("default_ml_model", None)
-    cfg.set_aux("default_inference_model", "simple")
-    cfg.set_aux("default_categories", ["incl", "1e", "1m"])
-    cfg.set_aux("default_variables", ("n_jet",))
-    cfg.set_aux("default_process_settings", [
+    cfg.x.default_calibrator = "skip_jecunc"
+    cfg.x.default_selector = "default"
+    cfg.x.default_producer = "default"
+    cfg.x.default_weight_producer = "all_weights"
+    cfg.x.default_ml_model = None
+    cfg.x.default_inference_model = "simple"
+    cfg.x.default_categories = ["incl", "1e", "1m"]
+    cfg.x.default_variables = ("n_jet",)
+    cfg.x.default_process_settings = [
         ["zprime_tt_m400_w40", "unstack"],
-    ])
+    ]
 
     # process groups for conveniently looping over certain processs
     # (used in wrapper_factory and during plotting)
@@ -957,6 +958,7 @@ def add_config(
             "levels": ["L1FastJet", "L2Relative", "L2L3Residual", "L3Absolute"],
             "levels_for_type1_met": ["L1FastJet"],
             "uncertainty_sources": [
+                # comment out most for now to prevent large file sizes
                 # "AbsoluteStat",
                 # "AbsoluteScale",
                 # "AbsoluteSample",
@@ -1031,7 +1033,7 @@ def add_config(
     # JEC uncertainty sources propagated to btag scale factors
     # (names derived from contents in BTV correctionlib file)
     cfg.x.btag_sf_jec_sources = [
-        "",  # total
+        "",  # same as "Total"
         "Absolute",
         "AbsoluteMPFBias",
         "AbsoluteScale",
@@ -1076,7 +1078,7 @@ def add_config(
 
     # TODO: check that everyting is setup as intended
 
-    # btag weight configuration
+    # name of the btag_sf correction set and jec uncertainties to propagate through
     cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
 
     # name of the top tagging scale factors correction set and working point
@@ -1233,6 +1235,7 @@ def add_config(
         cfg.add_shift(name="ISR_up", id=7001, type="shape")  # PS weight [0] ISR=2 FSR=1
         cfg.add_shift(name="ISR_down", id=7002, type="shape")  # PS weight [2] ISR=0.5 FSR=1
         add_shift_aliases(cfg, "ISR", {"ISR": "ISR_{direction}"})
+
         cfg.add_shift(name="FSR_up", id=7003, type="shape")  # PS weight [1] ISR=1 FSR=2
         cfg.add_shift(name="FSR_down", id=7004, type="shape")  # PS weight [3] ISR=1 FSR=0.5
         add_shift_aliases(cfg, "FSR", {"FSR": "FSR_{direction}"})
@@ -1246,33 +1249,36 @@ def add_config(
     # https://github.com/uhh-cms/hh2bbww/blob/master/hbw/config/config_run2.py#L535C7-L579C84
     #
 
-    # external files
-    json_mirror = "/afs/cern.ch/user/j/jmatthie/public/mirrors/jsonpog-integration-49ddc547"
-    local_repo = "/data/dust/user/matthiej/mttbar"  # TODO: avoid hardcoding path
+    sources = {
+        "cert": "https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22",
+        "local_repo": "/data/dust/user/matthiej/mttbar",  # TODO: avoid hardcoding path
+        "json_mirror": "/afs/cern.ch/user/j/jmatthie/public/mirrors/jsonpog-integration-49ddc547",
+        # "jet": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/cms-jet-JSON_Format-54860a23",
+    }
 
     corr_tag = f"{year}_Summer22{jerc_postfix}"
 
     cfg.x.external_files = DotDict.wrap({
         # pileup weight corrections
-        "pu_sf": (f"{json_mirror}/POG/LUM/{corr_tag}/puWeights.json.gz", "v1"),
+        "pu_sf": (f"{sources['json_mirror']}/POG/LUM/{corr_tag}/puWeights.json.gz", "v1"),  # noqa
 
-        # jet energy correction
-        "jet_jerc": (f"{json_mirror}/POG/JME/{corr_tag}/jet_jerc.json.gz", "v1"),
+        # jet energy corrections
+        "jet_jerc": (f"{sources['json_mirror']}/POG/JME/{corr_tag}/jet_jerc.json.gz", "v1"),  # noqa
+
+        # top-tagging scale factors (TODO)
+        # "toptag_sf": (f"{sources['jet']}/JMAR/???/???.json", "v1"),  # noqa
 
         # electron scale factors
-        "electron_sf": (f"{json_mirror}/POG/EGM/{corr_tag}/electron.json.gz", "v1"),
+        "electron_sf": (f"{sources['json_mirror']}/POG/EGM/{corr_tag}/electron.json.gz", "v1"),  # noqa
 
         # muon scale factors
-        "muon_sf": (f"{json_mirror}/POG/MUO/{corr_tag}/muon_Z.json.gz", "v1"),
-
-        # btag scale factor
-        "btag_sf_corr": (f"{json_mirror}/POG/BTV/{corr_tag}/btagging.json.gz", "v1"),
+        "muon_sf": (f"{sources['json_mirror']}/POG/MUO/{corr_tag}/muon_Z.json.gz", "v1"),  # noqa
 
         # met phi corrector
-        "met_phi_corr": (f"{json_mirror}/POG/JME/{corr_tag}/met.json.gz", "v1"),
+        "met_phi_corr": (f"{sources['json_mirror']}/POG/JME/{corr_tag}/met.json.gz", "v1"),
 
         # V+jets reweighting
-        "vjets_reweighting": f"{local_repo}/data/json/vjets_reweighting.json",
+        "vjets_reweighting": f"{sources['local_repo']}/data/json/vjets_reweighting.json",
     })
 
     # temporary fix due to missing corrections in run 3
@@ -1280,11 +1286,13 @@ def add_config(
 
     if year == 2022 and campaign.x.EE == "pre":
         cfg.x.external_files.update(DotDict.wrap({
-            # files from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideGoodLumiSectionsJSONFile
+            # lumi files from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideGoodLumiSectionsJSONFile
             "lumi": {
-                "golden": ("https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/Cert_Collisions2022_355100_362760_Golden.json", "v1"),  # noqa
+                "golden": (f"{sources['cert']}/Cert_Collisions2022_355100_362760_Golden.json", "v1"),  # noqa
                 "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
             },
+
+            # pileup files (for PU reweighting)
             "pu": {
                 # "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCD/pileup_JSON.txt", "v1"),  # noqa
                 "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCDEFG/pileup_JSON.txt", "v1"),  # noqa
@@ -1306,6 +1314,8 @@ def add_config(
                 "golden": ("https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/Cert_Collisions2022_355100_362760_Golden.json", "v1"),  # noqa
                 "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
             },
+
+            # pileup files (for PU reweighting)
             "pu": {
                 # "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/EFG/pileup_JSON.txt", "v1"),  # noqa
                 "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCDEFG/pileup_JSON.txt", "v1"),  # noqa
@@ -1455,23 +1465,30 @@ def add_config(
         "muon_weight": get_shifts("muon"),
         # "ISR": get_shifts("ISR"),
         # "FSR": get_shifts("FSR"),
+        # TODO: add scale and PDF weights, where available
+        # "scale_weight": ???,
+        # "pdf_weight": ???,
     })
 
+    # optional weights
     if not cfg.has_tag("skip_electron_weights"):
         cfg.x.event_weights["electron_weight"] = get_shifts("electron")
+
+    # event weights only present in certain datasets
     for dataset in cfg.datasets:
         dataset.x.event_weights = DotDict()
+
+        # TTbar: top pt reweighting
         if dataset.has_tag("is_ttbar"):
-            # top pt reweighting
             dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
+
+        # V+jets: QCD NLO reweighting (disable for now)
         # if dataset.has_tag("is_v_jets"):
-        #     # V+jets QCD NLO reweighting
         #     dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
 
     # versions per task family and optionally also dataset and shift
     # None can be used as a key to define a default value
-    cfg.set_aux("versions", {
-    })
+    cfg.x.versions = {}
 
     #
     # finalization

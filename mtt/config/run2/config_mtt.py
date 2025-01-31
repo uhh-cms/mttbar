@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Configuration of the 2017 m(ttbar) analysis.
+Configuration for the Run 2 m(ttbar) analysis.
 """
 
 from __future__ import annotations
@@ -17,11 +17,14 @@ from columnflow.config_util import (
     add_shift_aliases,
     get_root_processes_from_campaign,
     get_shifts_from_sources,
+    verify_config_processes,
 )
 from mtt.config.categories import add_categories_selection
 from mtt.config.variables import add_variables
 
 import order as od
+
+
 thisdir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -110,37 +113,12 @@ def add_config(
         cfg.get_process(proc).color1 = colors.get(proc.name, "#aaaaaa")
         cfg.get_process(proc).color2 = colors.get(proc.name, "#000000")
 
+    #
+    # datasets
+    #
+
     # add datasets we need to study
     dataset_names = [
-        # DATA
-        "data_e_b",
-        "data_e_c",
-        "data_e_d",
-        "data_e_e",
-        "data_e_f",
-        "data_mu_b",
-        "data_mu_c",
-        "data_mu_d",
-        "data_mu_e",
-        "data_mu_f",
-        "data_pho_b",
-        "data_pho_c",
-        "data_pho_d",
-        "data_pho_e",
-        "data_pho_f",
-        # TTbar
-        "tt_sl_powheg",
-        "tt_dl_powheg",
-        "tt_fh_powheg",
-        # WJets
-        "w_lnu_ht70to100_madgraph",
-        "w_lnu_ht100to200_madgraph",
-        "w_lnu_ht200to400_madgraph",
-        "w_lnu_ht400to600_madgraph",
-        "w_lnu_ht600to800_madgraph",
-        "w_lnu_ht800to1200_madgraph",
-        "w_lnu_ht1200to2500_madgraph",
-        "w_lnu_ht2500toinf_madgraph",
         # DY
         "dy_m50toinf_ht70to100_madgraph",
         "dy_m50toinf_ht100to200_madgraph",
@@ -150,10 +128,23 @@ def add_config(
         "dy_m50toinf_ht800to1200_madgraph",
         "dy_m50toinf_ht1200to2500_madgraph",
         "dy_m50toinf_ht2500toinf_madgraph",
+        # WJets
+        "w_lnu_ht70to100_madgraph",
+        "w_lnu_ht100to200_madgraph",
+        "w_lnu_ht200to400_madgraph",
+        "w_lnu_ht400to600_madgraph",
+        "w_lnu_ht600to800_madgraph",
+        "w_lnu_ht800to1200_madgraph",
+        "w_lnu_ht1200to2500_madgraph",
+        "w_lnu_ht2500toinf_madgraph",
         # Diboson
         "ww_pythia",
         "wz_pythia",
         "zz_pythia",
+        # TTbar
+        "tt_sl_powheg",
+        "tt_dl_powheg",
+        "tt_fh_powheg",
         # SingleTop
         "st_schannel_lep_4f_amcatnlo",
         "st_schannel_had_4f_amcatnlo",
@@ -333,6 +324,27 @@ def add_config(
         "rsgluon_tt_m5500_pythia",
         "rsgluon_tt_m6000_pythia",
     ]
+
+    # DATA
+    if year == 2017:
+        dataset_names.extend([
+            "data_e_b",
+            "data_e_c",
+            "data_e_d",
+            "data_e_e",
+            "data_e_f",
+            "data_mu_b",
+            "data_mu_c",
+            "data_mu_d",
+            "data_mu_e",
+            "data_mu_f",
+            "data_pho_b",
+            "data_pho_c",
+            "data_pho_d",
+            "data_pho_e",
+            "data_pho_f",
+        ])
+
     for dataset_name in dataset_names:
         dataset = cfg.add_dataset(campaign.get_dataset(dataset_name))
 
@@ -398,6 +410,10 @@ def add_config(
         if limit_dataset_files:
             for info in dataset.info.values():
                 info.n_files = min(info.n_files, limit_dataset_files)
+
+    # verify that the root processes of each dataset (or one of their
+    # ancestor processes) are registered in the config
+    verify_config_processes(cfg, warn=True)
 
     #
     # tagger configuration
@@ -534,7 +550,7 @@ def add_config(
     })
 
     # trigger paths for muon/electron channels
-    cfg.set_aux("triggers", DotDict.wrap({
+    cfg.x.triggers = DotDict.wrap({
         "lowpt": {
             "all": {
                 "triggers": {
@@ -581,15 +597,18 @@ def add_config(
                 },
             },
         },
-    }))
+    })
     # ensure mc trigger fraction add up to 100%
     cfg.x.triggers.highpt.late.mc_trigger_percent = (
         100. - cfg.x.triggers.highpt.early.mc_trigger_percent
     )
 
+    #
     # MET filters
+    #
+
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2?rev=158#2018_2017_data_and_MC_UL
-    cfg.set_aux("met_filters", {
+    cfg.x.met_filters = {
         "Flag.goodVertices",
         "Flag.globalSuperTightHalo2016Filter",
         "Flag.HBHENoiseFilter",
@@ -599,32 +618,32 @@ def add_config(
         "Flag.BadPFMuonDzFilter",
         "Flag.eeBadScFilter",
         "Flag.ecalBadCalibFilter",
-    })
+    }
 
     # default calibrator, selector, producer, ml model and inference model
-    cfg.set_aux("default_calibrator", "skip_jecunc")
-    cfg.set_aux("default_selector", "default")
-    cfg.set_aux("default_producer", "default")
-    cfg.set_aux("default_weight_producer", "all_weights")
-    cfg.set_aux("default_ml_model", None)
-    cfg.set_aux("default_inference_model", "simple")
-    cfg.set_aux("default_categories", ["incl", "1e", "1m"])
-    cfg.set_aux("default_variables", ("n_jet",))
-    cfg.set_aux("default_process_settings", [
+    cfg.x.default_calibrator = "skip_jecunc"
+    cfg.x.default_selector = "default"
+    cfg.x.default_producer = "default"
+    cfg.x.default_weight_producer = "all_weights"
+    cfg.x.default_ml_model = None
+    cfg.x.default_inference_model = "simple"
+    cfg.x.default_categories = ["incl", "1e", "1m"]
+    cfg.x.default_variables = ("n_jet",)
+    cfg.x.default_process_settings = [
         ["zprime_tt_m400_w40", "unstack"],
-    ])
+    ]
 
     # process groups for conveniently looping over certain processs
     # (used in wrapper_factory and during plotting)
-    cfg.set_aux("process_groups", {
+    cfg.x.process_groups = {
         "default": ["zprime_tt_m400_w40", "tt", "st", "dy", "w_lnu", "qcd", "vv"],
         "signal": ["zprime_tt_m400_w40"],
         "bkg": ["tt", "st", "w_lnu", "dy", "qcd", "vv"],
-    })
+    }
 
     # dataset groups for conveniently looping over certain datasets
     # (used in wrapper_factory and during plotting)
-    cfg.set_aux("dataset_groups", {
+    cfg.x.dataset_groups = {
         "all": ["*"],
         "data": [
             "data_mu_*", "data_e_*", "data_pho_*",
@@ -651,11 +670,11 @@ def add_config(
             "zprime_tt_m3000_w300_madgraph",
         ],
         "w_lnu": ["w_lnu_*"],
-    })
+    }
 
     # category groups for conveniently looping over certain categories
     # (used during plotting)
-    cfg.set_aux("category_groups", {
+    cfg.x.category_groups = {
         "default": ["incl", "1e", "1m"],
         "all": [
             "1e",
@@ -699,11 +718,11 @@ def add_config(
             "1e__0t__chi2pass__acts_9_1", "1e__1t__chi2pass__acts_9_1",
             "1m__0t__chi2pass__acts_9_1", "1m__1t__chi2pass__acts_9_1",
         ],
-    })
+    }
 
     # variable groups for conveniently looping over certain variables
     # (used during plotting)
-    cfg.set_aux("variable_groups", {
+    cfg.x.variable_groups = {
         "default": [
             "n_jet", "n_muon", "n_electron",
             "jet1_pt", "jet2_pt", "jet3_pt", "jet4_pt",
@@ -731,35 +750,35 @@ def add_config(
             "ttbar_mass_narrow", "gen_ttbar_mass_narrow",
             "cos_theta_star", "gen_cos_theta_star",
         ],
-    })
+    }
 
     # shift groups for conveniently looping over certain shifts
     # (used during plotting)
-    cfg.set_aux("shift_groups", {
+    cfg.x.shift_groups = {
         "jer": ["nominal", "jer_up", "jer_down"],
-    })
+    }
 
     # selector step groups for conveniently looping over certain steps
     # (used in cutflow tasks)
-    cfg.set_aux("selector_step_groups", {
+    cfg.x.selector_step_groups = {
         "default": ["Lepton", "MET", "Jet", "BJet", "JetLepton2DCut", "AllHadronicVeto", "DileptonVeto", "METFilters"],
-    })
+    }
 
-    cfg.set_aux("selector_step_labels", {
+    cfg.x.selector_step_labels = {
         "JetLepton2DCut": "2D cut",
         "AllHadronicVeto": r"all-hadr. veto",
         "DileptonVeto": r"dilep. veto",
-    })
+    }
 
     # process settings groups to quickly define settings for ProcessPlots
-    cfg.set_aux("process_settings_groups", {
+    cfg.x.process_settings_groups = {
         "default": [
             ["zprime_tt_m400_w40", "scale=2000", "unstack"],
         ],
         "unstack_all": [
             [proc, "unstack"] for proc in cfg.processes
         ],
-    })
+    }
 
     zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
     zprime_mass_labels = {
@@ -772,18 +791,22 @@ def add_config(
         proc_inst = cfg.get_process(proc)
         proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
 
+    #
+    # luminosity
+    #
+
     # 2017 luminosity with values in inverse pb and uncertainties taken from
     # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM?rev=176#LumiComb
-    cfg.set_aux("luminosity", Number(41480, {
+    cfg.x.luminosity = Number(41480, {
         "lumi_13TeV_2017": 0.02j,
         "lumi_13TeV_1718": 0.006j,
         "lumi_13TeV_correlated": 0.009j,
-    }))
+    })
 
     # 2017 minimum bias cross section in mb (milli) for creating PU weights, values from
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
     # Note: not used by updated JSON based pileup weights producer
-    # cfg.set_aux("minbias_xs", Number(69.2, 0.046j))
+    # cfg.x.minbias_xs = Number(69.2, 0.046j)
 
     # chi2 tuning parameters (mean masses/widths of top quarks
     # with hadronically/leptonically decaying W bosons)
@@ -805,7 +828,7 @@ def add_config(
 
     # parameters to fine-tune the ttbar combinatoric
     # reconstruction
-    cfg.set_aux("ttbar_reco_settings", DotDict.wrap({
+    cfg.x.ttbar_reco_settings = DotDict.wrap({
         # -- minimal settings (fast runtime)
         # "n_jet_max": 9,
         # "n_jet_lep_range": (1, 1),
@@ -830,7 +853,7 @@ def add_config(
         # "n_jet_had_range": (1, 9),
         # "n_jet_ttbar_range": (2, 10),
         # "max_chunk_size": 10000,
-    }))
+    })
 
     # L1 prefiring configuration
     cfg.x.l1_prefiring = DotDict.wrap({
@@ -856,7 +879,11 @@ def add_config(
         },
     })
 
-    # overwrite crosssections from cmsdb to adapt to UHH2 crosssections
+    #
+    # cross sections
+    #
+
+    # overwrite cross sections from cmsdb to adapt to UHH2 crosssections
     # https://github.com/UHH2/UHH2-datasets/blob/master/CrossSectionHelper.py#L1804C22-L1804C35
     dy_xsecs = {
         "dy_m50toinf_ht70to100": 140.1,
@@ -893,22 +920,32 @@ def add_config(
     diboson_xsecs = {
         "ww": Number(118.7, {"scale": (0.025j, 0.022j)}),
         "wz": Number(46.74, {"scale": (0.041j, 0.033j)}),
-        # "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)})  # (W+Z) + (W-Z)
+        # "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)}),  # (W+Z) + (W-Z)  # noqa
         "zz": Number(16.99, {"scale": (0.032j, 0.024j)}),
     }
 
     for ds in diboson_xsecs:
         procs.n(ds).set_xsec(13, diboson_xsecs[ds])
 
-    # location of JEC txt files
-    cfg.set_aux("jec", DotDict.wrap({
+    #
+    # JEC & JER  # FIXME: Taken from HBW
+    # https://github.com/uhh-cms/hh2bbww/blob/master/hbw/config/config_run2.py#L138C5-L269C1
+    #
+
+    # jec configuration
+    # https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC?rev=2017#Jet_Energy_Corrections_in_Run2
+
+    jerc_campaign = "Summer19UL17"
+    jet_type = "AK4PFchs"
+
+    cfg.x.jec = DotDict.wrap({
         "Jet": {
-            "campaign": "Summer19UL17",
+            "campaign": jerc_campaign,
             "version": "V5",
-            "jet_type": "AK4PFchs",
+            "jet_type": jet_type,
             "levels": ["L1L2L3Res"],
             "levels_for_type1_met": ["L1FastJet"],
-            "data_eras": sorted(filter(None, {d.x("jec_era", None) for d in cfg.datasets if d.is_data})),
+            # "data_eras": sorted(filter(None, {d.x("jec_era", None) for d in cfg.datasets if d.is_data})),
             "uncertainty_sources": [
                 # comment out most for now to prevent large file sizes
                 # "AbsoluteStat",
@@ -962,160 +999,308 @@ def add_config(
                 # "TimeRunB",
                 # "TimeRunC",
                 # "TimeRunD",
-                "CorrelationGroupMPFInSitu",
-                "CorrelationGroupIntercalibration",
-                "CorrelationGroupbJES",
-                "CorrelationGroupFlavor",
-                "CorrelationGroupUncorrelated",
+                # "CorrelationGroupMPFInSitu",
+                # "CorrelationGroupIntercalibration",
+                # "CorrelationGroupbJES",
+                # "CorrelationGroupFlavor",
+                # "CorrelationGroupUncorrelated",
             ],
         },
-    }))
+    })
 
-    cfg.set_aux("jer", DotDict.wrap({
+    # JER
+    # https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution?rev=107
+    cfg.x.jer = DotDict.wrap({
         "Jet": {
-            "campaign": "Summer19UL17",
+            "campaign": jerc_campaign,
             "version": "JRV2",
-            "jet_type": "AK4PFchs",
+            "jet_type": jet_type,
         },
-    }))
+    })
 
-    # -- electron scale factor names
-    cfg.set_aux("electron_sf_names",
-        ("UL-Electron-ID-SF", "2017", "wp80iso"),
-    )
+    # JEC uncertainty sources propagated to btag scale factors
+    # (names derived from contents in BTV correctionlib file)
+    cfg.x.btag_sf_jec_sources = [
+        "",  # same as "Total"
+        "Absolute",
+        "AbsoluteMPFBias",
+        "AbsoluteScale",
+        "AbsoluteStat",
+        f"Absolute_{year}",
+        "BBEC1",
+        f"BBEC1_{year}",
+        "EC2",
+        f"EC2_{year}",
+        "FlavorQCD",
+        "Fragmentation",
+        "HF",
+        f"HF_{year}",
+        "PileUpDataMC",
+        "PileUpPtBB",
+        "PileUpPtEC1",
+        "PileUpPtEC2",
+        "PileUpPtHF",
+        "PileUpPtRef",
+        "RelativeBal",
+        "RelativeFSR",
+        "RelativeJEREC1",
+        "RelativeJEREC2",
+        "RelativeJERHF",
+        "RelativePtBB",
+        "RelativePtEC1",
+        "RelativePtEC2",
+        "RelativePtHF",
+        "RelativeSample",
+        f"RelativeSample_{year}",
+        "RelativeStatEC",
+        "RelativeStatFSR",
+        "RelativeStatHF",
+        "SinglePionECAL",
+        "SinglePionHCAL",
+        "TimePtEta",
+    ]
 
-    # register shifts
-    cfg.add_shift(name="nominal", id=0)
-    cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
-    cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal"})
-    cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal"})
-    cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal"})
-    cfg.add_shift(name="minbias_xs_up", id=7, type="shape")
-    cfg.add_shift(name="minbias_xs_down", id=8, type="shape")
-    add_shift_aliases(cfg, "minbias_xs", {"pu_weight": "pu_weight_{name}"})
-    cfg.add_shift(name="top_pt_up", id=9, type="shape")
-    cfg.add_shift(name="top_pt_down", id=10, type="shape")
-    add_shift_aliases(cfg, "top_pt", {"top_pt_weight": "top_pt_weight_{direction}"})
+    #
+    # producer configurations
+    #
 
-    cfg.add_shift(name="mur_up", id=101, type="shape")
-    cfg.add_shift(name="mur_down", id=102, type="shape")
-    cfg.add_shift(name="muf_up", id=103, type="shape")
-    cfg.add_shift(name="muf_down", id=104, type="shape")
-    cfg.add_shift(name="scale_up", id=105, type="shape")
-    cfg.add_shift(name="scale_down", id=106, type="shape")
-    cfg.add_shift(name="pdf_up", id=107, type="shape")
-    cfg.add_shift(name="pdf_down", id=108, type="shape")
-    cfg.add_shift(name="alpha_up", id=109, type="shape")
-    cfg.add_shift(name="alpha_down", id=110, type="shape")
+    # name of the btag_sf correction set and jec uncertainties to propagate through
+    cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
 
-    cfg.add_shift(name="muon_up", id=111, type="shape")
-    cfg.add_shift(name="muon_down", id=112, type="shape")
-    add_shift_aliases(cfg, "muon", {"muon_weight": "muon_weight_{direction}"})
+    # name of the top tagging scale factors correction set and working point
+    # TODO (?): unify with `toptag_working_points`?
+    cfg.x.toptag_sf_config = DotDict.wrap({
+        "name": "DeepAK8_Top_MassDecorr",
+        "wp": "1p0",
+    })
 
-    cfg.add_shift(name="electron_up", id=113, type="shape")
-    cfg.add_shift(name="electron_down", id=114, type="shape")
-    add_shift_aliases(cfg, "electron", {"electron_weight": "electron_weight_{direction}"})
+    # lepton sf taken from
+    # https://github.com/uhh-cms/hh2bbww/blob/master/hbw/config/config_run2.py#L338C1-L352C85
+    # names of electron correction sets and working points
+    # (used in the electron_sf producer)
+    # TODO: check that these are appropriate
+    cfg.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
 
-    # V+jets reweighting
-    cfg.add_shift(name="vjets_up", id=201, type="shape")
-    cfg.add_shift(name="vjets_down", id=202, type="shape")
-    add_shift_aliases(cfg, "vjets", {"vjets_weight": "vjets_weight_{direction}"})
+    # names of muon correction sets and working points
+    # (used in the muon producer)
+    # TODO: check that these are appropriate
+    cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL")
+    # cfg.x.muon_id_sf_names = ("NUM_TightID_DEN_TrackerMuons", "2017_UL")
+    # cfg.x.muon_iso_sf_names = ("NUM_TightPFIso_DEN_TightID", "2017_UL")
 
-    # prefiring weights
-    cfg.add_shift(name="l1_ecal_prefiring_up", id=301, type="shape")
-    cfg.add_shift(name="l1_ecal_prefiring_down", id=302, type="shape")
-    add_shift_aliases(
-        cfg,
-        "l1_ecal_prefiring",
-        {"l1_ecal_prefiring_weight": "l1_ecal_prefiring_weight_{direction}"},
-    )
+    #
+    # systematic shifts
+    #
 
-    for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
-        add_shift_aliases(cfg, unc, {f"{unc}_weight": unc + "_weight_{direction}"})
-
+    # read in JEC sources from file
     with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
         all_jec_sources = yaml.load(f, yaml.Loader)["names"]
-    for jec_source in cfg.x.jec.Jet["uncertainty_sources"]:
-        idx = all_jec_sources.index(jec_source)
-        cfg.add_shift(name=f"jec_{jec_source}_up", id=5000 + 2 * idx, type="shape")
-        cfg.add_shift(name=f"jec_{jec_source}_down", id=5001 + 2 * idx, type="shape")
+
+    # declare the shifts
+    def add_shifts(cfg):
+        # register shifts
+        cfg.add_shift(name="nominal", id=0)
+
+        # tune shifts are covered by dedicated, varied datasets, so tag the shift as "disjoint_from_nominal"
+        # (this is currently used to decide whether ML evaluations are done on the full shifted dataset)
+        cfg.add_shift(name="tune_up", id=1, type="shape", tags={"disjoint_from_nominal"})
+        cfg.add_shift(name="tune_down", id=2, type="shape", tags={"disjoint_from_nominal"})
+
+        cfg.add_shift(name="hdamp_up", id=3, type="shape", tags={"disjoint_from_nominal"})
+        cfg.add_shift(name="hdamp_down", id=4, type="shape", tags={"disjoint_from_nominal"})
+
+        # pileup / minimum bias cross section variations
+        cfg.add_shift(name="minbias_xs_up", id=7, type="shape")
+        cfg.add_shift(name="minbias_xs_down", id=8, type="shape")
+        add_shift_aliases(cfg, "minbias_xs", {"pu_weight": "pu_weight_{name}"})
+
+        # top pt reweighting
+        cfg.add_shift(name="top_pt_up", id=9, type="shape")
+        cfg.add_shift(name="top_pt_down", id=10, type="shape")
+        add_shift_aliases(cfg, "top_pt", {"top_pt_weight": "top_pt_weight_{direction}"})
+
+        # renormalization scale
+        cfg.add_shift(name="mur_up", id=101, type="shape")
+        cfg.add_shift(name="mur_down", id=102, type="shape")
+
+        # factorization scale
+        cfg.add_shift(name="muf_up", id=103, type="shape")
+        cfg.add_shift(name="muf_down", id=104, type="shape")
+
+        # scale variation (?)
+        cfg.add_shift(name="scale_up", id=105, type="shape")
+        cfg.add_shift(name="scale_down", id=106, type="shape")
+
+        # pdf variations
+        cfg.add_shift(name="pdf_up", id=107, type="shape")
+        cfg.add_shift(name="pdf_down", id=108, type="shape")
+
+        # alpha_s variation
+        cfg.add_shift(name="alpha_up", id=109, type="shape")
+        cfg.add_shift(name="alpha_down", id=110, type="shape")
+
+        # TODO: murf_envelope?
+        for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
+            add_shift_aliases(cfg, unc, {
+                # TODO: normalized?
+                f"{unc}_weight": f"{unc}_weight_{{direction}}",
+            })
+
+        # event weights due to muon scale factors
+        if not cfg.has_tag("skip_muon_weights"):
+            cfg.add_shift(name="muon_up", id=111, type="shape")
+            cfg.add_shift(name="muon_down", id=112, type="shape")
+            add_shift_aliases(cfg, "muon", {"muon_weight": "muon_weight_{direction}"})
+
+        # event weights due to electron scale factors
+        if not cfg.has_tag("skip_electron_weights"):
+            cfg.add_shift(name="electron_up", id=113, type="shape")
+            cfg.add_shift(name="electron_down", id=114, type="shape")
+            add_shift_aliases(cfg, "electron", {"electron_weight": "electron_weight_{direction}"})
+
+        # V+jets reweighting
+        cfg.add_shift(name="vjets_up", id=201, type="shape")
+        cfg.add_shift(name="vjets_down", id=202, type="shape")
+        add_shift_aliases(cfg, "vjets", {"vjets_weight": "vjets_weight_{direction}"})
+
+        # prefiring weights
+        cfg.add_shift(name="l1_ecal_prefiring_up", id=301, type="shape")
+        cfg.add_shift(name="l1_ecal_prefiring_down", id=302, type="shape")
         add_shift_aliases(
             cfg,
-            f"jec_{jec_source}",
-            {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"},
+            "l1_ecal_prefiring",
+            {"l1_ecal_prefiring_weight": "l1_ecal_prefiring_weight_{direction}"},
         )
 
-    cfg.add_shift(name="jer_up", id=6000, type="shape")
-    cfg.add_shift(name="jer_down", id=6001, type="shape")
-    add_shift_aliases(
-        cfg,
-        "jer",
-        {"Jet.pt": "Jet.pt_{name}", "Jet.mass": "Jet.mass_{name}"},
-    )
+        # b-tagging shifts
+        btag_uncs = [
+            "hf", "lf",
+            f"hfstats1_{year}", f"hfstats2_{year}",
+            f"lfstats1_{year}", f"lfstats2_{year}",
+            "cferr1", "cferr2",
+        ]
+        for i, unc in enumerate(btag_uncs):
+            cfg.add_shift(name=f"btag_{unc}_up", id=501 + 2 * i, type="shape")
+            cfg.add_shift(name=f"btag_{unc}_down", id=502 + 2 * i, type="shape")
+            add_shift_aliases(
+                cfg,
+                f"btag_{unc}",
+                {
+                    # taken from
+                    # https://github.com/uhh-cms/hh2bbww/blob/c6d4ee87a5c970660497e52aed6b7ebe71125d20/hbw/config/config_run2.py#L421
+                    "normalized_btag_weight": f"normalized_btag_weight_{unc}_" + "{direction}",
+                    "normalized_njet_btag_weight": f"normalized_njet_btag_weight_{unc}_" + "{direction}",
+                    "btag_weight": f"btag_weight_{unc}_" + "{direction}",
+                    "njet_btag_weight": f"njet_btag_weight_{unc}_" + "{direction}",
+                },
+            )
 
-    def make_jme_filename(jme_aux, sample_type, name, era=None):
-        """
-        Convenience function to compute paths to JEC files.
-        """
-        # normalize and validate sample type
-        sample_type = sample_type.upper()
-        if sample_type not in ("DATA", "MC"):
-            raise ValueError(f"invalid sample type '{sample_type}', expected either 'DATA' or 'MC'")
+        # jet energy scale (JEC) uncertainty variations
+        for jec_source in cfg.x.jec.Jet.uncertainty_sources:
+            idx = all_jec_sources.index(jec_source)
+            cfg.add_shift(name=f"jec_{jec_source}_up", id=5000 + 2 * idx, type="shape", tags={"jec"})
+            cfg.add_shift(name=f"jec_{jec_source}_down", id=5001 + 2 * idx, type="shape", tags={"jec"})
+            add_shift_aliases(
+                cfg,
+                f"jec_{jec_source}",
+                {
+                    "Jet.pt": "Jet.pt_{name}",
+                    "Jet.mass": "Jet.mass_{name}",
+                    "MET.pt": "MET.pt_{name}",
+                },
+            )
 
-        jme_full_version = "_".join(s for s in (jme_aux.campaign, era, jme_aux.version, sample_type) if s)
+        # jet energy resolution (JER) scale factor variations
+        cfg.add_shift(name="jer_up", id=6000, type="shape")
+        cfg.add_shift(name="jer_down", id=6001, type="shape")
+        add_shift_aliases(
+            cfg,
+            "jer",
+            {
+                "Jet.pt": "Jet.pt_{name}",
+                "Jet.mass": "Jet.mass_{name}",
+                "MET.pt": "MET.pt_{name}",
+            },
+        )
 
-        return f"{jme_aux.source}/{jme_full_version}/{jme_full_version}_{name}_{jme_aux.jet_type}.txt"
+        # PSWeight variations
+        cfg.add_shift(name="ISR_up", id=7001, type="shape")  # PS weight [0] ISR=2 FSR=1
+        cfg.add_shift(name="ISR_down", id=7002, type="shape")  # PS weight [2] ISR=0.5 FSR=1
+        add_shift_aliases(cfg, "ISR", {"ISR": "ISR_{direction}"})
 
+        cfg.add_shift(name="FSR_up", id=7003, type="shape")  # PS weight [1] ISR=1 FSR=2
+        cfg.add_shift(name="FSR_down", id=7004, type="shape")  # PS weight [3] ISR=1 FSR=0.5
+        add_shift_aliases(cfg, "FSR", {"FSR": "FSR_{direction}"})
+
+    # add the shifts
+    add_shifts(cfg)
+
+    #
     # external files
+    # taken from
+    # https://github.com/uhh-cms/hh2bbww/blob/master/hbw/config/config_run2.py#L535C7-L579C84
+    #
+
     sources = {
         "cert": "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV",
         "local_repo": os.getenv("MTT_ORIG_BASE"),
         "json_mirror": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/jsonpog-integration-a81953b1",
         "jet": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/cms-jet-JSON_Format-54860a23",
     }
+
+    corr_tag = "2017_UL"
+
     cfg.x.external_files = DotDict.wrap({
+        # # pileup weight corrections
+        # "pu_sf": (f"{sources['json_mirror']}/POG/LUM/{corr_tag}/puWeights.json.gz", "v1"),  # noqa
+
         # jet energy corrections
-        "jet_jerc": (f"{sources['json_mirror']}/POG/JME/2017_UL/jet_jerc.json.gz", "v1"),  # noqa
+        "jet_jerc": (f"{sources['json_mirror']}/POG/JME/{corr_tag}/jet_jerc.json.gz", "v1"),  # noqa
 
         # top-tagging scale factors
         "toptag_sf": (f"{sources['jet']}/JMAR/DeepAK8/2017_DeepAK8_Top.json", "v1"),  # noqa
 
         # btag scale factors
-        "btag_sf_corr": (f"{sources['json_mirror']}/POG/BTV/2017_UL/btagging.json.gz", "v1"),  # noqa
+        "btag_sf_corr": (f"{sources['json_mirror']}/POG/BTV/{corr_tag}/btagging.json.gz", "v1"),  # noqa
 
         # electron scale factors
-        "electron_sf": (f"{sources['json_mirror']}/POG/EGM/2017_UL/electron.json.gz", "v1"),  # noqa
+        "electron_sf": (f"{sources['json_mirror']}/POG/EGM/{corr_tag}/electron.json.gz", "v1"),  # noqa
 
         # muon scale factors
-        "muon_sf": (f"{sources['json_mirror']}/POG/MUO/2017_UL/muon_Z.json.gz", "v1"),  # noqa
+        "muon_sf": (f"{sources['json_mirror']}/POG/MUO/{corr_tag}/muon_Z.json.gz", "v1"),  # noqa
+
+        # met phi corrector (TODO)
+        # "met_phi_corr": (f"{sources['json_mirror']}/POG/JME/{corr_tag}/met.json.gz", "v1"),
 
         # L1 prefiring corrections
-        "l1_prefiring": f"{os.getenv('MTT_ORIG_BASE')}/data/json/l1_prefiring.json",
+        "l1_prefiring": f"{sources['local_repo']}/data/json/l1_prefiring.json",
 
         # V+jets reweighting
-        "vjets_reweighting": f"{os.getenv('MTT_ORIG_BASE')}/data/json/vjets_reweighting.json",
-
-        # lumi files
-        "lumi": {
-            "golden": (f"{sources['cert']}/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
-            "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-        },
-
-        # files from
-        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
-        "pu": {
-            "json": (f"{sources['cert']}/PileUp/UltraLegacy/pileup_latest.txt", "v1"),  # noqa
-            "mc_profile": ("https://raw.githubusercontent.com/cms-sw/cmssw/435f0b04c0e318c1036a6b95eb169181bbbe8344/SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py", "v1"),  # noqa
-            "data_profile": {
-                "nominal": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root", "v1"),  # noqa
-                "minbias_xs_up": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root", "v1"),  # noqa
-                "minbias_xs_down": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root", "v1"),  # noqa
-            },
-        },
-
-        # pileup weight file
-        "pu_sf": f"{sources['json_mirror']}/POG/LUM/2017_UL/puWeights.json.gz",
+        "vjets_reweighting": f"{sources['local_repo']}/data/json/vjets_reweighting.json",
     })
+
+    if year == 2017:
+        cfg.x.external_files.update(DotDict.wrap({
+            # lumi files
+            "lumi": {
+                "golden": (f"{sources['cert']}/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt", "v1"),  # noqa
+                "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
+            },
+
+            # pileup files (for PU reweighting)
+            # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData?rev=44#Pileup_JSON_Files_For_Run_II
+            "pu": {
+                "json": (f"{sources['cert']}/PileUp/UltraLegacy/pileup_latest.txt", "v1"),  # noqa
+                "mc_profile": ("https://raw.githubusercontent.com/cms-sw/cmssw/435f0b04c0e318c1036a6b95eb169181bbbe8344/SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py", "v1"),  # noqa
+                "data_profile": {
+                    "nominal": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root", "v1"),  # noqa
+                    "minbias_xs_up": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root", "v1"),  # noqa
+                    "minbias_xs_down": (f"{sources['cert']}/PileUp/UltraLegacy/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root", "v1"),  # noqa
+                },
+            },
+        }))
+    else:
+        raise NotImplementedError(f"No lumi and pu files provided for year {year}")
 
     # columns to keep after certain steps
     cfg.x.keep_columns = DotDict.wrap({
@@ -1134,12 +1319,15 @@ def add_config(
             "genWeight",
             "LHEWeight.*",
             "LHEPdfWeight", "LHEScaleWeight",
+            "PSWeight",
 
             # muons
             "Muon.pt", "Muon.eta", "Muon.phi", "Muon.mass",
+            "VetoMuon.pt", "VetoMuon.eta", "VetoMuon.phi", "VetoMuon.mass",
             "Muon.pfRelIso04_all",
             # electrons
             "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
+            "VetoElectron.pt", "VetoElectron.eta", "VetoElectron.phi", "VetoElecton.mass",
             "Electron.deltaEtaSC",
             "Electron.pfRelIso03_all",
 
@@ -1233,99 +1421,53 @@ def add_config(
         "b": -0.0005,
     }
 
+    #
+    # event weights
+    #
+
     # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
     get_shifts = functools.partial(get_shifts_from_sources, cfg)
     cfg.x.event_weights = DotDict({
         "normalization_weight": [],
         "pu_weight": get_shifts("minbias_xs"),
         "muon_weight": get_shifts("muon"),
-        "electron_weight": get_shifts("electron"),
+        # "ISR": get_shifts("ISR"),
+        # "FSR": get_shifts("FSR"),
         # TODO: add scale and PDF weights, where available
         # "scale_weight": ???,
         # "pdf_weight": ???,
     })
 
+    # optional weights
+    if not cfg.has_tag("skip_electron_weights"):
+        cfg.x.event_weights["electron_weight"] = get_shifts("electron")
+
     # event weights only present in certain datasets
     for dataset in cfg.datasets:
         dataset.x.event_weights = DotDict()
+
+        # TTbar: top pt reweighting (disable for now)
         # if dataset.has_tag("is_sm_ttbar"):
-        #     # top pt reweighting (disable for now)
         #     dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
+
+        # V+jets: QCD NLO reweighting
         if dataset.has_tag("is_v_jets"):
-            # V+jets QCD NLO reweighting
             dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
+
+        # all MC: L1 prefiring
         if not dataset.is_data:
             # prefiring weights (all datasets except real data)
             dataset.x.event_weights["l1_ecal_prefiring_weight"] = get_shifts("l1_ecal_prefiring")
 
-    # names of electron correction sets and working points
-    # (used in the electron_sf producer)
-    # TODO: check that these are appropriate
-    cfg.x.electron_sf_names = ("UL-Electron-ID-SF", "2017", "wp80iso")
-
-    # names of muon correction sets and working points
-    # (used in the muon producer)
-    # TODO: check that these are appropriate
-    cfg.x.muon_sf_names = ("NUM_TightRelIso_DEN_TightIDandIPCut", "2017_UL")
-
-    # JEC uncertainty sources propagated to btag scale factors
-    # (names derived from contents in BTV correctionlib file)
-    year = cfg.campaign.x.year
-    cfg.x.btag_sf_jec_sources = [
-        "",  # same as "Total"
-        "Absolute",
-        "AbsoluteMPFBias",
-        "AbsoluteScale",
-        "AbsoluteStat",
-        f"Absolute_{year}",
-        "BBEC1",
-        f"BBEC1_{year}",
-        "EC2",
-        f"EC2_{year}",
-        "FlavorQCD",
-        "Fragmentation",
-        "HF",
-        f"HF_{year}",
-        "PileUpDataMC",
-        "PileUpPtBB",
-        "PileUpPtEC1",
-        "PileUpPtEC2",
-        "PileUpPtHF",
-        "PileUpPtRef",
-        "RelativeBal",
-        "RelativeFSR",
-        "RelativeJEREC1",
-        "RelativeJEREC2",
-        "RelativeJERHF",
-        "RelativePtBB",
-        "RelativePtEC1",
-        "RelativePtEC2",
-        "RelativePtHF",
-        "RelativeSample",
-        f"RelativeSample_{year}",
-        "RelativeStatEC",
-        "RelativeStatFSR",
-        "RelativeStatHF",
-        "SinglePionECAL",
-        "SinglePionHCAL",
-        "TimePtEta",
-    ]
-
-    # name of the btag_sf correction set and jec uncertainties to propagate through
-    cfg.x.btag_sf = ("deepJet_shape", cfg.x.btag_sf_jec_sources)
-
-    # name of the top tagging scale factors correction set and working point
-    # TODO (?): unify with `toptag_working_points`?
-    cfg.x.toptag_sf_config = DotDict.wrap({
-        "name": "DeepAK8_Top_MassDecorr",
-        "wp": "1p0",
-    })
-
     # versions per task family and optionally also dataset and shift
     # None can be used as a key to define a default value
-    cfg.set_aux("versions", {
-    })
+    cfg.x.versions = {}
 
+    #
+    # finalization
+    #
+
+    # add channels
     cfg.add_channel("e", id=1)
     cfg.add_channel("mu", id=2)
 

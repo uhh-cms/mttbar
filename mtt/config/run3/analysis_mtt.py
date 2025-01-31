@@ -33,6 +33,7 @@ ana.x.bash_sandboxes = [
     "$CF_BASE/sandboxes/venv_ml_tf.sh",
 ]
 
+# cmssw sandboxes that should be bundled for remote jobs in case they are needed
 ana.x.cmssw_sandboxes = [
     # "$CF_BASE/sandboxes/cmssw_default.sh",
 ]
@@ -50,45 +51,41 @@ ana.x.config_groups = {}
 #
 
 from mtt.config.run3.config_mtt import add_config
+
 from cmsdb.campaigns.run3_2022_preEE_nano_v12 import campaign_run3_2022_preEE_nano_v12 as campaign_run3_2022_preEE_nano_v12  # noqa
 from cmsdb.campaigns.run3_2022_postEE_nano_v12 import campaign_run3_2022_postEE_nano_v12 as campaign_run3_2022_postEE_nano_v12  # noqa
-# import cmsdb.campaigns.run3_2023_preBPix_nano_v12
-# import cmsdb.campaigns.run3_2023_postBPix_nano_v12
+# from cmsdb.campaigns.run3_2023_preBPix_nano_v12 import campaign_run3_2023_preBPix_nano_v12 as campaign_run3_2023_preBPix_nano_v12  # noqa
+# from cmsdb.campaigns.run3_2023_postBPix_nano_v12 import campaign_run3_2023_postBPix_nano_v12 as campaign_run3_2023_postBPix_nano_v12  # noqa
 
 campaign_run3_2022_preEE_nano_v12.x.EE = "pre"
-
 campaign_run3_2022_postEE_nano_v12.x.EE = "post"
-
-# campaign_run3_2023_preBPix_nano_v12 = cmsdb.campaigns.run3_2023_preBPix_nano_v12.campaign_run3_2023_preBPix_nano_v12
 # campaign_run3_2023_preBPix_nano_v12.x.BPix = "pre"
-
-# campaign_run3_2023_postBPix_nano_v12 = cmsdb.campaigns.run3_2023_postBPix_nano_v12.campaign_run3_2023_postBPix_nano_v12  # noqa
 # campaign_run3_2023_postBPix_nano_v12.x.BPix = "post"
 
 # default config
 config_2022_preEE = add_config(
-    analysis_mtt,
+    ana,
     campaign_run3_2022_preEE_nano_v12.copy(),
     config_name="run3_mtt_2022_preEE_nano_v12",
     config_id=3_22_11,  # 3: Run3 22: year 1: full stat 1: pre EE
 )
 
 config_2022_postEE = add_config(
-    analysis_mtt,
+    ana,
     campaign_run3_2022_postEE_nano_v12.copy(),
     config_name="run3_mtt_2022_postEE_nano_v12",
     config_id=3_22_12,  # 3: Run3 22: year 1: full stat 2: post EE
 )
 
 # config_2023_preBPix = add_config(
-#     analysis_mtt,
+#     ana,
 #     campaign_run3_2023_preBPix_nano_v12.copy(),
 #     config_name="run3_mtt_2023_preBPix_nano_v12",
 #     config_id=3_23_11,  # 3: Run3 23: year 1: full stat 1: pre BPix
 # )
 
 # config_2023_postBPix = add_config(
-#     analysis_mtt,
+#     ana,
 #     campaign_run3_2023_postBPix_nano_v12.copy(),
 #     config_name="run3_mtt_2023_postBPix_nano_v12",
 #     config_id=3_23_12,  # 3: Run3 23: year 1: full stat 2: post BPix
@@ -96,7 +93,7 @@ config_2022_postEE = add_config(
 
 # config with limited number of files
 config_2022_preEE_limited = add_config(
-    analysis_mtt,
+    ana,
     campaign_run3_2022_preEE_nano_v12.copy(),
     config_name="run3_mtt_2022_preEE_nano_v12_limited",
     config_id=3_22_21,  # 3: Run3 22: year 2: limited stat 1: pre EE
@@ -104,7 +101,7 @@ config_2022_preEE_limited = add_config(
 )
 
 config_2022_postEE_limited = add_config(
-    analysis_mtt,
+    ana,
     campaign_run3_2022_postEE_nano_v12.copy(),
     config_name="run3_mtt_2022_postEE_nano_v12_limited",
     config_id=3_22_22,  # 3: Run3 22: year 2: limited stat 2: post EE
@@ -112,7 +109,7 @@ config_2022_postEE_limited = add_config(
 )
 
 # config_2023_preBPix_limited = add_config(
-#     analysis_mtt,
+#     ana,
 #     campaign_run3_2023_preBPix_nano_v12.copy(),
 #     config_name="run3_mtt_2023_preBPix_nano_v12_limited",
 #     config_id=3_23_21,  # 3: Run3 23: year 2: limited stat 1: pre BPix
@@ -120,7 +117,7 @@ config_2022_postEE_limited = add_config(
 # )
 
 # config_2023_postBPix_limited = add_config(
-#     analysis_mtt,
+#     ana,
 #     campaign_run3_2023_postBPix_nano_v12.copy(),
 #     config_name="run3_mtt_2023_postBPix_nano_v12_limited",
 #     config_id=3_23_22,  # 3: Run3 23: year 2: limited stat 2: post BPix
