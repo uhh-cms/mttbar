@@ -1248,7 +1248,7 @@ def add_config(
 
     # external files
     json_mirror = "/afs/cern.ch/user/j/jmatthie/public/mirrors/jsonpog-integration-49ddc547"
-    local_repo = "/nfs/dust/cms/user/matthiej/mttbar"  # TODO: avoid hardcoding path
+    local_repo = "/data/dust/user/matthiej/mttbar"  # TODO: avoid hardcoding path
 
     corr_tag = f"{year}_Summer22{jerc_postfix}"
 
