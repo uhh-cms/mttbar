@@ -139,12 +139,22 @@ def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """All high-level featues, e.g. scalar jet pt sum (ht), number of jets, electrons, muons, etc."""
 
-    events = set_ak_column(events, "n_jet", ak.num(events.Jet.pt, axis=-1))
-    events = set_ak_column(events, "n_fatjet", ak.num(events.FatJet.pt, axis=-1))
-    events = set_ak_column(events, "n_muon", ak.num(events.Muon.pt, axis=-1))
-    events = set_ak_column(events, "n_electron", ak.num(events.Electron.pt, axis=-1))
+    # note: the missing Lorentz vector columns cause issues for
+    # arrays with registered names/behaviors, so we remove them
+    # before evaluating `ak.num`
+    jet = ak.without_parameters(events.Jet)
+    fatjet = ak.without_parameters(events.FatJet)
+    muon = ak.without_parameters(events.Muon)
+    electron = ak.without_parameters(events.Electron)
 
-    events = set_ak_column(events, "ht", ak.sum(events.Jet.pt, axis=-1))
+    # count objects using `pt` fields as a proxy
+    events = set_ak_column(events, "n_jet", ak.num(jet.pt, axis=-1))
+    events = set_ak_column(events, "n_fatjet", ak.num(fatjet.pt, axis=-1))
+    events = set_ak_column(events, "n_muon", ak.num(muon.pt, axis=-1))
+    events = set_ak_column(events, "n_electron", ak.num(electron.pt, axis=-1))
+
+    # count objects using `pt` fields as a proxy
+    events = set_ak_column(events, "ht", ak.sum(jet.pt, axis=-1))
 
     # dijet features
     events = self[jj_features](events, **kwargs)
