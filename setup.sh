@@ -147,8 +147,8 @@ setup_mtt() {
     #
 
     export LAW_HOME="${MTT_BASE}/.law"
-    #export LAW_CONFIG_FILE="${MTT_BASE}/law.cfg"
-    export LAW_CONFIG_FILE="${MTT_BASE}/law.nocert.cfg"
+    export LAW_CONFIG_FILE="${MTT_BASE}/law.cfg"
+    #export LAW_CONFIG_FILE="${MTT_BASE}/law.nocert.cfg"
 
     if which law &> /dev/null; then
         # source law's bash completion scipt
