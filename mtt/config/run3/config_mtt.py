@@ -1268,6 +1268,9 @@ def add_config(
         # top-tagging scale factors (TODO)
         # "toptag_sf": (f"{sources['jet']}/JMAR/???/???.json", "v1"),  # noqa
 
+        # btag scale factors
+        "btag_sf_corr": (f"{sources['json_mirror']}/POG/BTV/{corr_tag}/btagging.json.gz", "v1"),  # noqa
+
         # electron scale factors
         "electron_sf": (f"{sources['json_mirror']}/POG/EGM/{corr_tag}/electron.json.gz", "v1"),  # noqa
 
