@@ -63,6 +63,7 @@ setup_mtt() {
             # start querying for variables
             query CF_CERN_USER "CERN username" "$( whoami )"
             export_and_save CF_CERN_USER_FIRSTCHAR "\${CF_CERN_USER:0:1}"
+            query LAW_CONFIG_FILE "Law configuration file" "\$MTT_BASE/law.cfg"
             query CF_DATA "Local data directory" "\$MTT_BASE/data" "./data"
             query CF_STORE_NAME "Relative path used in store paths (see next queries)" "mtt_store"
             query CF_STORE_LOCAL "Default local output store" "\$CF_DATA/\$CF_STORE_NAME"
@@ -147,8 +148,7 @@ setup_mtt() {
     #
 
     export LAW_HOME="${MTT_BASE}/.law"
-    export LAW_CONFIG_FILE="${MTT_BASE}/law.cfg"
-    #export LAW_CONFIG_FILE="${MTT_BASE}/law.nocert.cfg"
+    export LAW_CONFIG_FILE="${LAW_CONFIG_FILE:-${MTT_BASE}/law.cfg}"
 
     if which law &> /dev/null; then
         # source law's bash completion scipt
