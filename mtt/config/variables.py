@@ -84,6 +84,17 @@ def add_variables(config: od.Config) -> None:
                 x_title=rf"{obj} {i+1} $\phi$",
             )
 
+    config.add_variable(
+        name="fatjet_tau32",
+        expression=lambda events: events.FatJet["tau3"] / events.FatJet["tau2"],
+        binning=(24 // 2, 0, 1.2),
+        x_title=r"FatJet $\tau_{{32}}$",
+        aux={
+            "inputs": {"FatJet.tau3", "FatJet.tau2"},
+            "short_label": "$\tau_{3}/\tau_{2}$",
+        },
+    )
+
     # Leptons
     for obj in ["Electron", "Muon"]:
         config.add_variable(
