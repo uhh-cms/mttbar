@@ -108,6 +108,23 @@ config_2022_postEE_limited = add_config(
     limit_dataset_files=1,
 )
 
+# config with medium limited number of files
+config_2022_preEE_medium_limited = add_config(
+    ana,
+    campaign_run3_2022_preEE_nano_v12.copy(),
+    config_name="run3_mtt_2022_preEE_nano_v12_medium_limited",
+    config_id=3_22_31,  # 3: Run3 22: year 3: medium limited stat 1: pre EE
+    limit_dataset_files=10,
+)
+
+config_2022_postEE_medium_limited = add_config(
+    ana,
+    campaign_run3_2022_postEE_nano_v12.copy(),
+    config_name="run3_mtt_2022_postEE_nano_v12_medium_limited",
+    config_id=3_22_32,  # 3: Run3 22: year 3: medium limited stat 2: post EE
+    limit_dataset_files=10,
+)
+
 # config_2023_preBPix_limited = add_config(
 #     ana,
 #     campaign_run3_2023_preBPix_nano_v12.copy(),
