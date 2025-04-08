@@ -1,7 +1,8 @@
 # coding: utf-8
 
 """
-Default selection without jet lepton 2D selection.
+Default selection for m(ttbar).
+Removed the jet-lepton 2d selection to test effect.
 """
 
 from operator import and_
@@ -79,11 +80,13 @@ def default_without_2d_selection(
     results = SelectionResult()
 
     # MET filters
-    results.steps.METFilters = self[met_filters](events, **kwargs)
+    events, met_filters_results = self[met_filters](events, **kwargs)
+    results.steps.METFilters = met_filters_results.steps.met_filter
 
     # JSON filter (data-only)
     if self.dataset_inst.is_data:
-        results.steps.JSON = self[json_filter](events, **kwargs)
+        events, json_filter_results = self[json_filter](events, **kwargs)
+        results.steps.JSON = json_filter_results.steps.json
 
     # lepton selection
     events, lepton_results = self[lepton_selection](events, **kwargs)
@@ -185,7 +188,7 @@ def default_without_2d_selection(
 
 
 @default_without_2d_selection.init
-def default_init(self: Selector) -> None:
+def default_without_2d_selection_init(self: Selector) -> None:
 
     if hasattr(self, "dataset_inst") and self.dataset_inst.has_tag("is_qcd"):
         self.uses |= {qcd_spikes}
@@ -193,5 +196,4 @@ def default_init(self: Selector) -> None:
 
     if hasattr(self, "dataset_inst") and not self.dataset_inst.is_mc:
         self.uses |= {data_trigger_veto}
-
         self.produces |= {data_trigger_veto}
