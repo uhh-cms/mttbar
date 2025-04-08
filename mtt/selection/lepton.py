@@ -82,7 +82,8 @@ def electron_selection(
         (lepton[sel_params.id_addveto.column] >= sel_params.id_addveto.min_value) &
         ~lepton_mask
     )
-    dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
+    veto_lepton_indices = masked_sorted_indices(add_leptons, lepton.pt)
+    # dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
 
     # lepton multiplicity
     n_lep = ak.sum(lepton_mask, axis=-1)
@@ -99,11 +100,12 @@ def electron_selection(
     return SelectionResult(
         steps={
             "Lepton": (ak.num(lepton_indices) == 1),
-            "DileptonVeto": dilepton_veto,
+            # "DileptonVeto": (ak.num(veto_lepton_indices) == 0),
         },
         objects={
             "Electron": {
                 "Electron": lepton_indices,
+                "VetoElectron": veto_lepton_indices,
             },
         },
         aux={
@@ -190,7 +192,8 @@ def muon_selection(
         (lepton[sel_params.id_addveto.column]) &
         ~lepton_mask
     )
-    dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
+    veto_lepton_indices = masked_sorted_indices(add_leptons, lepton.pt)
+    # dilepton_veto = (ak.sum(add_leptons, axis=-1) < 2)
 
     # lepton multiplicity
     n_lep = ak.sum(lepton_mask, axis=-1)
@@ -207,11 +210,12 @@ def muon_selection(
     return SelectionResult(
         steps={
             "Lepton": (ak.num(lepton_indices) == 1),
-            "DileptonVeto": dilepton_veto,
+            # "DileptonVeto": (ak.num(veto_lepton_indices) == 0),
         },
         objects={
             "Muon": {
                 "Muon": lepton_indices,
+                "VetoMuon": veto_lepton_indices,
             },
         },
         aux={
@@ -468,11 +472,12 @@ def lepton_selection(
     # veto events with both electrons and muons
     # passing the selection cuts
     merged_steps["DileptonVeto"] = (
-        merged_steps["DileptonVeto"] &
         (
             (
                 ak.num(merged_objects["Muon"]["Muon"], axis=-1) +
-                ak.num(merged_objects["Electron"]["Electron"], axis=-1)
+                ak.num(merged_objects["Muon"]["VetoMuon"], axis=-1) +
+                ak.num(merged_objects["Electron"]["Electron"], axis=-1) +
+                ak.num(merged_objects["Electron"]["VetoElectron"], axis=-1)
             ) <= 1
         )
     )
