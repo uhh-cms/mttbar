@@ -731,19 +731,66 @@ def ttbar(
         events = set_ak_column_ef(events, "TTbar.gen_cos_theta_star", gen_cos_theta_star)
         events = set_ak_column_ef(events, "TTbar.gen_abs_cos_theta_star", gen_abs_cos_theta_star)
 
-    # recalculate category ids with ttbar information
-    events = self[category_ids](events, **kwargs)
+    # recalculate category ids with ttbar information in extra producer
 
     return events
 
 
 @ttbar.init
 def ttbar_init(self: Producer) -> None:
+    if hasattr(self, "dataset_inst") and self.dataset_inst.is_mc:
+        self.uses |= {ttbar_gen}
+        self.produces |= {ttbar_gen}
+
+
+@producer(
+    produces={"category_ids"},
+    exposed=True,
+)
+def add_prod_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Add production categories to the events.
+    """
+    # recalculate category ids with ttbar information
+    events = self[category_ids](events, **kwargs)
+
+    return events
+
+
+@add_prod_cats.requires
+def add_prod_cats_reqs(self: Producer, task: law.Task, reqs: dict) -> None:
+    if "ttbar" in reqs or task.producer != "add_prod_cats":
+        return
+
+    producer_inst = task.build_producer_inst("ttbar", params={
+        "dataset": task.dataset,
+        "dataset_inst": task.dataset_inst,
+        "config": task.config,
+        "config_inst": task.config_inst,
+        "analysis": task.analysis,
+        "analysis_inst": task.analysis_inst,
+    })
+    from columnflow.tasks.production import ProduceColumns
+    reqs["ttbar"] = ProduceColumns.req(
+        task,
+        producer="ttbar",
+        producer_inst=producer_inst,
+    )
+
+
+@add_prod_cats.setup
+def add_prod_cats_setup(
+    self: Producer, task: law.Task, reqs: dict, inputs: dict, reader_targets: law.util.InsertableDict,
+) -> None:
+    reader_targets["columns"] = inputs["ttbar"]["columns"]
+
+
+@add_prod_cats.init
+def add_prod_cats_init(self: Producer) -> None:
     # add production categories to config
     if not self.config_inst.get_aux("has_categories_production", False):
         add_categories_production(self.config_inst)
         self.config_inst.x.has_categories_production = True
 
-    if hasattr(self, "dataset_inst") and self.dataset_inst.is_mc:
-        self.uses |= {ttbar_gen}
-        self.produces |= {ttbar_gen}
+    self.uses.add(category_ids)
+    self.produces.add(category_ids)
