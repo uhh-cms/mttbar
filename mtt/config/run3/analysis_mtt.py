@@ -97,7 +97,7 @@ config_2022_preEE_limited = add_config(
     campaign_run3_2022_preEE_nano_v12.copy(),
     config_name="run3_mtt_2022_preEE_nano_v12_limited",
     config_id=3_22_21,  # 3: Run3 22: year 2: limited stat 1: pre EE
-    limit_dataset_files=1,
+    limit_dataset_files=2,
 )
 
 config_2022_postEE_limited = add_config(
@@ -105,7 +105,7 @@ config_2022_postEE_limited = add_config(
     campaign_run3_2022_postEE_nano_v12.copy(),
     config_name="run3_mtt_2022_postEE_nano_v12_limited",
     config_id=3_22_22,  # 3: Run3 22: year 2: limited stat 2: post EE
-    limit_dataset_files=1,
+    limit_dataset_files=2,
 )
 
 # config with medium limited number of files

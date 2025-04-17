@@ -68,5 +68,5 @@ config_2017_limited = add_config(
     campaign_run2_2017_nano_v9.copy(),
     config_name="run2_mtt_2017_nano_v9_limited",
     config_id=2_17_2,  # 2: Run2 17: year 2: limited stat
-    limit_dataset_files=1,
+    limit_dataset_files=2,
 )
