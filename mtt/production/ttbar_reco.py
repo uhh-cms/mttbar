@@ -5,6 +5,7 @@ Column production methods related to ttbar mass reconstruction.
 """
 import itertools
 import math
+import law
 
 from law.util import human_duration
 
@@ -47,6 +48,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 def ttbar(
     self: Producer,
     events: ak.Array,
+    task: law.Task,
     # algorithm tweaks
     merge_mode="eager",
     # profiling/reporting options
@@ -115,7 +117,7 @@ def ttbar(
 
     # validate merging mode
     assert merge_mode in ("eager", "lazy"), f"invalid merge_mode '{merge_mode}'"
-    self.task.publish_message(f"merge mode is '{merge_mode}'")
+    task.publish_message(f"merge mode is '{merge_mode}'")
 
     # load coffea behaviors for simplified arithmetic with vectors
     events = ak.Array(events, behavior=coffea.nanoevents.methods.nanoaod.behavior)
@@ -243,7 +245,7 @@ def ttbar(
             task_name=name,
             # report on task completion
             msg_func=(
-                self.task.publish_message
+                task.publish_message  # FIXME broken after cf_taf
                 if verbose_level >= min_verbose_level
                 else None
             ),
@@ -555,7 +557,7 @@ def ttbar(
         result = None
         size = len(arrays[0])
         n_chunks = max(1, int(math.ceil(size / max_chunk_size)))
-        self.task.publish_message(
+        task.publish_message(
             f"processing {size} events in {n_chunks} sub-chunks",
         )
         for i_chk, arrays_chk in enumerate(

@@ -7,8 +7,9 @@ Producers for L1 prefiring weights.
 from __future__ import annotations
 
 from columnflow.production import Producer, producer
-from columnflow.util import maybe_import, InsertableDict, DotDict
+from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column
+from law.util import InsertableDict
 
 
 np = maybe_import("numpy")
