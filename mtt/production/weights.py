@@ -28,15 +28,15 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     if self.dataset_inst.is_mc:
         # compute electron weights
-        electron_mask = (events.Electron.pt >= 35)
+        electron_mask = (events.Electron["pt"] >= 35)
         events = self[electron_weights](events, electron_mask=electron_mask, **kwargs)
 
         # compute muon weights
-        muon_mask = (events.Muon.pt >= 30) & (abs(events.Muon.eta) < 2.4)
+        muon_mask = (events.Muon["pt"] >= 30) & (abs(events.Muon["eta"]) < 2.4)
         events = self[muon_weights](events, muon_mask=muon_mask, **kwargs)
 
         # compute btag weights
-        jet_mask = (events.Jet.pt >= 100) & (abs(events.Jet.eta) < 2.5)
+        jet_mask = (events.Jet["pt"] >= 100) & (abs(events.Jet["eta"]) < 2.5)
         events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
 
         # FIXME: not all weights are available for run 3
