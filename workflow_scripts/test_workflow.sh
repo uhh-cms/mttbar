@@ -4,7 +4,7 @@
 datasets=(tt_sl_powheg st_tchannel_t_4f_powheg dy_m4to50_ht800to1500_madgraph ww_pythia w_lnu_mlnu0to120_ht800to1500_madgraph qcd_ht1000to1200_madgraph data_mu_c)
 datasets_mc=(tt_sl_powheg st_tchannel_t_4f_powheg dy_m4to50_ht800to1500_madgraph ww_pythia w_lnu_mlnu0to120_ht800to1500_madgraph qcd_ht1000to1200_madgraph)
 
-version=test_updates_250113
+version=test_updates_250417
 analysis=mtt.config.run3.analysis_mtt.analysis_mtt
 config=run3_mtt_2022_preEE_nano_v12_limited
 calibrator=skip_jecunc
@@ -13,93 +13,103 @@ datasets_str=$(IFS=,; echo "${datasets[*]}")
 datasets_mc_str=$(IFS=,; echo "${datasets_mc[*]}")
 
 # process datasets
-for dataset in "${datasets[@]}"; do
+# for dataset in "${datasets[@]}"; do
+for dataset in tt_sl_powheg; do
     echo "Processing dataset: $dataset"
-    law run cf.CalibrateEvents \
+    echo law run cf.CalibrateEvents \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
     --calibrator $calibrator
-    law run cf.SelectEvents \
+    echo law run cf.SelectEvents \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
-    --calibrator $calibrator
-    law run cf.ProduceColumns \
+    --calibrators $calibrator
+    echo law run cf.ProduceColumns \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
-    --calibrator $calibrator \
+    --calibrators $calibrator \
     --producer ttbar
-    law run cf.ProduceColumns \
+    echo law run cf.ProduceColumns \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
-    --calibrator $calibrator \
+    --calibrators $calibrator \
     --producer features
     # don't run weights for data
     if [[ $dataset == data* ]]; then
         continue
     fi
-    law run cf.ProduceColumns \
+    echo law run cf.ProduceColumns \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
-    --calibrator $calibrator \
+    --calibrators $calibrator \
     --producer weights
 done
 
-# plot cutflow of mc samples
-# law run cf.PlotCutflow \
-#     --workers 5 \
-#     --shape-norm \
-#     --yscale log \
-#     --processes tt,st,dy,w_lnu,qcd \
-#     --process-settings tt,unstack:st,unstack:dy,unstack:w_lnu,unstack:qcd,unstack \
-#     --categories 1m,1e \
-#     --version $version \
-#     --variable mc_weight \
-#     --config $config \
-#     --analysis $analysis \
-#     --file-type png,pdf \
-#     --datasets $datasets_mc_str \
-#     --remove-output 0,a,y
+# plot cutflow of mc samples  # FIXME not working
+echo law run cf.PlotCutflow \
+    --workers 1 \
+    --shape-norm \
+    --yscale log \
+    --processes tt \
+    --process-settings tt,unstack:st,unstack:dy,unstack:w_lnu,unstack:qcd,unstack \
+    --categories 1m,1e \
+    --version $version \
+    --variable mc_weight \
+    --config $config \
+    --analysis $analysis \
+    --file-type png,pdf \
+    --datasets tt_sl_powheg \
+    --remove-output 0,a,y
+
+
+    # --processes tt,st,dy,w_lnu,qcd \
+    # --datasets $datasets_mc_str \
 
 # create yield table of samples
-# law run cf.CreateYieldTable \
-#     --version $version \
-#     --analysis $analysis \
-#     --config $config \
-#     --categories 1m,1e \
+echo law run cf.CreateYieldTable \
+    --version $version \
+    --analysis $analysis \
+    --config $config \
+    --categories 1m,1e \
+    --producers ttbar,features,weights \
+    --calibrator $calibrator \
+    --table-format simple \
+    --workers 1 \
+    --workflow local \
+    --datasets tt_sl_powheg
+    # --print-status 4,1
+    # --remove-output 0,a,y
+
+
 #     --datasets $datasets_str \
-#     --producers ttbar,features,weights \
-#     --calibrator $calibrator \
-#     --table-format simple \
-#     --workers 8 \
-#     --workflow htcondor \
-#     --remove-output 0,a,y
 
 # plot pt of muon and electron in 1e and 1m - normalized
-# law run cf.PlotVariables1D \
-#     --version $version \
-#     --analysis $analysis \
-#     --config $config \
-#     --producers ttbar,features,weights \
-#     --datasets $datasets_str \
-#     --categories 1m,1e \
-#     --variables electron_pt,muon_pt \
-#     --file-types pdf,png \
-#     --yscale log \
-#     --remove-output 0,a,y \
-#     --shape-norm \
-#     --plot-suffix norm \
-#     --workers 8 \
-#     --workflow local
+law run cf.PlotVariables1D \
+    --version $version \
+    --analysis $analysis \
+    --config $config \
+    --producers add_prod_cats,features,weights \
+    --datasets $datasets_str \
+    --categories 1m__0t,1e \
+    --variables electron_pt,muon_pt \
+    --file-types pdf,png \
+    --yscale log \
+    --remove-output 0,a,y \
+    --shape-norm \
+    --plot-suffix norm \
+    --workers 10 \
+    --workflow htcondor \
+    --local-scheduler false
 
 # plot pt of muon and electron in 1e and 1m - not normalized
 # law run cf.PlotVariables1D \
@@ -141,3 +151,17 @@ done
 #     --file-types pdf,png \
 #     --yscale log \
 #     --remove-output 0,a,y
+
+# echo law run cf.PlotVariables1D \
+#     --version $version \
+#     --analysis $analysis \
+#     --config $config \
+#     --producers ttbar,features,weights \
+#     --datasets $datasets_str \
+#     --categories 1m,1e \
+#     --variables n_jet,n_muon,n_electron \
+#     --file-types pdf,png \
+#     --shape-norm \
+#     --remove-output 0,a,y \
+#     --workflow local \
+#     --workers 8
