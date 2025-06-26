@@ -36,3 +36,4 @@ data
 .law
 .setups
 workflow_scripts/*
+luigi-server*
