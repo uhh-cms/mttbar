@@ -8,13 +8,15 @@ version=test_updates_250417
 analysis=mtt.config.run3.analysis_mtt.analysis_mtt
 config=run3_mtt_2022_preEE_nano_v12_limited
 calibrator=skip_jecunc
+selector=default
+reducer=default
 
 datasets_str=$(IFS=,; echo "${datasets[*]}")
 datasets_mc_str=$(IFS=,; echo "${datasets_mc[*]}")
 
 # process datasets
-# for dataset in "${datasets[@]}"; do
-for dataset in tt_sl_powheg; do
+for dataset in "${datasets[@]}"; do
+# for dataset in $datasets_str; do
     echo "Processing dataset: $dataset"
     echo law run cf.CalibrateEvents \
     --version $version \
@@ -27,21 +29,34 @@ for dataset in tt_sl_powheg; do
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
-    --calibrators $calibrator
+    --calibrators $calibrator \
+    --selector $selector
+    echo law run cf.ReduceEvents \
+    --version $version \
+    --analysis $analysis \
+    --config $config \
+    --dataset $dataset \
+    --calibrators $calibrator \
+    --selector $selector \
+    --reducer $reducer
     echo law run cf.ProduceColumns \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
     --calibrators $calibrator \
-    --producer ttbar
+    --producer ttbar \
+    --selector $selector \
+    --reducer $reducer
     echo law run cf.ProduceColumns \
     --version $version \
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
     --calibrators $calibrator \
-    --producer features
+    --producer features \
+    --selector $selector \
+    --reducer $reducer
     # don't run weights for data
     if [[ $dataset == data* ]]; then
         continue
@@ -52,7 +67,9 @@ for dataset in tt_sl_powheg; do
     --config $config \
     --dataset $dataset \
     --calibrators $calibrator \
-    --producer weights
+    --producer weights \
+    --selector $selector \
+    --reducer $reducer
 done
 
 # plot cutflow of mc samples  # FIXME not working
@@ -107,9 +124,11 @@ law run cf.PlotVariables1D \
     --remove-output 0,a,y \
     --shape-norm \
     --plot-suffix norm \
-    --workers 10 \
-    --workflow htcondor \
-    --local-scheduler false
+    --workers 1 \
+    --workflow local \
+    --local-scheduler false \
+    --selector $selector \
+    --reducer $reducer
 
 # plot pt of muon and electron in 1e and 1m - not normalized
 # law run cf.PlotVariables1D \
