@@ -5,11 +5,22 @@ from columnflow.reduction.default import cf_default
 from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
 
+from mtt.production.gen_top import gen_parton_top
+from mtt.production.gen_v import gen_v_boson
+
 ak = maybe_import("awkward")
 
 @reducer(
-    uses={cf_default},
-    produces={cf_default},
+    uses={
+        cf_default,
+        gen_parton_top,
+        gen_v_boson,
+    },
+    produces={
+        cf_default,
+        gen_parton_top,
+        gen_v_boson,
+    },
 )
 def default(self: Reducer, events: ak.Array, selection: ak.Array, **kwargs) -> ak.Array:
     # run cf's default reduction which handles event selection and collection creation
