@@ -19,6 +19,7 @@ np = maybe_import("numpy")
 
 # custom jec calibrator that only runs nominal correction
 jec_nominal = jec.derive("jec_nominal", cls_dict={"uncertainty_sources": []})
+jer_nominal = jer.derive("jer_nominal", cls_dict={"jec_uncertainty_sources": []})
 
 
 @calibrator
@@ -31,7 +32,7 @@ def jet_energy(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     if self.dataset_inst.is_mc:
         # TODO: for testing purposes, only run jec_nominal for now
         events = self[jec_nominal](events, **kwargs)
-        events = self[jer](events, **kwargs)
+        events = self[jer_nominal](events, **kwargs)
     else:
         events = self[jec_nominal](events, **kwargs)
 
@@ -43,8 +44,8 @@ def jet_energy_init(self: Calibrator) -> None:
     # add standard jec and jer for mc, and only jec nominal for dta
     if getattr(self, "dataset_inst", None) and self.dataset_inst.is_mc:
         # TODO: for testing purposes, only run jec_nominal for now
-        self.uses |= {jec_nominal, jer}
-        self.produces |= {jec_nominal, jer}
+        self.uses |= {jec_nominal, jer_nominal}
+        self.produces |= {jec_nominal, jer_nominal}
     else:
         self.uses |= {jec_nominal}
         self.produces |= {jec_nominal}

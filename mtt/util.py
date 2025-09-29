@@ -33,3 +33,17 @@ def iter_chunks(*arrays, max_chunk_size):
         slc = slice(i_chunk * max_chunk_size, end)
 
         yield tuple(a[slc] for a in arrays)
+
+
+def print_log_msg(
+        msg: str,
+        print_msg: bool = False,
+) -> None:
+    """
+    Print a log message if `print_msg` is True.
+    """
+    if print_msg:
+        print(msg)
+    else:
+        # in case of no printing, we could log it to a file or similar
+        pass  # Placeholder for future logging implementation

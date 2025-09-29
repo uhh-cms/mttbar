@@ -27,8 +27,10 @@ from mtt.selection.jets import met_selection
 from mtt.selection.qcd_spikes import qcd_spikes
 from mtt.selection.data_trigger_veto import data_trigger_veto
 
-from mtt.production.gen_top import gen_parton_top
-from mtt.production.gen_v import gen_v_boson
+from mtt.util import print_log_msg
+
+# from mtt.production.gen_top import gen_parton_top
+# from mtt.production.gen_v import gen_v_boson
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -44,8 +46,8 @@ ak = maybe_import("awkward")
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
         met_filters,
-        gen_parton_top,
-        gen_v_boson,
+        # gen_parton_top,
+        # gen_v_boson,
         json_filter,
     },
     produces={
@@ -57,8 +59,8 @@ ak = maybe_import("awkward")
         process_ids, increment_stats, attach_coffea_behavior,
         mc_weight,
         met_filters,
-        gen_parton_top,
-        gen_v_boson,
+        # gen_parton_top,
+        # gen_v_boson,
         json_filter,
     },
     shifts={
@@ -125,29 +127,37 @@ def default(
 
     for step, sel in results.steps.items():
         n_sel = ak.sum(sel, axis=-1)
-        print(f"{step}: {n_sel}")
+        print_log_msg(f"{step}: {n_sel}", print_msg=True)
 
     n_sel = ak.sum(event_sel, axis=-1)
-    print(f"__all__: {n_sel}")
+    print_log_msg(f"__all__: {n_sel}", print_msg=True)
 
-    # produce features relevant for selection and event weights
-    if self.dataset_inst.has_tag("is_sm_ttbar"):
-        events = self[gen_parton_top](events, **kwargs)
+    # # produce features relevant for selection and event weights
+    # if self.dataset_inst.has_tag("is_sm_ttbar"):
+    #     # TODO: add gen-level features at reduction step
+    #     print_log_msg("Storing gen-level features for SM ttbar")
+    #     events = self[gen_parton_top](events, **kwargs)
 
-    if self.dataset_inst.has_tag("is_v_jets"):
-        events = self[gen_v_boson](events, **kwargs)
+    # if self.dataset_inst.has_tag("is_v_jets"):
+    #     # TODO: add gen-level features at reduction step
+    #     print_log_msg("Generating gen-level features for V+jets")
+    #     events = self[gen_v_boson](events, **kwargs)
 
     # add cutflow features
+    print_log_msg("Storing cutflow features", print_msg=False)
     events = self[cutflow_features](events, results=results, **kwargs)
 
     # build categories
+    print_log_msg("Building categories", print_msg=False)
     events = self[category_ids](events, results=results, **kwargs)
 
     # create process ids
+    print_log_msg("Creating process ids", print_msg=False)
     events = self[process_ids](events, **kwargs)
 
     # add mc weights (needed for cutflow plots)
     if self.dataset_inst.is_mc:
+        print_log_msg("Adding MC weights", print_msg=False)
         events = self[mc_weight](events, **kwargs)
 
     # increment stats
@@ -182,6 +192,9 @@ def default(
                 "mask_fn": (lambda v: events.process_id == v),
             },
         }
+
+    # increment stats
+    print_log_msg("Incrementing stats", print_msg=False)
     events, results = self[increment_stats](
         events,
         results,

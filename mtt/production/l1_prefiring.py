@@ -13,8 +13,9 @@ from functools import reduce
 
 from columnflow.production import Producer, producer
 from columnflow.production.util import attach_coffea_behavior
-from columnflow.util import maybe_import, InsertableDict, DotDict
+from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column, flat_np_view, layout_ak_array
+from law.util import InsertableDict
 
 
 np = maybe_import("numpy")

@@ -132,8 +132,8 @@ def add_config(
     # errors taken over from top sf analysis, might work in this analysis
     dataset_names = [
         # DY 2022 v12 preEE datasets
-        # "dy_m4to50_ht40to70_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        # "dy_m4to50_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        "dy_m4to50_ht40to70_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        "dy_m4to50_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
         "dy_m4to50_ht100to400_madgraph",
         "dy_m4to50_ht400to800_madgraph",
         "dy_m4to50_ht800to1500_madgraph",
@@ -148,7 +148,7 @@ def add_config(
         "w_lnu_mlnu0to120_ht100to400_madgraph",
         "w_lnu_mlnu0to120_ht400to800_madgraph",
         "w_lnu_mlnu0to120_ht800to1500_madgraph",
-        # "w_lnu_mlnu0to120_ht1500to2500_madgraph",
+        "w_lnu_mlnu0to120_ht1500to2500_madgraph",
         "w_lnu_mlnu0to120_ht2500toinf_madgraph",
         # Diboson
         "ww_pythia",
@@ -168,11 +168,11 @@ def add_config(
         "st_twchannel_t_fh_powheg",
         "st_twchannel_tbar_fh_powheg",
         # QCD 2022 v12 preEE datasets
-        # "qcd_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        # "qcd_ht100to200_madgraph",  # FIXME no xs for 13.6 in https://xsdb-temp.app.cern.ch/xsdb/?columns=67108863&currentPage=0&pageSize=10&searchQuery=DAS%3DQCD-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8  # noqa
-        # "qcd_ht200to400_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        # "qcd_ht400to600_madgraph",  # FIXME AssertionError in preEE (full stat.)
-        # "qcd_ht600to800_madgraph",
+        "qcd_ht70to100_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        "qcd_ht100to200_madgraph",  # FIXME no xs for 13.6 in https://xsdb-temp.app.cern.ch/xsdb/?columns=67108863&currentPage=0&pageSize=10&searchQuery=DAS%3DQCD-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8  # noqa
+        "qcd_ht200to400_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        "qcd_ht400to600_madgraph",  # FIXME AssertionError in preEE (full stat.)
+        "qcd_ht600to800_madgraph",
         "qcd_ht800to1000_madgraph",
         "qcd_ht1000to1200_madgraph",
         "qcd_ht1200to1500_madgraph",
@@ -644,8 +644,10 @@ def add_config(
     # default calibrator, selector, producer, ml model and inference model
     cfg.x.default_calibrator = "skip_jecunc"
     cfg.x.default_selector = "default"
+    cfg.x.default_reducer = "default"
     cfg.x.default_producer = "default"
     cfg.x.default_weight_producer = "all_weights"
+    cfg.x.default_hist_producer = "cf_default"
     cfg.x.default_ml_model = None
     cfg.x.default_inference_model = "simple"
     cfg.x.default_categories = ["incl", "1e", "1m"]
@@ -1362,7 +1364,7 @@ def add_config(
             "Muon.pfRelIso04_all",
             # electrons
             "Electron.pt", "Electron.eta", "Electron.phi", "Electron.mass",
-            "VetoElectron.pt", "VetoElectron.eta", "VetoElectron.phi", "VetoElecton.mass",
+            "VetoElectron.pt", "VetoElectron.eta", "VetoElectron.phi", "VetoElectron.mass",
             "Electron.deltaEtaSC",
             "Electron.pfRelIso03_all",
 

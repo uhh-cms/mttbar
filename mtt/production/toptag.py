@@ -7,8 +7,9 @@ Column producers related to top-tagged jets.
 from __future__ import annotations
 
 from columnflow.production import Producer, producer
-from columnflow.util import maybe_import, InsertableDict
+from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column, flat_np_view, layout_ak_array
+from law.util import InsertableDict
 
 
 ak = maybe_import("awkward")

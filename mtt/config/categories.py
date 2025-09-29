@@ -37,7 +37,7 @@ parent category.
 import order as od
 
 from columnflow.ml import MLModel
-from columnflow.config_util import create_category_combinations
+from columnflow.config_util import create_category_combinations, CategoryGroup
 
 from mtt.ml.categories import register_ml_selectors
 
@@ -107,14 +107,8 @@ def add_categories_selection(config: od.Config) -> None:
     # -- combined categories
 
     category_groups = {
-        "lepton": [
-            config.get_category(name)
-            for name in ["1e", "1m"]
-        ],
-        "n_top_tags": [
-            config.get_category(name)
-            for name in ["0t", "1t"]
-        ],
+        "lepton": CategoryGroup(["1e", "1m"], is_complete=True, has_overlap=False),
+        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
     }
 
     create_category_combinations(config, category_groups, name_fn, kwargs_fn)
@@ -172,22 +166,14 @@ def add_categories_production(config: od.Config) -> None:
     # -- combined categories
 
     category_groups = {
-        "lepton": [
-            config.get_category(name)
-            for name in ["1e", "1m"]
-        ],
-        "n_top_tags": [
-            config.get_category(name)
-            for name in ["0t", "1t"]
-        ],
-        "chi2": [
-            config.get_category(name)
-            for name in ["chi2pass", "chi2fail"]
-        ],
-        "cos_theta_star": [
-            config.get_category(name)
-            for name in ["acts_0_5", "acts_5_7", "acts_7_9", "acts_9_1"]
-        ],
+        "lepton": CategoryGroup(["1e", "1m"], is_complete=True, has_overlap=False),
+        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
+        "chi2": CategoryGroup(["chi2pass", "chi2fail"], is_complete=True, has_overlap=False),
+        "cos_theta_star": CategoryGroup(
+            ["acts_0_5", "acts_5_7", "acts_7_9", "acts_9_1"],
+            is_complete=True,
+            has_overlap=False,
+        ),
     }
 
     create_category_combinations(config, category_groups, name_fn, kwargs_fn)
@@ -214,28 +200,6 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
             label=f"dnn_{proc}",
         )
         dnn_categories.append(cat)
-
-    # -- combined categories
-
-    category_groups = {
-        "lepton": [
-            config.get_category(name)
-            for name in ["1e", "1m"]
-        ],
-        "n_top_tags": [
-            config.get_category(name)
-            for name in ["0t", "1t"]
-        ],
-        "chi2": [
-            config.get_category(name)
-            for name in ["chi2pass", "chi2fail"]
-        ],
-        "cos_theta_star": [
-            config.get_category(name)
-            for name in ["acts_0_5", "acts_5_7", "acts_7_9", "acts_9_1"]
-        ],
-        "dnn": dnn_categories,
-    }
 
     # fixed numbering scheme for ML categories
     def kwargs_fn_dnn(categories: dict[str, od.Category]):
@@ -279,6 +243,20 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
                 cat.label for cat in categories.values()
             ),
         }
+    
+    # -- combined categories
+
+    category_groups = {
+        "lepton": CategoryGroup(["1e", "1m"], is_complete=True, has_overlap=False),
+        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
+        "chi2": CategoryGroup(["chi2pass", "chi2fail"], is_complete=True, has_overlap=False),
+        "cos_theta_star": CategoryGroup(
+            ["acts_0_5", "acts_5_7", "acts_7_9", "acts_9_1"],
+            is_complete=True,
+            has_overlap=False,
+        ),
+        "dnn": CategoryGroup(dnn_categories, is_complete=True, has_overlap=False),
+    }
 
     create_category_combinations(
         config,
