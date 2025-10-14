@@ -8,6 +8,7 @@ import itertools
 from functools import partial
 
 from columnflow.util import maybe_import
+from columnflow.production.util import _lv_base
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -155,7 +156,7 @@ def ak_arg_grouped_combinations(
 # functions for operating on lorentz vectors
 #
 
-_lv_base = partial(ak_extract_fields, behavior=coffea.nanoevents.methods.nanoaod.behavior)
+# _lv_base = partial(ak_extract_fields, behavior=coffea.nanoevents.methods.nanoaod.behavior)  # broken (14.10.25)
 
 lv_xyzt = partial(_lv_base, fields=["x", "y", "z", "t"], with_name="LorentzVector")
 lv_xyzt.__doc__ = """Construct a `LorentzVectorArray` from an input array."""
