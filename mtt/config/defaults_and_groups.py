@@ -266,11 +266,11 @@ def set_variables_groups(
         ],
         "new_version_test": [
             "n_jet", "n_electron", "n_muon",
-            "met_pt", "met_phi",
-            "electron_pt", "electron_phi",
-            "muon_pt", "muon_phi",
-            "jet1_pt", "jet1_phi",
-            "fatjet1_pt", "fatjet1_phi",
+            "puppi_met_pt", "puppi_met_phi",
+            "electron_pt", "electron_phi", "electron_eta",
+            "muon_pt", "muon_phi", "muon_eta",
+            "jet1_pt", "jet1_phi", "jet1_eta",
+            "fatjet1_pt", "fatjet1_phi", "fatjet1_eta",
             "chi2_lt100",
             "top_had_mass",
             "top_lep_mass",
@@ -321,14 +321,15 @@ def set_selector_steps(
     run = config.campaign.x.run
     tag = config.x.cpn_tag
 
-    base_steps = DotDict.wrap({
-        "default": ["Lepton", "MET", "Jet", "BJet", "JetLepton2DCut", "AllHadronicVeto", "DileptonVeto", "METFilters"],
-    })
-    base_steps_labels = DotDict.wrap({
+    base_steps = {
+        "default": ["METFilters", "DiLeptonVeto", "AllHadronicVeto", "JetLepton2DCut", "BJet", "Jet", "MET", "Lepton"],
+    }
+    base_steps_labels = {
         "JetLepton2DCut": "2D cut",
         "AllHadronicVeto": r"all-hadr. veto",
         "DileptonVeto": r"dilep. veto",
-    })
+        "jet_veto_map": "JetVetoMap",
+    }
 
     overrides = {
         # set custom selector steps for specific runs and tags if needed
@@ -341,5 +342,5 @@ def set_selector_steps(
     merged_steps = {**base_steps, **override}
     merged_steps_labels = {**base_steps_labels, **override_labels}
 
-    config.x.selector_steps = DotDict.wrap(merged_steps)
+    config.x.selector_step_groups = DotDict.wrap(merged_steps)
     config.x.selector_steps_labels = DotDict.wrap(merged_steps_labels)

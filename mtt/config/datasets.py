@@ -124,6 +124,14 @@ def dy_datasets(
                 "dy_m50to120_ht100to400_madgraph",
                 "dy_m50to120_ht400to800_madgraph",
             ],
+            "2024": [
+                # no HT-binned samples available yet, but in production chain -> to be checked!
+                # https://cms-pdmv-prod.web.cern.ch/grasp/samples?campaign=RunIII2024Summer24*GS&dataset=DYto2*-4J # noqa
+                # using LO samples binned in lepton flavor
+                "dy_4j_mumu_m50toinf_madgraph",
+                "dy_4j_ee_m50toinf_madgraph",
+                # "dy_4j_tautau_m50toinf_madgraph",
+            ]
         }
     }
 
@@ -184,6 +192,26 @@ def w_lnu_datasets(
                 "w_lnu_mlnu0to120_ht1500to2500_madgraph",
                 "w_lnu_mlnu0to120_ht2500toinf_madgraph",
             ],
+            "2024": [
+                # no HT-binned samples available yet, but in production chain -> to be checked!
+                # https://cms-pdmv-prod.web.cern.ch/grasp/samples?campaign=RunIII2024Summer24*GS&dataset=WtoLNu-4Jets_Bin-HT  # noqa
+                # # NLO samples: have very little stats in our phasespace -> use LO samples
+                # "w_lnu_1j_pt40to100_amcatnlo",
+                # "w_lnu_1j_pt100to200_amcatnlo",
+                # "w_lnu_1j_pt200to400_amcatnlo",
+                # "w_lnu_1j_pt400to600_amcatnlo",
+                # "w_lnu_1j_pt600toinf_amcatnlo",
+                # "w_lnu_2j_pt40to100_amcatnlo",
+                # "w_lnu_2j_pt100to200_amcatnlo",
+                # "w_lnu_2j_pt200to400_amcatnlo",
+                # "w_lnu_2j_pt400to600_amcatnlo",
+                # "w_lnu_2j_pt600toinf_amcatnlo",
+                # LO samples binned in jet multiplicity only
+                "w_lnu_1j_madgraph",
+                "w_lnu_2j_madgraph",
+                "w_lnu_3j_madgraph",
+                "w_lnu_4j_madgraph",
+            ]
         }
     }
     try:
@@ -359,7 +387,7 @@ def st_datasets(
                 "st_twchannel_t_sl_powheg",
                 "st_twchannel_tbar_sl_powheg",
                 "st_twchannel_t_dl_powheg",
-                "st_twchannel_tbar_dl_powheg",
+                # "st_twchannel_tbar_dl_powheg",
                 "st_twchannel_t_fh_powheg",
                 "st_twchannel_tbar_fh_powheg",
             ],
@@ -431,6 +459,19 @@ def qcd_datasets(
                 "qcd_ht1500to2000_madgraph",
                 "qcd_ht2000toinf_madgraph",
             ],
+            "2024": [
+                # "qcd_ht40to70_madgraph",  # FIXME empty after selection (lim. config)
+                # "qcd_ht70to100_madgraph",  # FIXME empty after selection (lim. config)
+                # "qcd_ht100to200_madgraph",  # FIXME empty after selection (lim. config)
+                "qcd_ht200to400_madgraph",
+                "qcd_ht400to600_madgraph",
+                "qcd_ht600to800_madgraph",
+                "qcd_ht800to1000_madgraph",
+                "qcd_ht1000to1200_madgraph",
+                "qcd_ht1200to1500_madgraph",
+                "qcd_ht1500to2000_madgraph",
+                "qcd_ht2000toinf_madgraph",
+            ]
         },
     }
     try:
@@ -498,8 +539,41 @@ def zprime_datasets(
             "2017": zprime_datasets,
         },
         3: {
-            "2022preEE": zprime_datasets,
-            "2022postEE": zprime_datasets,
+            # FIXME add datasets when available
+            "2022preEE": [],
+            "2022postEE": [],
+            "2023preBPix": [
+                "zprime_tt_m500_w5_madgraph",
+                "zprime_tt_m500_w50_madgraph",
+                "zprime_tt_m500_w150_madgraph",
+                "zprime_tt_m1000_w10_madgraph",
+                "zprime_tt_m1000_w100_madgraph",
+                "zprime_tt_m1000_w300_madgraph",
+                "zprime_tt_m1600_w16_madgraph",
+                "zprime_tt_m1800_w180_madgraph",
+                "zprime_tt_m5000_w50_madgraph",
+                "zprime_tt_m5000_w500_madgraph",
+                "zprime_tt_m5000_w1500_madgraph",
+                "zprime_tt_m6000_w600_madgraph",
+                "zprime_tt_m8000_w2400_madgraph",
+            ],
+            "2023postBPix": [
+                "zprime_tt_m500_w5_madgraph",
+                "zprime_tt_m500_w50_madgraph",
+                "zprime_tt_m500_w150_madgraph",
+                "zprime_tt_m1000_w10_madgraph",
+                "zprime_tt_m1000_w100_madgraph",
+                "zprime_tt_m1000_w300_madgraph",
+                "zprime_tt_m5000_w50_madgraph",
+                "zprime_tt_m5000_w500_madgraph",
+                "zprime_tt_m5000_w1500_madgraph",
+                "zprime_tt_m7000_w2100_madgraph",
+            ],
+            "2024": [
+                "zprime_tt_m500_w5_madgraph",
+                "zprime_tt_m5000_w1500_madgraph",
+                "zprime_tt_m7000_w70_madgraph",
+            ],
         }
     }
 

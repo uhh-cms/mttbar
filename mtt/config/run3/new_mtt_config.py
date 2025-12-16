@@ -25,14 +25,14 @@ from mtt.config.variables import add_variables
 
 from mtt.config.datasets import (
     data_datasets,
-    # dy_datasets,
-    # w_lnu_datasets,
-    # qcd_datasets,
+    dy_datasets,
+    w_lnu_datasets,
+    qcd_datasets,
     tt_datasets,
     st_datasets,
     vv_datasets,
-    # Run 3 signal samples not yet in cmsdb
-    # zprime_datasets,
+    # Run 3 signal samples
+    zprime_datasets,
     # hscalar_datasets,
     # hpseudo_datasets,
     # rsgluon_datasets,
@@ -48,11 +48,13 @@ from mtt.config.defaults_and_groups import (
     set_selector_steps,
 )
 from mtt.config.corrections import (
-    vjets_reweighting,
-    jerc,
-    btag_sf,
-    toptag_sf,
-    lepton_sf,
+    vjets_reweighting_cfg,
+    jerc_cfg,
+    btag_sf_cfg,
+    toptag_sf_cfg,
+    lepton_sf_cfg,
+    met_phi_cfg,
+    jet_id_cfg,
 )
 
 import order as od
@@ -101,6 +103,7 @@ def add_new_config(
     # add tags to config
     cfg.x.run = 3
     cfg.x.cpn_tag = f"{year}{corr_postfix}"
+    cfg.x.year = year
 
     # get all root processes
     procs = get_root_processes_from_campaign(campaign)
@@ -115,21 +118,41 @@ def add_new_config(
     cfg.add_process(procs.n.st)
     st_datasets(cfg, limit_dataset_files, log=False)
 
-    # cfg.add_process(procs.n.w_lnu)
-    # w_lnu_datasets(cfg, limit_dataset_files, log=False)
-
-    # cfg.add_process(procs.n.dy)
-    # dy_datasets(cfg, limit_dataset_files, log=False)
-
-    # cfg.add_process(procs.n.qcd)
-    # qcd_datasets(cfg, limit_dataset_files, log=False)
-
     cfg.add_process(procs.n.vv)
     vv_datasets(cfg, limit_dataset_files, log=False)
 
     # # ttbar signal processes
-    # cfg.add_process(procs.n.zprime_tt)
-    # zprime_datasets(cfg, log=True)
+    if year in [2023, 2024]:
+        cfg.add_process(procs.n.zprime_tt)
+        zprime_datasets(cfg, limit_dataset_files, log=False)
+        process_insts = [
+            process_inst
+            for process_inst, _, _ in cfg.walk_processes()
+            if process_inst.name.startswith("zprime_tt")
+        ]
+        for process_inst in process_insts:
+            if not process_inst.xsecs.get(13.6, None):
+                # print(f"Warning: cross section for process {process_inst.name} at 13.6 TeV is not set.")
+                # print("Setting it to 0.1 pb.")
+                process_inst.xsecs[13.6] = Number(0.1)
+
+    if year == 2024:
+        cfg.add_process(procs.n.dy)
+        dy_datasets(cfg, limit_dataset_files, log=False)
+
+        cfg.add_process(procs.n.qcd)
+        qcd_datasets(cfg, limit_dataset_files, log=False)
+
+        cfg.add_process(procs.n.w_lnu)
+        w_lnu_datasets(cfg, limit_dataset_files, log=False)
+
+        cfg.add_process(procs.n.w_lnu_1j)
+
+        cfg.add_process(procs.n.w_lnu_2j)
+
+        cfg.add_process(procs.n.w_lnu_3j)
+
+        cfg.add_process(procs.n.w_lnu_4j)
 
     # cfg.add_process(procs.n.hscalar_tt)
     # hscalar_datasets(cfg, log=True)
@@ -141,23 +164,23 @@ def add_new_config(
     # rsgluon_datasets(cfg, log=True)
 
     # set flags for signal processes (used when plotting)
-    # for process, _, _ in cfg.walk_processes():
-    #     if any(
-    #         process.name.startswith(prefix)
-    #         for prefix in [
-    #             "zprime_tt",
-    #             "hpseudo_tt",
-    #             "hscalar_tt",
-    #             "rsgluon_tt",
-    #         ]
-    #     ):
-    #         process.color1 = "#aaaaaa"
-    #         process.color2 = "#000000"
-    #         process.x.is_mtt_signal = True
-    #         process.unstack = True
-    #         process.hide_errors = True
-    #     else:
-    #         process.x.is_mtt_signal = False
+    for process, _, _ in cfg.walk_processes():
+        if any(
+            process.name.startswith(prefix)
+            for prefix in [
+                "zprime_tt",
+                "hpseudo_tt",
+                "hscalar_tt",
+                "rsgluon_tt",
+            ]
+        ):
+            process.color1 = "#aaaaaa"
+            process.color2 = "#000000"
+            process.x.is_mtt_signal = True
+            process.unstack = True
+            process.hide_errors = True
+        else:
+            process.x.is_mtt_signal = False
 
     # set color of main processes
     colors = {
@@ -165,47 +188,53 @@ def add_new_config(
         "tt": "#E04F21",  # red
         "qcd": "#5E8FFC",  # blue
         "w_lnu": "#82FF28",  # green
+        "w_lnu_1j": "#006400",  # dark green
+        "w_lnu_2j": "#98FB98",  # light green
+        "w_lnu_3j": "#00FF7F",  # spring green
+        "w_lnu_4j": "#7CFC00",  # lawn green
         "higgs": "#984ea3",  # purple
         "st": "#3E00FB",  # dark purple
         "dy": "#FBFF36",  # yellow
         "vv": "#B900FC",  # pink
         "other": "#999999",  # grey
-        "zprime_m_500_w_???": "#000000",  # black
-        "zprime_m_1000_w_???": "#CCCCCC",  # light gray
-        "zprime_m_3000_w_???": "#666666",  # dark gray
+        "zprime_m500_w5": "#000000",  # black
+        "zprime_m1000_w???": "#CCCCCC",  # light gray
+        "zprime_m3000_w???": "#666666",  # dark gray
     }
 
-    # # process settings groups to quickly define settings for ProcessPlots
-    # cfg.x.process_settings_groups = {
-    #     "default": [
-    #         ["zprime_tt_m400_w40", "scale=2000", "unstack"],
-    #     ],
-    #     "unstack_all": [
-    #         [proc, "unstack"] for proc in cfg.processes
-    #     ],
-    # }
+    # process settings groups to quickly define settings for ProcessPlots
+    if year == 2024:
+        cfg.x.process_settings_groups = {
+            "default": [
+                ["zprime_tt_m400_w40", "scale=2000", "unstack"],
+            ],
+            "unstack_all": [
+                [proc, "unstack"] for proc in cfg.processes
+            ],
+        }
 
-    # zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
-    # zprime_mass_labels = {
-    #     "zprime_tt_m500_w50": "$m$ = 0.5 TeV",
-    #     "zprime_tt_m1000_w100": "$m$ = 1 TeV",
-    #     "zprime_tt_m3000_w300": "$m$ = 3 TeV",
-    # }
+        # zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
+        # zprime_mass_labels = {
+        #     # "zprime_tt_m500_w50": "$m$ = 0.5 TeV",
+        #     # "zprime_tt_m1000_w100": "$m$ = 1 TeV",
+        #     # "zprime_tt_m3000_w300": "$m$ = 3 TeV",
+        #     "zprime_tt_m7000_w70": "$m$ = 7 TeV",
+        # }
 
-    # for proc, zprime_mass_label in zprime_mass_labels.items():
-    #     proc_inst = cfg.get_process(proc)
-    #     proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
+        # for proc, zprime_mass_label in zprime_mass_labels.items():
+        #     proc_inst = cfg.get_process(proc)
+        #     proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
 
-    for proc in cfg.processes:
-        cfg.get_process(proc).color1 = colors.get(proc.name, "#aaaaaa")
-        cfg.get_process(proc).color2 = colors.get(proc.name, "#000000")
+        for proc in cfg.processes:
+            cfg.get_process(proc).color1 = colors.get(proc.name, "#aaaaaa")
+            cfg.get_process(proc).color2 = colors.get(proc.name, "#000000")
 
     # verify that the root processes of each dataset (or one of their
     # ancestor processes) are registered in the config
     verify_config_processes(cfg, warn=True)
 
     # add tagger working points
-    cfg.x.btag_wp = btag_params(cfg)
+    cfg.x.btag_wp_names = btag_params(cfg)
     cfg.x.toptag_wp = toptag_params(cfg)
 
     #
@@ -276,18 +305,27 @@ def add_new_config(
                 "mu": [50, 50],
             },
             "btagger": {
-                "column": "btagDeepFlavB" if year != 2024 else "btagUPartAK4B",
-                "wp": cfg.x.btag_wp.deepjet.medium if year != 2024 else cfg.x.btag_wp.UPartAK4.medium,
+                "column": "btagDeepFlavB" if year != 2024 else "btagUParTAK4B",
+                # "column": "btagDeepFlavB" if year != 2024 else "btagPNetB",
+                "wp": cfg.x.btag_wp_names.deepjet.medium if year != 2024 else cfg.x.btag_wp_names.UParTAK4.medium,
+                # "wp": cfg.x.btag_wp.deepjet.medium if year != 2024 else cfg.x.btag_wp.particle_net.medium,
             },
         },
         "ak8": {
             "column": "FatJet",
             "max_abseta": 2.5,
-            "min_pt": 400,
+            "min_pt": {
+                "baseline": 200,
+                "toptagged": 400,
+            },
             "msoftdrop": [105, 210],
             "toptagger": {
-                "column": "particleNetWithMass_TvsQCD",
-                "wp": cfg.x.toptag_wp.particle_net.tight,
+                "column": ["particleNetWithMass_TvsQCD"] if year != 2024 else [
+                    "globalParT3_TopbWqq",
+                    "globalParT3_TopbWq",
+                    "globalParT3_QCD",
+                ],
+                "wp": cfg.x.toptag_wp.particle_net.tight if year != 2024 else cfg.x.toptag_wp.GloParTv3.tight,
             },
             "delta_r_lep": 0.8,
         },
@@ -295,7 +333,8 @@ def add_new_config(
 
     # MET selection parameters
     cfg.x.met_selection = DotDict.wrap({
-        "column": "MET",
+        "column": "PuppiMET",
+        "raw_column": "RawPuppiMET",
         "min_pt": {
             "e": 60,
             "mu": 70,
@@ -353,6 +392,7 @@ def add_new_config(
         "Flag.EcalDeadCellTriggerPrimitiveFilter",
         "Flag.BadPFMuonFilter",
         "Flag.BadPFMuonDzFilter",
+        "Flag.hfNoisyHitsFilter",
         "Flag.eeBadScFilter",
         "Flag.ecalBadCalibFilter",
     }
@@ -363,19 +403,6 @@ def add_new_config(
 
     # lumi values in inverse pb
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVRun3Analysis
-    # if year == 2022:
-    #     if campaign.x.EE == "pre":
-    #         cfg.x.luminosity = Number(7971, {
-    #             "lumi_13p6TeV_2022": 0.01j,
-    #             # "lumi_13p6TeV_correlated": 0.006j,
-    #         })
-    #     elif campaign.x.EE == "post":
-    #         cfg.x.luminosity = Number(26337, {
-    #             "lumi_13p6TeV_2022": 0.01j,
-    #             # "lumi_13p6TeV_correlated": 0.006j,
-    #         })
-    # elif year == 2023:
-    # else:
     if year == 2022 and campaign.x.EE == "pre":
         cfg.x.luminosity = Number(7_980.4541, {
             "lumi_13p6TeV_2022": 0.014j,
@@ -396,6 +423,10 @@ def add_new_config(
         cfg.x.luminosity = Number(109_080.0, {  # TODO: update number
             "lumi_13p6TeV_2024": 0.013j,
         })
+        # processed lumi for limited configs
+        # cfg.x.luminosity = Number(995.223558512, {
+        #     "lumi_13p6TeV_2024": 0.013j,
+        # })
     else:
         raise NotImplementedError(f"Luminosity for year {year} is not defined.")
 
@@ -563,27 +594,49 @@ def add_new_config(
         add_shift_aliases(cfg, "vjets", {"vjets_weight": "vjets_weight_{direction}"})
 
         # b-tagging shifts
-        btag_uncs = [
-            "hf", "lf",
-            f"hfstats1_{year}", f"hfstats2_{year}",
-            f"lfstats1_{year}", f"lfstats2_{year}",
-            "cferr1", "cferr2",
-        ]
-        for i, unc in enumerate(btag_uncs):
-            cfg.add_shift(name=f"btag_{unc}_up", id=501 + 2 * i, type="shape")
-            cfg.add_shift(name=f"btag_{unc}_down", id=502 + 2 * i, type="shape")
-            add_shift_aliases(
-                cfg,
-                f"btag_{unc}",
-                {
-                    # taken from
-                    # https://github.com/uhh-cms/hh2bbww/blob/c6d4ee87a5c970660497e52aed6b7ebe71125d20/hbw/config/config_run2.py#L421
-                    "normalized_btag_weight": f"normalized_btag_weight_{unc}_" + "{direction}",
-                    "normalized_njet_btag_weight": f"normalized_njet_btag_weight_{unc}_" + "{direction}",
-                    "btag_weight": f"btag_weight_{unc}_" + "{direction}",
-                    "njet_btag_weight": f"njet_btag_weight_{unc}_" + "{direction}",
-                },
-            )
+        if year != 2024:
+            btag_uncs = [
+                "hf", "lf",
+                "hfstats1", "hfstats2",
+                "lfstats1", "lfstats2",
+                "cferr1", "cferr2",
+            ]
+            for i, unc in enumerate(btag_uncs):
+                cfg.add_shift(name=f"btag_{unc}_up", id=501 + 2 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_down", id=502 + 2 * i, type="shape")
+                add_shift_aliases(
+                    cfg,
+                    f"btag_{unc}",
+                    {
+                        # PREVIOUS IMPLEMENTATION (still used in some configs?)
+                        # taken from
+                        # https://github.com/uhh-cms/hh2bbww/blob/c6d4ee87a5c970660497e52aed6b7ebe71125d20/hbw/config/config_run2.py#L421
+                        "normalized_btag_weight": f"normalized_btag_weight_{unc}_" + "{direction}",
+                        "normalized_njet_btag_weight": f"normalized_njet_btag_weight_{unc}_" + "{direction}",
+                        "btag_weight": f"btag_weight_{unc}_" + "{direction}",
+                        "njet_btag_weight": f"njet_btag_weight_{unc}_" + "{direction}",
+                    },
+                )
+        else:
+            # https://cms-analysis-corrections.docs.cern.ch/corrections_era/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/BTV/2025-08-19/#btagging_preliminaryjsongz  # noqa
+            btag_uncs = [
+                "fsrdef", "isrdef",
+                "hdamp", "jer", "jes",
+                "mass", "statistic",
+                "tune",
+            ]
+            for i, unc in enumerate(btag_uncs):
+                cfg.add_shift(name=f"btag_{unc}_up", id=501 + 2 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_down", id=502 + 2 * i, type="shape")
+                add_shift_aliases(
+                    cfg,
+                    f"btag_{unc}",
+                    {
+                        # UPDATED FOR 2024 USING UParTAK4B for b-tagging
+                        "normalized_btag_weight_upart": f"btagUParTAK4B_shape_weight_{unc}_" + "{direction}",
+                        "normalized_njet_btag_weight_upart": f"btagUParTAK4B_shape_weight_{unc}_" + "{direction}",
+                    },
+                )
 
         # jet energy scale (JEC) uncertainty variations
         for jec_source in cfg.x.jec.Jet.uncertainty_sources:
@@ -626,16 +679,23 @@ def add_new_config(
     # corrections
     #
 
-    cfg.x.vjets_reweighting = vjets_reweighting()
-    cfg.x.jec, cfg.x.jer = jerc(campaign, year)
+    cfg.x.vjets_reweighting = vjets_reweighting_cfg()
+    cfg.x.jec, cfg.x.jer = jerc_cfg(campaign, year)
     # add the shifts
     add_shifts(cfg)
-    cfg.x.btag_sf = btag_sf(year)
-    cfg.x.toptag_sf = toptag_sf()
-    cfg.x.electron_sf_names = lepton_sf(cfg, "electron").sf_names
-    cfg.x.muon_sf_names = lepton_sf(cfg, "muon").sf_names
-    cfg.x.lepton_id_sf_names = lepton_sf(cfg, "muon").id_sf_names
-    cfg.x.lepton_iso_sf_names = lepton_sf(cfg, "muon").iso_sf_names
+
+    cfg.x.btag_sf = btag_sf_cfg(year)
+    cfg.x.toptag_sf = toptag_sf_cfg()
+
+    cfg.x.electron_sf = lepton_sf_cfg(cfg, "electron")
+
+    cfg.x.muon_sf_names = lepton_sf_cfg(cfg, "muon")[0]
+    cfg.x.muon_id_sf_names = lepton_sf_cfg(cfg, "muon")[1]
+    cfg.x.muon_iso_sf_names = lepton_sf_cfg(cfg, "muon")[2]
+
+    cfg.x.met_phi_correction = met_phi_cfg(cfg)  # METPhiConfig object
+    cfg.x.jet_id = jet_id_cfg()["Jet"]  # JetIdConfig object
+    cfg.x.fatjet_id = jet_id_cfg()["FatJet"]  # JetIdConfig object
 
     # top pt reweighting parameters
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat?rev=31
@@ -654,16 +714,13 @@ def add_new_config(
         "normalization_weight": [],
         "pu_weight": get_shifts("minbias_xs"),
         "muon_weight": get_shifts("muon"),
+        "electron_weight": get_shifts("electron"),
         # "ISR": get_shifts("ISR"),
         # "FSR": get_shifts("FSR"),
         # TODO: add scale and PDF weights, where available
         # "scale_weight": ???,
         # "pdf_weight": ???,
     })
-
-    # optional weights
-    if not cfg.has_tag("skip_electron_weights"):
-        cfg.x.event_weights["electron_weight"] = get_shifts("electron")
 
     # event weights only present in certain datasets
     for dataset in cfg.datasets:
@@ -728,8 +785,7 @@ def add_new_config(
             vnano=15,
             era="24CDEReprocessingFGHIPrompt-Summer24",
             pog_directories={"dc": "Collisions24"},
-            # TODO: tau and lum not yet available
-            snapshot=CATSnapshot(btv="2025-08-19", dc="2025-07-25", egm="2025-08-15", jme="2025-07-17", muo="2025-08-27"),  # noqa: E501
+            snapshot=CATSnapshot(btv="2025-12-03", dc="2025-07-25", egm="2025-12-03", jme="2025-12-02", muo="2025-11-27", lum="2025-12-02"),  # noqa: E501
         ),
     }[(year, campaign.x.postfix, vnano)]
     cfg.x.cat_info = cat_info
@@ -756,38 +812,49 @@ def add_new_config(
             2024: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_BRIL.json", "v1"),  # TODO: correct?
         }[year],
     })
+
     # pileup weight corrections
     if year != 2024:  # TODO: not yet available, see https://cms-analysis-corrections.docs.cern.ch
         add_external("pu_sf", (cat_info.get_file("lum", "puWeights.json.gz"), "v1"))
+    elif year == 2024:
+        add_external("pu_sf", (cat_info.get_file("lum", "puWeights_BCDEFGHI.json.gz"), "v1"))
+
     # jet energy correction
     add_external("jet_jerc", (cat_info.get_file("jme", "jet_jerc.json.gz"), "v1"))
+
+    # fat jet energy correction
+    add_external("fat_jet_jerc", (cat_info.get_file("jme", "fat_jet_jerc.json.gz" if year != 2024 else "fatJet_jerc.json.gz"), "v1"))
+
     # jet veto map
     add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v1"))
+
     # btag scale factor
-    add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
+    if year != 2024:
+        add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
+    else:
+        # SF stored in preliminary file for 2024 for now?
+        add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging_preliminary.json.gz"), "v1"))  # noqa: E501
 
     # updated jet id
     add_external("jet_id", (cat_info.get_file("jme", "jetid.json.gz"), "v1"))
+
     # muon scale factors
     add_external("muon_sf", (cat_info.get_file("muo", "muon_Z.json.gz"), "v1"))
+
     # met phi correction
-    if year != 2024:  # TODO: not yet available
+    if year != 2024:  # TODO: not yet available for 2024
         add_external("met_phi_corr", (cat_info.get_file("jme", f"met_xyCorrections_{year}_{year}{campaign.x.postfix}.json.gz"), "v1"))  # noqa: E501
+
     # electron scale factors
-    # TODO: the postfix will be obsolete soon, see https://gitlab.cern.ch/cms-analysis-corrections/EGM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/-/issues/1 # noqa: E501
-    egm_postfix = "_v1" if year == 2024 else ""
-    add_external("electron_sf", (cat_info.get_file("egm", f"electron{egm_postfix}.json.gz"), "v1"))
+    add_external("electron_sf", (cat_info.get_file("egm", "electron.json.gz"), "v1"))
     # electron energy correction and smearing
-    add_external("electron_ss", (cat_info.get_file("egm", f"electronSS_EtDependent{egm_postfix}.json.gz"), "v1"))  # FIXME correct for us? # noqa: E501
+    add_external("electron_ss", (cat_info.get_file("egm", "electronSS_EtDependent.json.gz"), "v1"))  # FIXME correct for us? # noqa: E501
 
     # # top-tagging scale factors (TODO)
     # "toptag_sf": (f"{sources['jet']}/JMAR/???/???.json", "v1"),  # noqa
 
     # # V+jets reweighting
     # "vjets_reweighting": f"{sources['local_repo']}/data/json/vjets_reweighting.json",
-
-    # # temporary fix due to missing corrections in run 3
-    # cfg.x.external_files.pop("met_phi_corr")
 
     # if year == 2022 and campaign.x.EE == "pre":
     #     cfg.x.external_files.update(DotDict.wrap({
@@ -884,12 +951,13 @@ def add_new_config(
             "Photon.{pt,eta,phi,mass,jetIdx}",
 
             # AK4 jets
-            "{Jet,BJet,LightJet}.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour}",
+            "{Jet,BJet,LightJet,LooseJet}.{pt,eta,phi,mass,btagDeepFlavB,hadronFlavour,btagUParTAK4B}",
             "Jet.rawFactor",
 
             # AK8 jets
             "{FatJet,FatJetTopTag,FatJetTopTagDeltaRLepton}.{pt,eta,phi,mass,rawFactor}",
             "{FatJet,FatJetTopTag}.{msoftdrop,particleNetWithMass_TvsQCD,deepTagMD_TvsQCD}",
+            "FatJet.globalParT3.{TopbWqq,TopbWq,QCD}",
             "{FatJet,FatJetTopTag,FatJetTopTagDeltaRLepton}.{tau1,tau2,tau3}",
             "FatJetTopTagDeltaRLepton.msoftdrop",
             "FatJetTopTagDeltaRLepton.deepTagDeltaRLeptonMD_TvsQCD",
@@ -906,6 +974,7 @@ def add_new_config(
             "GenJetAK8.*",
 
             # missing transverse momentum
+            "PuppiMET.{pt,phi,significance,covXX,covXY,covYY}",
             "MET.{pt,phi,significance,covXX,covXY,covYY}",
 
             # number of primary vertices

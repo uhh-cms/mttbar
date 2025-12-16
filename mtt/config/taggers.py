@@ -89,11 +89,17 @@ def btag_params(
                 # },
             },
             "2024": {
-                "UPartAK4": {
+                "UParTAK4": {
                     "loose": 0.0246,
                     "medium": 0.1272,
                     "tight": 0.4648,
-                }
+                },
+                "particle_net": {
+                    # FIXME: placeholder values, need to be updated when official values are available
+                    "loose": 0.0246,
+                    "medium": 0.1272,
+                    "tight": 0.4648,
+                },
             }
         }
     }
@@ -166,6 +172,12 @@ def toptag_params(
                     "tight": 0.821,
                     "very_tight": 0.974,
                 },
+                # FIXME: placeholder values, need to be updated when official values are available
+                "GloParTv3": {
+                    "medium": 0.639,
+                    "tight": 0.821,
+                    "very_tight": 0.974,
+                }
             },
         },
     }
