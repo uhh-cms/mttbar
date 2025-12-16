@@ -5,7 +5,8 @@ Custom jet energy calibration methods that disable data uncertainties (for searc
 """
 
 from columnflow.calibration import Calibrator, calibrator
-from columnflow.calibration.cms.jets import jec, jer
+# from columnflow.calibration.cms.jets import jec, jer
+from columnflow.calibration.cms.jets import jec_ak4, jer_ak4, jec_ak8, jer_ak8
 from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import set_ak_column
@@ -18,8 +19,42 @@ np = maybe_import("numpy")
 
 
 # custom jec calibrator that only runs nominal correction
-jec_nominal = jec.derive("jec_nominal", cls_dict={"uncertainty_sources": []})
-jer_nominal = jer.derive("jer_nominal", cls_dict={"jec_uncertainty_sources": []})
+jec_ak4_nominal = jec_ak4.derive(
+    "jec_ak4_nominal",
+    cls_dict={
+        "uncertainty_sources": [],
+        "met_name": "PuppiMET",
+        "raw_met_name": "RawPuppiMET",
+    }
+)
+jer_ak4_nominal = jer_ak4.derive(
+    "jer_ak4_nominal",
+    cls_dict={
+        "jec_uncertainty_sources": [],
+        "met_name": "PuppiMET",
+        "raw_met_name": "RawPuppiMET"
+    }
+)
+
+# MET propagation disabled for AK8 jets as it's already handled by AK4 jet calibrators above
+jec_ak8_nominal = jec_ak8.derive(
+    "jec_ak8_nominal",
+    cls_dict={
+        "uncertainty_sources": [],
+        "propagate_met": False,
+        "met_name": "DO_NOT_USE",
+        "raw_met_name": "DO_NOT_USE",
+    }
+)
+jer_ak8_nominal = jer_ak8.derive(
+    "jer_ak8_nominal",
+    cls_dict={
+        "jec_uncertainty_sources": [],
+        "propagate_met": False,
+        "met_name": "DO_NOT_USE",
+        "raw_met_name": "DO_NOT_USE",
+    }
+)
 
 
 @calibrator
@@ -31,10 +66,13 @@ def jet_energy(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     """
     if self.dataset_inst.is_mc:
         # TODO: for testing purposes, only run jec_nominal for now
-        events = self[jec_nominal](events, **kwargs)
-        events = self[jer_nominal](events, **kwargs)
+        events = self[jec_ak4_nominal](events, **kwargs)
+        events = self[jer_ak4_nominal](events, **kwargs)
+        events = self[jec_ak8_nominal](events, **kwargs)
+        events = self[jer_ak8_nominal](events, **kwargs)
     else:
-        events = self[jec_nominal](events, **kwargs)
+        events = self[jec_ak4_nominal](events, **kwargs)
+        events = self[jec_ak8_nominal](events, **kwargs)
 
     return events
 
@@ -44,11 +82,11 @@ def jet_energy_init(self: Calibrator) -> None:
     # add standard jec and jer for mc, and only jec nominal for dta
     if getattr(self, "dataset_inst", None) and self.dataset_inst.is_mc:
         # TODO: for testing purposes, only run jec_nominal for now
-        self.uses |= {jec_nominal, jer_nominal}
-        self.produces |= {jec_nominal, jer_nominal}
+        self.uses |= {jec_ak4_nominal, jer_ak4_nominal, jec_ak8_nominal, jer_ak8_nominal}
+        self.produces |= {jec_ak4_nominal, jer_ak4_nominal, jec_ak8_nominal, jer_ak8_nominal}
     else:
-        self.uses |= {jec_nominal}
-        self.produces |= {jec_nominal}
+        self.uses |= {jec_ak4_nominal, jec_ak8_nominal}
+        self.produces |= {jec_ak4_nominal, jec_ak8_nominal}
 
 
 @calibrator(
