@@ -111,7 +111,7 @@ def add_categories_selection(config: od.Config) -> None:
         "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
     }
 
-    create_category_combinations(config, category_groups, name_fn, kwargs_fn)
+    create_category_combinations(config, category_groups, name_fn, kwargs_fn=kwargs_fn, parent_mode="safe")
 
 
 def add_categories_production(config: od.Config) -> None:
@@ -176,7 +176,7 @@ def add_categories_production(config: od.Config) -> None:
         ),
     }
 
-    create_category_combinations(config, category_groups, name_fn, kwargs_fn)
+    create_category_combinations(config, category_groups, name_fn, kwargs_fn=kwargs_fn, parent_mode="all")
 
 
 def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
@@ -262,6 +262,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
         config,
         category_groups,
         name_fn,
-        kwargs_fn_dnn,
+        kwargs_fn=kwargs_fn_dnn,
         skip_existing=True,
+        parent_mode="all",
     )

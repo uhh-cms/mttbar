@@ -6,6 +6,9 @@ Calibration methods.
 
 from columnflow.calibration import Calibrator, calibrator
 from columnflow.calibration.cms.jets import jets
+# TODO should we add these later?
+# from columnflow.calibration.cms.egamma import electron_scale_smear
+# from columnflow.calibration.cms.muon import muon_sr
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.util import maybe_import

@@ -20,6 +20,18 @@ from mtt.production.toptag import toptag_weights
 
 ak = maybe_import("awkward")
 
+btag_uncs = {
+    "fsrdef": "fsrdef",
+    "hdamp": "hdamp",
+    "isrdef": "isrdef",
+    "jer": "jer",
+    "jes": "jes",
+    "mass": "mass",
+    "statistic": "statistic",
+    "tune": "tune",
+}
+upart_btag_weights = btag_weights.derive("upart_btag_weights", cls_dict={"btag_uncs": btag_uncs})
+
 
 @producer
 def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
@@ -28,7 +40,10 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     if self.dataset_inst.is_mc:
         # compute electron weights
-        electron_mask = (events.Electron["pt"] >= 35)
+        if self.config_inst.x.year in [2022, 2023]:
+            electron_mask = (events.Electron["pt"] >= 35)
+        elif self.config_inst.x.year == 2024:
+            electron_mask = ((events.Electron["pt"] >= 20.0) & (events.Electron["pt"] < 1000.0))
         events = self[electron_weights](events, electron_mask=electron_mask, **kwargs)
 
         # compute muon weights
@@ -37,7 +52,10 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
         # compute btag weights
         jet_mask = (events.Jet["pt"] >= 100) & (abs(events.Jet["eta"]) < 2.5)
-        events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+        if self.config_inst.x.year in [2022, 2023]:
+            events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+        elif self.config_inst.x.year == 2024:
+            events = self[upart_btag_weights](events, jet_mask=jet_mask, **kwargs)
 
         # FIXME: not all weights are available for run 3
         if self.config_inst.x.run == 2:
@@ -63,7 +81,6 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         # compute MC weights
         events = self[mc_weight](events, **kwargs)
 
-        # compute pu weights
         events = self[pu_weight](events, **kwargs)
 
     return events
@@ -74,13 +91,20 @@ def weights_init(self: Producer) -> None:
     if getattr(self, "dataset_inst", None) and self.dataset_inst.is_mc:
         # dynamically add dependencies if running on MC
         self.uses |= {
-            electron_weights, muon_weights, btag_weights,
-            normalization_weights, pu_weight, mc_weight,
+            electron_weights, muon_weights,
+            # btag_weights,
+            normalization_weights,
+            pu_weight,
+            mc_weight,
             top_pt_weight,
+            "Muon.{pt,eta,phi}",
         }
         self.produces |= {
-            electron_weights, muon_weights, btag_weights,
-            normalization_weights, pu_weight, mc_weight,
+            electron_weights, muon_weights,
+            # btag_weights,
+            normalization_weights,
+            pu_weight,
+            mc_weight,
             top_pt_weight,
         }
         if self.config_inst.x.run == 2:
@@ -93,4 +117,18 @@ def weights_init(self: Producer) -> None:
                 # l1_prefiring_weights,
                 vjets_weight,
                 toptag_weights,
+            }
+        if self.config_inst.x.year in [2022, 2023]:
+            self.uses |= {
+                btag_weights,
+            }
+            self.produces |= {
+                btag_weights,
+            }
+        elif self.config_inst.x.year == 2024:
+            self.uses |= {
+                upart_btag_weights,
+            }
+            self.produces |= {
+                upart_btag_weights,
             }

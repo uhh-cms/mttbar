@@ -301,7 +301,7 @@ def ttbar(
         elif regime == "boosted":
             assert len(n_jets) == 1, (
                 f"`n_jets` must have length 1 (lep) "
-                f"for resolved regime, got {len(n_jets)}"
+                f"for boosted regime, got {len(n_jets)}"
             )
             is_boosted_regime = True
             n_jet_lep = n_jets[0]
@@ -701,6 +701,7 @@ def ttbar(
             gen_ttbar.w_1,
         )]
         gen_ttbar_lv = lv_mass(gen_top_had) + lv_mass(gen_top_lep)
+        gen_ttbar_unmatched = lv_mass(gen_top_1) + lv_mass(gen_top_2)
 
         # -- calculate gen-level cos(theta*)
 
@@ -730,6 +731,9 @@ def ttbar(
         events = set_ak_column_ef(events, "TTbar.gen_delta_r", dr_gen_ttbar)
         events = set_ak_column_ef(events, "TTbar.gen_cos_theta_star", gen_cos_theta_star)
         events = set_ak_column_ef(events, "TTbar.gen_abs_cos_theta_star", gen_abs_cos_theta_star)
+
+        events = set_ak_column_ef(events, "GenTTbar.ttbar_mass", gen_ttbar_unmatched.mass)
+        events = set_ak_column_ef(events, "GenTTbar.mass_diff", gen_ttbar_unmatched.mass - gen_ttbar_lv.mass)
 
     # recalculate category ids with ttbar information in extra producer
 

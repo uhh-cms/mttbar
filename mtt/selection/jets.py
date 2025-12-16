@@ -6,6 +6,7 @@ Selection involving jets and MET.
 
 from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
+from columnflow.production.cms.jet import jet_id, fatjet_id
 
 from columnflow.selection import Selector, SelectionResult, selector
 
@@ -34,14 +35,8 @@ def jet_selection(
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     """Baseline jet selection for m(ttbar)."""
-    # electron channel:
-    # - require at least one AK4 jet with pt>50 and abseta<2.5
-    # - require a second AK4 jet with pt>40 and abseta<2.5
-    # muon channel:
-    # - require at least one AK4 jet with pt>50 and abseta<2.5
-    # - require a second AK4 jet with pt>50 and abseta<2.5
-    # both channels:
-    # - require that at least one AK4 jet (pt>50 and abseta<2.5) is b-tagged
+    events = self[jet_id](events, **kwargs)
+    tight_jet_id = (events.Jet.jetId & 2 == 2)
     sel_params = self.config_inst.x.jet_selection.ak4
     jet = events[sel_params.column]
 
@@ -60,7 +55,8 @@ def jet_selection(
     # jets (pt>30)
     jet_mask = (
         (abs(jet.eta) < sel_params.max_abseta) &
-        (jet.pt > sel_params.min_pt.baseline)
+        (jet.pt > sel_params.min_pt.baseline) &
+        (tight_jet_id)
     )
     jet_indices = masked_sorted_indices(jet_mask, jet.pt)
 
@@ -105,7 +101,8 @@ def jet_selection(
         },
         objects={
             "Jet": {
-                "Jet": loose_jet_indices,
+                "LooseJet": loose_jet_indices,
+                "Jet": jet_indices,
                 "BJet": bjet_indices,
                 "LightJet": lightjet_indices,
             },
@@ -126,6 +123,12 @@ def jet_selection_init(self: Selector) -> None:
             f"{column}.eta",
             f"{column}.{params.btagger.column}",
         }
+    self.uses |= {
+        jet_id,
+    }
+    self.produces |= {
+        jet_id,
+    }
 
 
 @selector(
@@ -146,20 +149,41 @@ def top_tagged_jets(
     """
     sel_params = self.config_inst.x.jet_selection.ak8
     fatjet = events[sel_params.column]
+    events = self[fatjet_id](events, **kwargs)
+    tight_id = events.FatJet.jetId & 2 == 2
 
     # top-tagger working point
     wp_top_md = sel_params.toptagger.wp
 
+    if self.config_inst.x.year == 2024:
+        # for 2024, the toptagger column is a list of columns (one per GloPar category)
+        TopbWqq, TopbWq, QCD = sel_params.toptagger.column
+        # score defined in https://twiki.cern.ch/twiki/bin/viewauth/CMS/GlobalParT
+        top_tagging_score = (fatjet[TopbWqq] + fatjet[TopbWq]) / (fatjet[TopbWqq] + fatjet[TopbWq] + fatjet[QCD])
+        toptag_mask = (top_tagging_score > wp_top_md)
+    else:
+        # single column for other years
+        toptag_mask = (fatjet[sel_params.toptagger.column] > wp_top_md)
+
+    # fatjets > 200 GeV and |eta|<2.5
+    fatjet_mask = (
+        (fatjet.pt > sel_params.min_pt.baseline) &
+        (abs(fatjet.eta) < sel_params.max_abseta)
+    )
+    fatjet_indices = masked_sorted_indices(fatjet_mask, fatjet.pt)
+
     # top-tagging criteria
     fatjet_mask_toptag = (
         # kinematic cuts
-        (fatjet.pt > sel_params.min_pt) &
+        (fatjet.pt > sel_params.min_pt.toptagged) &
         (abs(fatjet.eta) < sel_params.max_abseta) &
         # 1st topjet requirement: top tagger working point
-        (fatjet[sel_params.toptagger.column] > wp_top_md) &
+        (toptag_mask) &
         # 2nd topjet requirement: softdrop mass window
         (fatjet.msoftdrop > sel_params.msoftdrop[0]) &
-        (fatjet.msoftdrop < sel_params.msoftdrop[1])
+        (fatjet.msoftdrop < sel_params.msoftdrop[1]) &
+        # jet ID
+        (tight_id)
     )
     fatjet_indices_toptag = masked_sorted_indices(
         fatjet_mask_toptag,
@@ -192,6 +216,7 @@ def top_tagged_jets(
         },
         objects={
             "FatJet": {
+                "FatJet": fatjet_indices,
                 "FatJetTopTag": fatjet_indices_toptag,
                 "FatJetTopTagDeltaRLepton": fatjet_indices_toptag_delta_r_lepton,
             },
@@ -213,14 +238,22 @@ def top_tagged_jets_init(self: Selector) -> None:
             f"{column}.phi",
             f"{column}.mass",
             f"{column}.msoftdrop",
-            f"{column}.{params.toptagger.column}",
         }
+        self.uses |= {f"{column}.{params.toptagger.column}"} if isinstance(params.toptagger.column, str) else {
+            f"{column}.{col}" for col in params.toptagger.column
+        }
+    self.uses |= {
+        fatjet_id,
+    }
+    self.produces |= {
+        fatjet_id,
+    }
 
 
 @selector(
     uses={
         "event",
-        "MET.pt",
+        "PuppiMET.pt",
         "channel_id",
     },
     exposed=True,

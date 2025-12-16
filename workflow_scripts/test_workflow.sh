@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 # set parameters
-datasets=(tt_sl_powheg st_tchannel_t_4f_powheg dy_m4to50_ht800to1500_madgraph ww_pythia w_lnu_mlnu0to120_ht800to1500_madgraph qcd_ht1000to1200_madgraph data_mu_c)
+# datasets=(tt_sl_powheg st_tchannel_t_4f_powheg dy_m4to50_ht800to1500_madgraph ww_pythia w_lnu_mlnu0to120_ht800to1500_madgraph qcd_ht1000to1200_madgraph data_mu_c)
+datasets=(tt_sl_powheg)
 datasets_mc=(tt_sl_powheg st_tchannel_t_4f_powheg dy_m4to50_ht800to1500_madgraph ww_pythia w_lnu_mlnu0to120_ht800to1500_madgraph qcd_ht1000to1200_madgraph)
 
-version=test_updates_250417
-analysis=mtt.config.run3.analysis_mtt.analysis_mtt
-config=run3_mtt_2022_preEE_nano_v12_limited
+version=test_updates_251013_v2
+analysis=mtt.config.run3.analysis_mtt.analysis_mtt_new
+config=run3_mtt_2024_nano_v15_limited_new
 calibrator=skip_jecunc
 selector=default
 reducer=default
@@ -23,8 +24,10 @@ for dataset in "${datasets[@]}"; do
     --analysis $analysis \
     --config $config \
     --dataset $dataset \
-    --calibrator $calibrator
-    echo law run cf.SelectEvents \
+    --workflow local \
+    --calibrator $calibrator \
+    --remove-output 0,a,y
+    law run cf.SelectEvents \
     --version $version \
     --analysis $analysis \
     --config $config \
@@ -111,7 +114,7 @@ echo law run cf.CreateYieldTable \
 #     --datasets $datasets_str \
 
 # plot pt of muon and electron in 1e and 1m - normalized
-law run cf.PlotVariables1D \
+echo law run cf.PlotVariables1D \
     --version $version \
     --analysis $analysis \
     --config $config \
