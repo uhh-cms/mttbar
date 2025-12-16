@@ -15,6 +15,7 @@ from columnflow.selection import Selector, SelectionResult, selector
 from columnflow.selection.stats import increment_stats
 from columnflow.selection.cms.met_filters import met_filters
 from columnflow.selection.cms.json_filter import json_filter
+from columnflow.selection.cms.jets import jet_veto_map
 from columnflow.production.categories import category_ids
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
@@ -49,6 +50,7 @@ ak = maybe_import("awkward")
         # gen_parton_top,
         # gen_v_boson,
         json_filter,
+        jet_veto_map
     },
     produces={
         jet_selection, lepton_selection, met_selection, top_tagged_jets, lepton_jet_2d_selection,
@@ -62,6 +64,7 @@ ak = maybe_import("awkward")
         # gen_parton_top,
         # gen_v_boson,
         json_filter,
+        jet_veto_map
     },
     shifts={
         jet_energy_shifts,
@@ -112,6 +115,10 @@ def default(
     # all-hadronic veto
     events, top_tagged_jets_results = self[top_tagged_jets](events, **kwargs)
     results += top_tagged_jets_results
+
+    # apply jet veto map
+    events, jet_veto_results = self[jet_veto_map](events, **kwargs)
+    results += jet_veto_results
 
     if self.dataset_inst.has_tag("is_qcd"):
         events, qcd_sel_results = self[qcd_spikes](events, **kwargs)
