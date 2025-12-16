@@ -137,7 +137,7 @@ def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     },
 )
 def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
-    """All high-level featues, e.g. scalar jet pt sum (ht), number of jets, electrons, muons, etc."""
+    """All high-level features, e.g. scalar jet pt sum (ht), number of jets, electrons, muons, etc."""
 
     # note: the missing Lorentz vector columns cause issues for
     # arrays with registered names/behaviors, so we remove them

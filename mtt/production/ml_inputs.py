@@ -30,13 +30,13 @@ set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
         choose_lepton,
         # AK4 jets
         "Jet.pt", "Jet.eta", "Jet.phi", "Jet.mass",
-        "Jet.btagDeepFlavB",
+        "Jet.btagUParTAK4B",
         # AK8 jets
         "FatJet.pt", "FatJet.eta", "FatJet.phi", "FatJet.mass",
         "FatJet.msoftdrop",
         "FatJet.tau1", "FatJet.tau2", "FatJet.tau3",
         # MET
-        "MET.pt", "MET.phi",
+        "PuppiMET.pt", "PuppiMET.phi",
     },
     produces={
         weights,
@@ -57,14 +57,14 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     jet = ak.with_name(events.Jet, "Jet")
     fatjet = ak.with_name(events.FatJet, "FatJet")
     lepton = ak.with_name(events.Lepton, "PtEtaPhiMLorentzVector")
-    met = events.MET
+    met = events.PuppiMET
 
     # btag score for AK4 jets
-    jet["btag"] = jet.btagDeepFlavB
+    jet["btagUParTAK4B"] = jet.btagUParTAK4B  # FIXME make configurable from config
 
     # n-subjettiness discriminants for AK8 jets
-    fatjet["tau32"] = fatjet.tau3 / fatjet.tau2
-    fatjet["tau21"] = fatjet.tau2 / fatjet.tau1
+    fatjet["tau32"] = fatjet.tau3 / fatjet["tau2"]  # avoid fatjet.tau2 to prevent conflict with vector behaviour
+    fatjet["tau21"] = fatjet["tau2"] / fatjet.tau1
 
     # jet/fatjet multiplicities
     events = set_ak_column(events, f"{ns}.n_jet", ak.num(events.Jet, axis=1))
@@ -92,13 +92,13 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # AK4 jets
     events = set_vars(
         events, "jet", jet, n_max=5,
-        attrs=("energy", "pt", "eta", "phi", "mass", "btag"),
+        attrs=("energy", "pt", "eta", "phi", "mass", "btagUParTAK4B"),
     )
 
     # AK8 jets
     events = set_vars(
         events, "fatjet", fatjet, n_max=3,
-        attrs=("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32"),
+        attrs=("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32", "tau1", "tau2", "tau3"),
     )
 
     # Lepton
@@ -130,11 +130,11 @@ def ml_inputs_init(self: Producer) -> None:
         "n_fatjet",
     } | {
         f"jet_{var}_{i + 1}"
-        for var in ("energy", "pt", "eta", "phi", "mass", "btag")
+        for var in ("energy", "pt", "eta", "phi", "mass", "btagUParTAK4B")
         for i in range(5)
     } | {
         f"fatjet_{var}_{i + 1}"
-        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
+        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32", "tau1", "tau2", "tau3")
         for i in range(3)
     } | {
         f"lepton_{var}"
