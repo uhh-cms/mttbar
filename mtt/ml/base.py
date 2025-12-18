@@ -439,11 +439,6 @@ class MLClassifierBase(MLModel):
         return used_datasets
 
     def uses(self, config_inst: od.Config) -> set[Route | str]:
-        if not all("MLInput" in var for var in self.input_features):
-            raise Exception(
-                "We currently expect all input_features to contain 'MLInput', which is not the case"
-                f"for one of the variables in the 'input_features' {self.input_features}",
-            )
         # include all variables starting with 'MLInput' to enable reusing MergeMLEvents outputs
         columns = {"MLInput.*"}
         logger.info(f"MLClassifierBase.uses adding input features: {self.input_features}")
