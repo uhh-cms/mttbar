@@ -2,6 +2,7 @@
 
 """
 Mixin classes to build ML models
+Taken from hbw analysis.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ import law
 
 from columnflow.types import Union
 from columnflow.util import maybe_import, DotDict
-from hbw.util import log_memory, call_func_safe, timeit
+from mtt.util import log_memory, call_func_safe, timeit
 
 
 np = maybe_import("numpy")
@@ -67,7 +68,7 @@ class DenseModelMixin(object):
         import tensorflow.keras as keras
         from keras.models import Sequential
         from keras.layers import Dense, BatchNormalization
-        from hbw.ml.tf_util import cumulated_crossentropy
+        from mtt.ml.tf_util import cumulated_crossentropy
         # from keras.losses import CategoricalFocalCrossentropy
 
         n_inputs = len(set(self.input_features))
@@ -439,8 +440,8 @@ class ModelFitMixin(CallbacksBase):
         Training loop but with custom dataset
         """
         # import tensorflow as tf
-        from hbw.ml.tf_util import MultiDataset
-        from hbw.ml.plotting import plot_history
+        from mtt.ml.tf_util import MultiDataset
+        from mtt.ml.plotting import plot_history
 
         log_memory("start")
 

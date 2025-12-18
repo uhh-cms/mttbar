@@ -1,5 +1,6 @@
 """
 Collection of classes to load and prepare data for machine learning.
+Taken from hbw analysis.
 """
 
 from __future__ import annotations
@@ -10,8 +11,8 @@ import order as od
 from columnflow.util import maybe_import
 from columnflow.columnar_util import remove_ak_column
 from columnflow.ml import MLModel
-from hbw.ml.helper import predict_numpy_on_batch
-from hbw.util import timeit
+from mtt.ml.helper import predict_numpy_on_batch
+from mtt.util import timeit
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -198,16 +199,47 @@ class MLDatasetLoader:
             return self._features
 
         # work with a copy of the events
-        features = self._events
+        features = self._events.MLInput
+
+        # Create a mapping from raw feature names to MLInput column names
+        raw_ml_features = set(self.ml_model_inst.input_features)
+        available_columns = set(f"MLInput.{var}" for var in features.fields)
+
+        logger.debug(f"Raw ML features requested: {raw_ml_features}")
+        logger.debug(f"Available MLInput columns: {available_columns}")
 
         # remove columns that are not used as training features
         for var in features.fields:
-            if var not in self.ml_model_inst.input_features:
+            col = f"MLInput.{var}"
+            # Check if the raw feature name (without MLInput. prefix) is in the requested features
+            if var not in raw_ml_features:
                 features = remove_ak_column(features, var)
+                logger.debug(f"Removed column {col} from features for process {self.process}.")
 
-        # bookkeep order of input features and perform sanity checks
+        # bookkeep order of input features (store the raw names without MLInput. prefix)
         self._input_features = tuple(features.fields)
-        input_features_sanity_checks(self.ml_model_inst, self._input_features)
+
+        # Create a mapping for sanity checks - convert raw names to what the ML model expects
+        mapped_features_for_check = tuple(f"MLInput.{feat}" if not feat.startswith("MLInput.") else feat for feat in self._input_features)  # noqa
+
+        try:
+            # Temporarily modify the ml_model_inst.input_features for the sanity check
+            original_features = self.ml_model_inst.input_features
+            # Convert the ml_model raw features to MLInput format for comparison
+            expected_with_prefix = set(f"MLInput.{feat}" if not feat.startswith("MLInput.") else feat for feat in original_features)  # noqa
+
+            # Create a temporary modified ml_model_inst for the sanity check
+            import types
+            temp_ml_model = types.SimpleNamespace()
+            temp_ml_model.__dict__.update(self.ml_model_inst.__dict__)
+            temp_ml_model.input_features = expected_with_prefix
+
+            input_features_sanity_checks(temp_ml_model, mapped_features_for_check)
+
+        except Exception as e:
+            logger.error(f"Input features sanity check failed: {e}")
+            logger.error(f"Expected (with MLInput prefix): {expected_with_prefix}")
+            logger.error(f"Got (with MLInput prefix): {set(mapped_features_for_check)}")
 
         # transform features into numpy npdarray
         # NOTE: when converting to numpy, the awkward array seems to stay in memory...
@@ -218,6 +250,85 @@ class MLDatasetLoader:
 
         # check for infinite values
         if np.any(~np.isfinite(features)):
+            mask = ~np.isfinite(features)
+            n_total = mask.sum()
+            n_nan = np.sum(np.isnan(features))
+            n_posinf = np.sum(features == np.inf)
+            n_neginf = np.sum(features == -np.inf)
+            logger.error(f"Found {n_total} non-finite values in input features for process {self.process}:")
+            logger.error(f" - NaNs: {n_nan}")
+            logger.error(f" - +inf: {n_posinf}")
+            logger.error(f" - -inf: {n_neginf}")
+
+            # Additional debugging: identify which features contain non-finite values
+            logger.error("Debugging non-finite values:")
+
+            # Check each feature column separately
+            for i, feature_name in enumerate(self._input_features):
+                feature_col = features[:, i]
+                if np.any(~np.isfinite(feature_col)):
+                    n_nan_col = np.sum(np.isnan(feature_col))
+                    n_posinf_col = np.sum(feature_col == np.inf)
+                    n_neginf_col = np.sum(feature_col == -np.inf)
+                    n_total_col = n_nan_col + n_posinf_col + n_neginf_col
+
+                    logger.error(f"  Feature '{feature_name}' (col {i}): {n_total_col} non-finite values")
+                    logger.error(f"    - NaNs: {n_nan_col}, +inf: {n_posinf_col}, -inf: {n_neginf_col}")
+
+                    # Show statistics for this feature
+                    finite_mask = np.isfinite(feature_col)
+                    if np.any(finite_mask):
+                        finite_values = feature_col[finite_mask]
+                        logger.error(f"    - Finite values: min={np.min(finite_values):.6f}, max={np.max(finite_values):.6f}, mean={np.mean(finite_values):.6f}")  # noqa
+                    else:
+                        logger.error("    - No finite values found!")
+
+                    # Show first few problematic indices and values
+                    problem_indices = np.where(~np.isfinite(feature_col))[0][:5]  # First 5 problematic indices
+                    logger.error(f"    - First problematic indices: {problem_indices}")
+                    for idx in problem_indices:
+                        val = feature_col[idx]
+                        if np.isnan(val):
+                            val_type = "NaN"
+                        elif val == np.inf:
+                            val_type = "+inf"
+                        elif val == -np.inf:
+                            val_type = "-inf"
+                        else:
+                            val_type = "other"
+                        logger.error(f"      Event {idx}: {val} ({val_type})")
+
+            # Check if specific events have multiple problematic features
+            events_with_problems = np.any(mask, axis=1)
+            problematic_event_indices = np.where(events_with_problems)[0]
+            n_problematic_events = len(problematic_event_indices)
+
+            logger.error(f"Found {n_problematic_events} events with non-finite features")
+
+            if n_problematic_events > 0:
+                # Show details for first few problematic events
+                logger.error("Details for first few problematic events:")
+                for i, event_idx in enumerate(problematic_event_indices[:3]):  # First 3 events
+                    event_mask = mask[event_idx]
+                    problematic_features = np.where(event_mask)[0]
+
+                    logger.error(f"  Event {event_idx}: {len(problematic_features)} problematic features")
+                    for feat_idx in problematic_features:
+                        feat_name = self._input_features[feat_idx]
+                        feat_val = features[event_idx, feat_idx]
+                        logger.error(f"    {feat_name}: {feat_val}")
+
+            # Check if there's a pattern in the original awkward array
+            logger.error("Checking original MLInput data before numpy conversion:")
+            orig_features = self._events.MLInput
+            for feature_name in self._input_features:
+                if f"MLInput.{feature_name}" in orig_features.fields:
+                    orig_col = ak.to_numpy(orig_features[f"MLInput.{feature_name}"])
+                    if np.any(~np.isfinite(orig_col)):
+                        logger.error(f"  Non-finite values also present in original '{feature_name}' column")
+                    else:
+                        logger.error(f"  Original '{feature_name}' column appears clean - issue in conversion?")
+
             raise Exception(f"Found non-finite values in input features for process {self.process}.")
 
         self._features = features
@@ -391,14 +502,20 @@ class MLDatasetLoader:
         :param data: The data to be split.
         :return: The end indices for the training and validation data.
         """
+        logger.debug("Determining data split for training, validation, and testing.")
         if hasattr(self, "_train_end") and hasattr(self, "_val_end"):
+            logger.debug(f"Using cached data split: {self._train_end}, {self._val_end}")
             return self._train_end, self._val_end
 
         data_split = np.array(self.ml_model_inst.train_val_test_split)
+        logger.debug(f"Original data split: {data_split}")
         data_split = data_split / np.sum(data_split)
+        logger.debug(f"Normalized data split: {data_split}")
 
         self._train_end = int(data_split[0] * self.n_events)
+        logger.debug(f"Training data end index: {self._train_end}")
         self._val_end = int((data_split[0] + data_split[1]) * self.n_events)
+        logger.debug(f"Validation data end index: {self._val_end}")
 
         return self._train_end, self._val_end
 
@@ -415,6 +532,7 @@ class MLDatasetLoader:
 
         if self.shuffle:
             data = data[self.shuffle_indices]
+        logger.debug(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa
 
         return data[:train_end], data[train_end:val_end], data[val_end:]
 

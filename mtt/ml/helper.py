@@ -1,4 +1,8 @@
 # coding: utf-8
+"""
+Helper functions for ML in mtt analysis
+Taken from hbw analysis.
+"""
 
 
 import order as od

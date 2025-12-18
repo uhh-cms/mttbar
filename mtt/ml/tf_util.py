@@ -1,4 +1,8 @@
 # coding: utf-8
+"""
+MultiDataset class for handling multiple datasets with process-specific batching.
+Taken from hbw analysis.
+"""
 
 from __future__ import annotations
 import gc

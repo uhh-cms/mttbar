@@ -2,6 +2,7 @@
 
 """
 First implementation of DNN for HH analysis, generalized (TODO)
+Taken from hbw analysis. (probably not needed as it's old?)
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ from columnflow.ml import MLModel
 from columnflow.util import maybe_import, dev_sandbox
 from columnflow.columnar_util import Route, set_ak_column, remove_ak_column
 from columnflow.tasks.selection import MergeSelectionStatsWrapper
-from hbw.config.categories import add_categories_ml
+from mtt.config.categories import add_categories_ml
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

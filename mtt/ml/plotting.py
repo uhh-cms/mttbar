@@ -1,4 +1,8 @@
 # coding: utf-8
+"""
+Plotting functions for ML in mtt analysis
+Taken from hbw analysis.
+"""
 
 from __future__ import annotations
 
@@ -9,7 +13,7 @@ import gc
 import law
 import order as od
 
-from hbw.util import round_sig, timeit
+from mtt.util import round_sig, timeit
 from columnflow.ml import MLModel
 from columnflow.util import maybe_import, DotDict
 from columnflow.plotting.plot_util import get_position
@@ -85,7 +89,7 @@ def plot_introspection(
     input_features: list | None = None,
     stats: dict | None = None,
 ):
-    from hbw.ml.introspection import sensitivity_analysis, gradient_times_input, shap_ranking
+    from mtt.ml.introspection import sensitivity_analysis, gradient_times_input, shap_ranking
 
     # get only signal events for now
     inputs = inputs.features[inputs.labels == 0]

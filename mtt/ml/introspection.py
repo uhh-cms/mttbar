@@ -1,6 +1,7 @@
 # coding: utf-8
 """
 Functions for model introspection.
+Taken from hbw analysis.
 """
 
 from __future__ import annotations

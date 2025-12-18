@@ -1,7 +1,8 @@
 # coding: utf-8
 
 """
-First implementation of DNN for HH analysis, generalized (TODO)
+taken from hbw analysis
+Base class for ML Classifiers
 """
 
 from __future__ import annotations
@@ -19,11 +20,11 @@ from columnflow.util import maybe_import, dev_sandbox, DotDict, DerivableMeta
 from columnflow.columnar_util import Route, set_ak_column
 from columnflow.config_util import get_datasets_from_process
 
-from hbw.util import log_memory
-from hbw.ml.data_loader import MLDatasetLoader, MLProcessData, input_features_sanity_checks
-from hbw.config.processes import prepare_ml_processes
+from mtt.util import log_memory
+from mtt.ml.data_loader import MLDatasetLoader, MLProcessData, input_features_sanity_checks
+from mtt.config.processes import prepare_ml_processes
 
-from hbw.tasks.ml import MLPreTraining
+from mtt.tasks.ml import MLPreTraining
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -85,7 +86,7 @@ class MLClassifierBase(MLModel):
 
     # training-specific parameters. Only need to re-run training when changing these
     _default__class_factors: dict = {"st": 1, "tt": 1}
-    _default__sub_process_class_factors: dict = {"st": 2, "tt": 1}
+    _default__sub_process_class_factors: dict = {"st": 1, "tt": 1}
     _default__negative_weights: str = "handle"
     _default__epochs: int = 50
     _default__batchsize: int = 2 ** 10
@@ -264,7 +265,7 @@ class MLClassifierBase(MLModel):
         self._parameters_repr = parameters_repr
         return self._parameters_repr
 
-    from hbw.util import timeit_multiple
+    from mtt.util import timeit_multiple
 
     def valid_ml_id_sanity_check(self):
         """
@@ -387,14 +388,14 @@ class MLClassifierBase(MLModel):
         # categorization Producers in the same workflow is messy, so we skip it for now
         # return requested_producers or ["event_weights", "pre_ml_cats", analysis_inst.x.ml_inputs_producer]
         # return requested_producers or ["event_weights", analysis_inst.x.ml_inputs_producer]
-        return ["event_weights", analysis_inst.x.ml_inputs_producer]
+        return ["weights", "ml_inputs"]
 
     def evaluation_producers(self, analysis_inst: od.Analysis, requested_producers: Sequence[str]) -> list[str]:
         # NOTE: there is still an issue that this can only remove (not add) Producers, so the
         # ml_inputs_producer also needs to be added in all task calls that use the evaluation of this model
         if use_old_version:
             return ["event_weights", analysis_inst.x.ml_inputs_producer]
-        return [analysis_inst.x.ml_inputs_producer]
+        return ["ml_inputs"]
 
     def requires(self, task: law.Task) -> dict[str, Any]:
         # Custom requirements (none currently)
@@ -405,7 +406,7 @@ class MLClassifierBase(MLModel):
 
     def sandbox(self, task: law.Task) -> str:
         # venv_ml_tf sandbox but with scikit-learn and restricted to tf 2.11.0
-        return dev_sandbox("bash::$HBW_BASE/sandboxes/venv_ml_plotting.sh")
+        return dev_sandbox("bash::$MTT_BASE/sandboxes/venv_ml_plotting.sh")
 
     def datasets(self, config_inst: od.Config) -> set[od.Dataset]:
         used_datasets = set()
@@ -438,18 +439,19 @@ class MLClassifierBase(MLModel):
         return used_datasets
 
     def uses(self, config_inst: od.Config) -> set[Route | str]:
-        if not all(var.startswith("mli_") for var in self.input_features):
+        if not all("MLInput" in var for var in self.input_features):
             raise Exception(
-                "We currently expect all input_features to start with 'mli_', which is not the case"
+                "We currently expect all input_features to contain 'MLInput', which is not the case"
                 f"for one of the variables in the 'input_features' {self.input_features}",
             )
-        # include all variables starting with 'mli_' to enable reusing MergeMLEvents outputs
-        columns = {"mli_*"}
+        # include all variables starting with 'MLInput' to enable reusing MergeMLEvents outputs
+        columns = {"MLInput.*"}
+        logger.info(f"MLClassifierBase.uses adding input features: {self.input_features}")
+        logger.info(f"MLClassifierBase.uses adding columns: {columns}")
         # TODO: switch to full event weight
         # TODO: this might not work with data, to be checked
         columns.add("process_id")
         columns.add("normalization_weight")
-        columns.add("stitched_normalization_weight")
         columns.add("event_weight")
         return columns
 
@@ -480,7 +482,7 @@ class MLClassifierBase(MLModel):
         # ]
         outp["required_files"] = [
             target.child(fname, type="f") for fname in
-            ("mlmodel.keras", "parameters.yaml", "input_features.pkl")
+            ("mlmodel.keras", "parameters.yaml", "input_features.pickle")
         ]
         return outp
 
@@ -490,7 +492,7 @@ class MLClassifierBase(MLModel):
         models = {}
 
         models["input_features"] = tuple(target["mlmodel"].child(
-            "input_features.pkl", type="f",
+            "input_features.pickle", type="f",
         ).load(formatter="pickle"))
 
         # NOTE: we cannot use the .load method here, because it's unable to read tuples etc.
@@ -500,7 +502,7 @@ class MLClassifierBase(MLModel):
         models["parameters"] = yaml.load(f_in, Loader=yaml.Loader)
 
         # custom loss needed due to output layer changes for negative weights
-        # from hbw.ml.tf_util import cumulated_crossentropy
+        # from mtt.ml.tf_util import cumulated_crossentropy
         models["model"] = tf.keras.models.load_model(
             target["mlmodel_file"].abspath,
             # custom_objects={cumulated_crossentropy.__name__: cumulated_crossentropy},
@@ -546,7 +548,7 @@ class MLClassifierBase(MLModel):
         log_memory("loading validation data")
 
         # store input features as an output
-        output["mlmodel"].child("input_features.pkl", type="f").dump(self.input_features_ordered, formatter="pickle")
+        output["mlmodel"].child("input_features.pickle", type="f").dump(self.input_features_ordered, formatter="pickle")
 
         return train, validation
 
@@ -663,7 +665,7 @@ class MLClassifierBase(MLModel):
 
         # check that all MLTrainings were started with the same set of parameters
         parameters = [model["parameters"] for model in models]
-        from hbw.util import dict_diff
+        from mtt.util import dict_diff
         for i, params in enumerate(parameters[1:]):
             if params != parameters[0]:
                 diff = dict_diff(params, parameters[0])
@@ -731,7 +733,7 @@ class ExampleDNN(MLClassifierBase):
 
         from keras.models import Sequential
         from keras.layers import Dense, BatchNormalization
-        from hbw.ml.tf_util import cumulated_crossentropy
+        from mtt.ml.tf_util import cumulated_crossentropy
 
         n_inputs = len(set(self.input_features))
         n_outputs = len(self.processes)
@@ -779,7 +781,7 @@ class ExampleDNN(MLClassifierBase):
         Minimal implementation of training loop.
         """
         import tensorflow as tf
-        from hbw.ml.tf_util import MultiDataset
+        from mtt.ml.tf_util import MultiDataset
 
         # with tf.device("CPU"):
         tf_train = MultiDataset(data=train, batch_size=self.batchsize, kind="train")
