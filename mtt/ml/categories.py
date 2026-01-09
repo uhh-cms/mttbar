@@ -11,6 +11,7 @@ from columnflow.columnar_util import Route, set_ak_column
 from columnflow.selection import Selector, selector
 from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
+from columnflow.categorization import categorizer
 
 # from mtt.config.categories import add_categories_ml
 from mtt.util import get_subclasses_deep
@@ -28,11 +29,11 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
 
     ml_output_columns = {
         f"{ml_model_inst.cls_name}.score_{proc}"
-        for proc in ml_model_inst.processes
+        for proc in ml_model_inst.train_nodes.keys()
     }
 
-    for proc in ml_model_inst.processes:
-        @selector(
+    for proc in ml_model_inst.train_nodes.keys():
+        @categorizer(
             uses={"events"} | ml_output_columns,
             cls_name=f"sel_dnn_{proc}",
         )
@@ -123,6 +124,7 @@ def add_ml_cats_init(self: Producer) -> None:
 
     # add categories to config inst
     from mtt.config.categories import add_categories_ml
+    logger.warning("Adding ML categories to config...")
     add_categories_ml(self.config_inst, self.ml_model_name)
 
     self.uses.add(category_ids)

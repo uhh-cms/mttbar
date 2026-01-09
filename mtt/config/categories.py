@@ -186,6 +186,9 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
 
     # -- register category selectors
     from mtt.ml.categories import register_ml_selectors
+    # if not already done, get the ml_model instance
+    if isinstance(ml_model_inst, str):
+        ml_model_inst = MLModel.get_cls(ml_model_inst)(config)
 
     register_ml_selectors(ml_model_inst)
 
@@ -193,7 +196,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
 
     # get output categories from ML model
     dnn_categories = []
-    for i, proc in enumerate(ml_model_inst.processes):
+    for i, proc in enumerate(ml_model_inst.train_nodes.keys()):
         cat = config.add_category(
             name=f"dnn_{proc}",
             id=(i + 1) * 100000,
