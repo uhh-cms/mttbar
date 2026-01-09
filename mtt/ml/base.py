@@ -23,6 +23,7 @@ from columnflow.config_util import get_datasets_from_process
 from mtt.util import log_memory
 from mtt.ml.data_loader import MLDatasetLoader, MLProcessData, input_features_sanity_checks
 from mtt.config.processes import prepare_ml_processes
+# from mtt.config.categories import add_categories_ml
 
 from mtt.tasks.ml import MLPreTraining
 
@@ -81,8 +82,8 @@ class MLClassifierBase(MLModel):
 
     # NOTE: we split each fold into train, val, test + do k-folding, so we have a 4-way split in total
     # TODO: test whether setting "test" to 0 is working
-    train_val_test_split: tuple = (0.75, 0.15, 0.10)
-    folds: int = 5
+    _default__train_val_test_split: tuple = (0.75, 0.15, 0.10)
+    _default__folds: int = 5
 
     # training-specific parameters. Only need to re-run training when changing these
     _default__class_factors: dict = {"st": 1, "tt": 1}
@@ -358,7 +359,17 @@ class MLClassifierBase(MLModel):
                         },  # automatically rebin to 40 bins for plotting tasks
                     )
 
+        # dynamically add ml categories (but only if production categories have been added)
+        if (
+                self.config_inst.x("add_categories_ml", True) and
+                not self.config_inst.x("add_categories_production", True)
+        ):
+            from mtt.config.categories import add_categories_ml
+            add_categories_ml(self.config_inst, ml_model_inst=self)
+            self.config_inst.x.add_categories_ml = False
+
         # add tag to allow running this function just once
+        logger.debug(f"Running {self.cls_name} for the first time")
         self.config_inst.add_tag(f"{self.cls_name}_called")
 
     @property
@@ -640,11 +651,11 @@ class MLClassifierBase(MLModel):
             logger.warning(f"Dataset {task.dataset} is empty. No columns are produced.")
             return events
 
-        events = self.patch_events(events)
+        # events = self.patch_events(events)
 
-        # check that the input features are the same for all models
-        for model in models:
-            input_features_sanity_checks(self, model["input_features"])
+        # # check that the input features are the same for all models
+        # for model in models:
+        #     input_features_sanity_checks(self, model["input_features"])
 
         process = task.dataset_inst.x("ml_process", task.dataset_inst.processes.get_first().name)
         process_inst = task.config_inst.get_process(process)

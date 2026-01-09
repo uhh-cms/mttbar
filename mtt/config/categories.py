@@ -39,7 +39,7 @@ import order as od
 from columnflow.ml import MLModel
 from columnflow.config_util import create_category_combinations, CategoryGroup
 
-from mtt.ml.categories import register_ml_selectors
+# from mtt.ml.categories import register_ml_selectors
 
 
 def name_fn(categories: dict[str, od.Category]):
@@ -185,6 +185,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
     """
 
     # -- register category selectors
+    from mtt.ml.categories import register_ml_selectors
 
     register_ml_selectors(ml_model_inst)
 
@@ -243,7 +244,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
                 cat.label for cat in categories.values()
             ),
         }
-    
+
     # -- combined categories
 
     category_groups = {

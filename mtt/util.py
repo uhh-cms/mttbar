@@ -250,7 +250,7 @@ def call_func_safe(func, *args, **kwargs) -> Any:
     """
     Small helper to make sure that our training does not fail due to plotting
     """
-
+    # from hbw utils
     # get the function name without the possibility of raising an error
     try:
         func_name = func.__name__
@@ -268,3 +268,46 @@ def call_func_safe(func, *args, **kwargs) -> Any:
         outp = None
 
     return outp
+
+
+def build_param_product(params: dict[str, list], output_keys: Callable = lambda i: i):
+    """
+    Helper that builds the product of all *param* values and returns a dictionary of
+    all the resulting parameter combinations.
+
+    Example:
+
+    .. code-block:: python
+        build_param_product({"A": ["a", "b"], "B": [1, 2]})
+        # -> {
+            0: {"A": "a", "B": 1},
+            1: {"A": "a", "B": 2},
+            2: {"A": "b", "B": 1},
+            3: {"A": "b", "B": 2},
+        }
+    """
+    # from hbw utils
+    from itertools import product
+    param_product = {}
+    keys, values = zip(*params.items())
+    for i, bundle in enumerate(product(*values)):
+        d = dict(zip(keys, bundle))
+        param_product[output_keys(i)] = d
+
+    return param_product
+
+
+def get_subclasses_deep(*classes):
+    """
+    Helper that gets all subclasses from input classes based on the '_subclasses' attribute.
+    """
+    # from hbw utils
+    classes = {_cls.__name__: _cls for _cls in classes}
+    all_classes = {}
+
+    while classes:
+        for key, _cls in classes.copy().items():
+            classes.update(getattr(_cls, "_subclasses", {}))
+            all_classes[key] = classes.pop(key)
+
+    return all_classes
