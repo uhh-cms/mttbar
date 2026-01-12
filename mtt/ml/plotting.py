@@ -535,10 +535,12 @@ def plot_input_features(
 
     for i, feature_name in enumerate(input_features):
         fig, ax = plt.subplots()
+        # add var name
+        feature_name_full = f"AN_v12_mli_{feature_name}"
 
-        variable_inst = model.config_inst.get_variable(feature_name, default=None)
+        variable_inst = model.config_inst.get_variable(feature_name_full, default=None)
         if not variable_inst:
-            logger.warning(f"Could not get variable instance for {feature_name}, skipping")
+            logger.warning(f"Could not get variable instance for {feature_name_full}, skipping")
             continue
 
         h = (

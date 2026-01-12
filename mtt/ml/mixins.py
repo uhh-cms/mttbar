@@ -140,6 +140,14 @@ class CallbacksBase(object):
     # NOTE: we could remove these parameters since they can be implemented via reduce_lr_kwargs
     _default__reduce_lr_factor: float = 0.8
     _default__reduce_lr_patience: int = 3
+    _default__reduce_lr_min_delta: float = 0.0
+    _default__reduce_lr_mode: str = "auto"
+    _default__reduce_lr_monitor: str = "val_loss"
+
+    # FIXME: for some reasons, these default parameters are not picked up from the derived class
+    #        parameters can be set via early_stopping_kwargs though
+    _default__early_stopping_monitor: str = "val_loss"
+    _default__early_stopping_min_delta: float = 0.0
 
     # custom callback kwargs
     checkpoint_kwargs: dict = {}
@@ -156,6 +164,12 @@ class CallbacksBase(object):
         self.remove_backup = bool(self.remove_backup)
         self.reduce_lr_factor = float(self.reduce_lr_factor)
         self.reduce_lr_patience = int(self.reduce_lr_patience)
+        self.reduce_lr_min_delta = float(self.reduce_lr_min_delta)
+        self.reduce_lr_mode = str(self.reduce_lr_mode)
+        self.reduce_lr_monitor = str(self.reduce_lr_monitor)
+
+        self.early_stopping_monitor = str(self.early_stopping_monitor)
+        self.early_stopping_min_delta = float(self.early_stopping_min_delta)
 
     def get_callbacks(self, output):
         import tensorflow.keras as keras
@@ -199,8 +213,8 @@ class CallbacksBase(object):
 
         if "early_stopping" in self.callbacks:
             early_stopping_kwargs = dict(
-                monitor="val_loss",
-                min_delta=0,
+                monitor=self.early_stopping_monitor,
+                min_delta=self.early_stopping_min_delta,
                 patience=max(min(50, int(self.epochs / 5)), 10),
                 verbose=1,
                 restore_best_weights=True,
@@ -211,12 +225,12 @@ class CallbacksBase(object):
 
         if "reduce_lr" in self.callbacks:
             reduce_lr_kwargs = dict(
-                monitor="val_loss",
+                monitor=self.reduce_lr_monitor,
                 factor=self.reduce_lr_factor,
                 patience=self.reduce_lr_patience,
                 verbose=1,
-                mode="auto",
-                min_delta=0,
+                mode=self.reduce_lr_mode,
+                min_delta=self.reduce_lr_min_delta,
                 min_lr=0,
             )
             reduce_lr_kwargs.update(self.reduce_lr_kwargs)
@@ -410,13 +424,21 @@ class ModelFitMixin(CallbacksBase):
         batch_sizes = {proc_inst: int(batch_size * batch_scaler) for proc_inst, batch_size in batch_sizes.items()}
         return batch_sizes
 
+    # def set_validation_weights(self, validation, batch_sizes, train_steps_per_epoch):
+    #     """
+    #     FIXME: Update the train weights such that??
+    #     taken from hbw analysis but seems odd
+    #     """
+    #     for proc_inst, arrays in validation.items():
+    #         bs = batch_sizes[proc_inst]
+    #         arrays.validation_weights = arrays.weights / np.sum(arrays.weights) * bs * train_steps_per_epoch
+
     def set_validation_weights(self, validation, batch_sizes, train_steps_per_epoch):
-        """
-        Update the train weights such that
-        """
+        """Use consistent weights between training and validation"""
         for proc_inst, arrays in validation.items():
-            bs = batch_sizes[proc_inst]
-            arrays.validation_weights = arrays.weights / np.sum(arrays.weights) * bs * train_steps_per_epoch
+            # keep original weights - no artificial scaling
+            arrays.validation_weights = arrays.train_weights
+            logger.debug(f"Validation weights for {proc_inst.name}: sum={np.sum(arrays.validation_weights):.2e}")
 
     def _check_weights(self, train):
         sum_nodes = np.zeros(len(self.train_nodes), dtype=np.float32)
@@ -446,7 +468,13 @@ class ModelFitMixin(CallbacksBase):
         log_memory("start")
 
         batch_sizes = self.get_batch_sizes(data=train)
-        print("batch_sizes:", batch_sizes)
+        logger.debug(f"batch_sizes: {batch_sizes}")
+
+        # Add debugging for batch calculations
+        for proc_inst, batch_size in batch_sizes.items():
+            proc_events = len(train[proc_inst].train_weights)
+            steps_for_this_process = proc_events // batch_size if batch_size > 0 else 0
+            logger.debug(f"Process {proc_inst.name}: {proc_events} events ÷ {batch_size} batch_size = {steps_for_this_process} steps")  # noqa: E501
 
         # Create MultiDataset
         tf_train = MultiDataset(data=train, batch_size=batch_sizes, kind="train", buffersize=0)
@@ -457,18 +485,44 @@ class ModelFitMixin(CallbacksBase):
             ml_dataset.cleanup()
         log_memory("train cleanup")
 
-        # determine the requested steps_per_epoch
+        # # determine the requested steps_per_epoch
+        # # taken from hbw analysis but seems odd
+        # if isinstance(self.steps_per_epoch, str):
+        #     magic_smooth_factor = 1
+        #     # steps_per_epoch is usually "iter_smallest_process" (TODO: check performance with other factors)
+        #     steps_per_epoch = getattr(tf_train, self.steps_per_epoch) * magic_smooth_factor
+        # else:
+        #     raise Exception("self.steps_per_epoch is not a string, cannot determine steps_per_epoch")
+        # if not isinstance(steps_per_epoch, int):
+        #     raise Exception(
+        #         f"steps_per_epoch is {self.steps_per_epoch} but has to be either an integer or"
+        #         "a string corresponding to an integer attribute of the MultiDataset",
+        #     )
+        # logger.info(f"Training will be done with {steps_per_epoch} steps per epoch")
+
+        # don't use iter_smallest_process - use a reasonable multiplier
         if isinstance(self.steps_per_epoch, str):
-            magic_smooth_factor = 1
-            # steps_per_epoch is usually "iter_smallest_process" (TODO: check performance with other factors)
-            steps_per_epoch = getattr(tf_train, self.steps_per_epoch) * magic_smooth_factor
-        else:
-            raise Exception("self.steps_per_epoch is not a string, cannot determine steps_per_epoch")
-        if not isinstance(steps_per_epoch, int):
-            raise Exception(
-                f"steps_per_epoch is {self.steps_per_epoch} but has to be either an integer or"
-                "a string corresponding to an integer attribute of the MultiDataset",
+            base_steps = getattr(tf_train, self.steps_per_epoch)
+
+            # Calculate what we actually need to see all data reasonably
+            total_events = sum(len(data.train_weights) for data in train.values())
+            total_batch_size = sum(batch_sizes.values())
+            steps_to_see_all_data = total_events // total_batch_size
+
+            # Use a reasonable fraction of all data per epoch
+            steps_per_epoch = max(
+                steps_to_see_all_data // 10,  # See 1/10th of all data per epoch
+                base_steps * 50,              # Or 50x the smallest process
+                200                           # Minimum 200 steps per epoch
             )
+
+            logger.debug(f"Base steps (smallest process): {base_steps}")
+            logger.debug(f"Steps to see all data: {steps_to_see_all_data}")
+            logger.debug(f"Using steps per epoch: {steps_per_epoch}")
+
+        else:
+            steps_per_epoch = self.steps_per_epoch
+
         logger.info(f"Training will be done with {steps_per_epoch} steps per epoch")
 
         # Create validation dataset
@@ -482,6 +536,14 @@ class ModelFitMixin(CallbacksBase):
 
         # check that the weights are set correctly
         # self._check_weights(train)
+        # weight consistency check
+        train_weight_sum = sum(np.sum(data.train_weights) for data in train.values())
+        val_weight_sum = sum(np.sum(data.validation_weights) for data in validation.values())
+        weight_ratio = val_weight_sum / train_weight_sum
+        logger.debug(f"Weight ratio (validation/training): {weight_ratio:.2e}")
+
+        if weight_ratio > 10 or weight_ratio < 0.1:
+            logger.warning(f"Large weight imbalance detected: {weight_ratio:.2e}")
 
         # set the kwargs used for training
         model_fit_kwargs = {
@@ -494,12 +556,48 @@ class ModelFitMixin(CallbacksBase):
         }
         # start training by iterating over the MultiDataset
         iterator = (x for x in tf_train)
+
+        def debug_weights_and_labels(self, train, validation):
+            """Debug function to check weight and label distributions"""
+
+            logger.debug("=== WEIGHT DISTRIBUTION DEBUG ===")
+
+            for split_name, data in [("Training", train), ("Validation", validation)]:
+                logger.debug(f"\n{split_name} Data:")
+
+                total_weight = 0
+                label_counts = {}
+
+                for proc_name, proc_data in data.items():
+                    weight_attr = 'train_weights' if split_name == 'Training' else 'validation_weights'
+                    weights = getattr(proc_data, weight_attr)
+                    labels = proc_data.labels
+
+                    proc_weight = np.sum(weights)
+                    total_weight += proc_weight
+
+                    unique_labels, counts = np.unique(labels, return_counts=True)
+                    for label, count in zip(unique_labels, counts):
+                        label_counts[label] = label_counts.get(label, 0) + count
+
+                    logger.debug(f"  {proc_name}: weight_sum={proc_weight:.2e}, n_events={len(weights)}")
+
+                logger.debug(f"  Total weight: {total_weight:.2e}")
+                logger.debug(f"  Label distribution: {label_counts}")
+
+        debug_weights_and_labels(self, train, validation)
+
         logger.info("Starting training...")
         # Removed debugger call for performance
         model.fit(
             iterator,
             **model_fit_kwargs,
         )
+
+        # Log normalized losses for comparison
+        final_train_loss = model.history.history['loss'][-1]
+        final_val_loss = model.history.history['val_loss'][-1]
+        logger.info(f"Final losses - Train: {final_train_loss:.4f}, Val: {final_val_loss:.4f}")
 
         # Explicit cleanup to prevent memory leaks
         try:
