@@ -34,12 +34,15 @@ to a set of leaf categories, the sum of the category IDs is the ID of the
 parent category.
 """
 
+import law
 import order as od
 
 from columnflow.ml import MLModel
 from columnflow.config_util import create_category_combinations, CategoryGroup
 
 # from mtt.ml.categories import register_ml_selectors
+
+logger = law.logger.get_logger(__name__)
 
 
 def name_fn(categories: dict[str, od.Category]):
@@ -119,6 +122,12 @@ def add_categories_production(config: od.Config) -> None:
     Adds categories to a *config* that are available after the feature
     production step.
     """
+    # only run if not already done
+    logger.debug(f"config.x.added_categories_production: {getattr(config.x, 'added_categories_production', False)}")
+    if getattr(config.x, "added_categories_production", False):
+        logger.debug("Production categories have already been added to config, skipping...")
+        return
+    logger.debug("Adding production categories to config using 'add_categories_production'...")
 
     # -- atomic categories
 
@@ -178,11 +187,25 @@ def add_categories_production(config: od.Config) -> None:
 
     create_category_combinations(config, category_groups, name_fn, kwargs_fn=kwargs_fn, parent_mode="all")
 
+    # add tag to config to indicate that production categories have been added
+    config.x.added_categories_production = True
+    logger.debug(f"config.x.added_categories_production: {config.x.added_categories_production}")
+
 
 def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
     """
     Adds categories to a *config* that are available after the machine learning step.
     """
+    # only run if not already done
+    if getattr(config.x, "added_categories_ml", False):
+        logger.debug("ML categories have already been added to config, skipping...")
+        return
+    logger.debug("Adding ML categories to config using 'add_categories_ml'...")
+
+    # non-ml categories must have been added already
+    if getattr(config.x, "added_categories_production", False) is not True:
+        logger.debug("Production categories not yet present in config, adding them first in 'add_categories_ml'...")
+        add_categories_production(config)
 
     # -- register category selectors
     from mtt.ml.categories import register_ml_selectors
@@ -197,12 +220,17 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
     # get output categories from ML model
     dnn_categories = []
     for i, proc in enumerate(ml_model_inst.train_nodes.keys()):
-        cat = config.add_category(
-            name=f"dnn_{proc}",
-            id=(i + 1) * 100000,
-            selection=f"sel_dnn_{proc}",
-            label=f"dnn_{proc}",
-        )
+        try:
+
+            cat = config.add_category(
+                name=f"dnn_{proc}",
+                id=(i + 1) * 100000,
+                selection=f"sel_dnn_{proc}",
+                label=f"dnn_{proc}",
+            )
+        except:
+            logger.debug(f"Category dnn_{proc} already exists in config, retrieving it")
+            cat = config.get_category(f"dnn_{proc}")
         dnn_categories.append(cat)
 
     # fixed numbering scheme for ML categories
@@ -270,3 +298,5 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
         skip_existing=True,
         parent_mode="all",
     )
+
+    config.x.added_categories_ml = True

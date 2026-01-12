@@ -8,13 +8,12 @@ import law
 from columnflow.ml import MLModel
 from columnflow.util import maybe_import
 from columnflow.columnar_util import Route, set_ak_column
-from columnflow.selection import Selector, selector
 from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
-from columnflow.categorization import categorizer
+from columnflow.categorization import Categorizer, categorizer
 
 # from mtt.config.categories import add_categories_ml
-from mtt.util import get_subclasses_deep
+# from mtt.util import get_subclasses_deep  # for automated producer creation
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -28,7 +27,8 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
     """
 
     ml_output_columns = {
-        f"{ml_model_inst.cls_name}.score_{proc}"
+        # f"{ml_model_inst.cls_name}.score_{proc}"
+        f"mlscore.{proc}"
         for proc in ml_model_inst.train_nodes.keys()
     }
 
@@ -38,9 +38,10 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
             cls_name=f"sel_dnn_{proc}",
         )
         def sel_dnn(
-            self: Selector,
+            self: Categorizer,
             events: ak.Array,
-            this_output_column=f"{ml_model_inst.cls_name}.score_{proc}",
+            # this_output_column=f"{ml_model_inst.cls_name}.score_{proc}",
+            this_output_column=f"mlscore.{proc}",
             all_output_columns=ml_output_columns,
             **kwargs,
         ) -> ak.Array:
@@ -73,6 +74,7 @@ def add_ml_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     max_score = ak.fill_none(ak.max([events.mlscore[f] for f in events.mlscore.fields], axis=0), 0)
     events = set_ak_column(events, "mlscore.max_score", max_score, value_type=np.float32)
+    logger.debug("Set 'mlscore.max_score' column in events.")
     # category ids
     events = self[category_ids](events, **kwargs)
 
@@ -105,6 +107,7 @@ def add_ml_cats_setup(
 
 @add_ml_cats.init
 def add_ml_cats_init(self: Producer) -> None:
+    logger.debug(f"Initializing ML categorization producer {self.cls_name}...")
     if not self.ml_model_name:
         raise ValueError(f"invalid ml_model_name {self.ml_model_name} for Producer {self.cls_name}")
 
@@ -123,15 +126,24 @@ def add_ml_cats_init(self: Producer) -> None:
         )
 
     # add categories to config inst
-    from mtt.config.categories import add_categories_ml
-    logger.warning("Adding ML categories to config...")
-    add_categories_ml(self.config_inst, self.ml_model_name)
+    if getattr(self.config_inst.x, "added_categories_ml", False):
+        logger.debug("ML categories already present in config.")
+        return
+    if not self.config_inst.get_aux("has_categories_ml", False):
+        logger.debug(f"Adding ML categories to config using {self.cls_name}...")
+        from mtt.config.categories import add_categories_ml
+        add_categories_ml(self.config_inst, self.ml_model_name)
+        self.config_inst.x.has_categories_ml = True
 
-    self.uses.add(category_ids)
+    self.uses |= {
+        "TTbar.chi2",
+        category_ids
+    }
     self.produces.add(category_ids)
 
 
 # # get all the derived MLModels and instantiate a corresponding producer for each one
+# # FIXME to be tested again, currently disabled to avoid issues with circular imports
 # from mtt.ml.base import MLClassifierBase
 # ml_model_names = get_subclasses_deep(MLClassifierBase)
 # logger.info(f"deriving {len(ml_model_names)} ML categorizer...")
@@ -150,4 +162,4 @@ add_ml_cats_v1_AN_v12 = add_ml_cats.derive("add_ml_cats_v1_AN_v12", cls_dict={
     "ml_model_name": "v1_AN_v12"
 })
 
-logger.info("Created ML categorization producers manually")
+logger.debug("Created ML categorization producers manually")

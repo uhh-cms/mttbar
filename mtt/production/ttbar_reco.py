@@ -29,6 +29,8 @@ np = maybe_import("numpy")
 coffea = maybe_import("coffea")
 maybe_import("coffea.nanoevents.methods.nanoaod")
 
+logger = law.logger.get_logger(__name__)
+
 
 @producer(
     uses={
@@ -755,6 +757,12 @@ def add_prod_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     Add production categories to the events.
     """
+    if self.config_inst.x.added_categories_ml:
+        logger.warning(
+            "production categories have already been added via 'add_categories_ml' "
+            "producer; skipping addition via 'add_prod_cats'.",
+        )
+        return events
     # recalculate category ids with ttbar information
     events = self[category_ids](events, **kwargs)
 
