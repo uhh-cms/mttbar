@@ -98,8 +98,8 @@ def plot_introspection(
 
     rankings = {
         "SHAP": shap_ranking_dict,
-        "Sensitivity Analysis": sensitivity_analysis(model.trained_model, inputs, output_node, input_features),
-        "Gradient * Input": gradient_times_input(model.trained_model, inputs, output_node, input_features),
+        # "Sensitivity Analysis": sensitivity_analysis(model.trained_model, inputs, output_node, input_features),
+        # "Gradient * Input": gradient_times_input(model.trained_model, inputs, output_node, input_features),
     }
     # TODO: dump rankings in stats json (need to convert float32 into str for json compatibility)
     # if stats:
