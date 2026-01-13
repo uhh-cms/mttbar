@@ -757,7 +757,7 @@ def add_prod_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     """
     Add production categories to the events.
     """
-    if self.config_inst.x.added_categories_ml:
+    if getattr(self.config_inst.x, "added_categories_ml", False):
         logger.warning(
             "production categories have already been added via 'add_categories_ml' "
             "producer; skipping addition via 'add_prod_cats'.",
