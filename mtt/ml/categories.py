@@ -34,7 +34,7 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
 
     for proc in ml_model_inst.train_nodes.keys():
         @categorizer(
-            uses={"events"} | ml_output_columns,
+            uses=ml_output_columns,
             cls_name=f"sel_dnn_{proc}",
         )
         def sel_dnn(
@@ -58,7 +58,7 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
                     this_score > Route(other_col).apply(events)
                 )
 
-            return mask
+            return events, mask
 
 
 @producer(
@@ -84,16 +84,35 @@ def add_ml_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 @add_ml_cats.requires
 def add_ml_cats_reqs(self: Producer, task: law.Task, reqs: dict) -> None:
     if "ml" in reqs:
+        logger.debug("ML requirements already present, skipping addition of MLEvaluation.")
         return
 
     from columnflow.tasks.ml import MLTraining, MLEvaluation
     if task.pilot:
+        logger.debug("Pilot task detected, skipping MLEvaluation requirement.")
         # skip MLEvaluation in pilot, but ensure that MLTraining has already been run
         reqs["mlmodel"] = MLTraining.req(task, ml_model=self.ml_model_name)
     else:
+        logger.debug("Adding MLEvaluation requirement.")
         reqs["ml"] = MLEvaluation.req(
             task,
             ml_model=self.ml_model_name,
+        )
+        # also ensure that ttbar production is present
+        logger.debug("Adding ttbar production requirement for MLEvaluation.")
+        producer_inst = task.build_producer_inst("ttbar", params={
+            "dataset": task.dataset,
+            "dataset_inst": task.dataset_inst,
+            "config": task.config,
+            "config_inst": task.config_inst,
+            "analysis": task.analysis,
+            "analysis_inst": task.analysis_inst,
+        })
+        from columnflow.tasks.production import ProduceColumns
+        reqs["ttbar"] = ProduceColumns.req(
+            task,
+            producer="ttbar",
+            producer_inst=producer_inst,
         )
 
 
@@ -103,6 +122,7 @@ def add_ml_cats_setup(
 ) -> None:
     # self.uses |= self[category_ids].uses
     reader_targets["mlcolumns"] = inputs["ml"]["mlcolumns"]
+    reader_targets["columns"] = inputs["ttbar"]["columns"]
 
 
 @add_ml_cats.init
@@ -143,7 +163,7 @@ def add_ml_cats_init(self: Producer) -> None:
 
 
 # # get all the derived MLModels and instantiate a corresponding producer for each one
-# # FIXME to be tested again, currently disabled to avoid issues with circular imports
+# # FIXME to be tested again, currently disabled
 # from mtt.ml.base import MLClassifierBase
 # ml_model_names = get_subclasses_deep(MLClassifierBase)
 # logger.info(f"deriving {len(ml_model_names)} ML categorizer...")
