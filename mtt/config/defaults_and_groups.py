@@ -29,10 +29,10 @@ def set_defaults(
         "ml_model": None,
         "inference_model": "simple",
         "categories": [
-            "1m", "1e", "1m__0t", "1e__0t", "1m__1t", "1e__1t"
+            "1m", "1e", "1m__0t", "1e__0t", "1m__1t", "1e__1t",
         ],
         "variables": [
-            "electron_pt", "muon_pt"
+            "electron_pt", "muon_pt",
         ],
         "dataset": "tt_sl_powheg",
     })
@@ -156,16 +156,16 @@ def set_category_groups(
         "0t", "1t",
     ]
     chi2_categories = [
-        "pass", "fail"
+        "pass", "fail",
     ]
     acts_categories = [
-        "0_5", "5_7", "7_9", "9_1"
+        "0_5", "5_7", "7_9", "9_1",
     ]
 
     def generate_all_category_combinations(
             dimensions: tuple,
             min_depth: int = 1,
-            max_depth: int = None
+            max_depth: int = None,
     ) -> list[str]:
         """
         Generate all combinations of categories from the given dimensions.
