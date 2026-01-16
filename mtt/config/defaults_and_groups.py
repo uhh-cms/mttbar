@@ -27,7 +27,7 @@ def set_defaults(
         "weight_producer": "all_weights",
         "hist_producer": "cf_default",
         "ml_model": None,
-        "inference_model": "simple",
+        "inference_model": "an_v12_simplified__m7000_w70",
         "categories": [
             "1m", "1e", "1m__0t", "1e__0t", "1m__1t", "1e__1t",
         ],
