@@ -229,6 +229,18 @@ def set_category_groups(
             for chi2 in chi2_categories
             for acts in acts_categories
         ],
+        "v12_simplified": [
+            # signal regions
+            "1e__0t__chi2pass__dnn_tt",
+            "1m__0t__chi2pass__dnn_tt",
+            "1e__1t__chi2pass__dnn_tt",
+            "1m__1t__chi2pass__dnn_tt",
+            # control regions
+            "1e__dnn_other",
+            "1m__dnn_other",
+            "1m__dnn_st",
+            "1e__dnn_st",
+        ],
     })
 
     overrides = {
@@ -322,7 +334,7 @@ def set_selector_steps(
     tag = config.x.cpn_tag
 
     base_steps = {
-        "default": ["METFilters", "DiLeptonVeto", "AllHadronicVeto", "JetLepton2DCut", "BJet", "Jet", "MET", "Lepton"],
+        "default": ["METFilters", "DileptonVeto", "AllHadronicVeto", "JetLepton2DCut", "BJet", "Jet", "MET", "Lepton"],
     }
     base_steps_labels = {
         "JetLepton2DCut": "2D cut",
