@@ -574,9 +574,16 @@ def zprime_datasets(
                 "zprime_tt_m7000_w2100_madgraph",
             ],
             "2024": [
+                # 1% width samples
                 "zprime_tt_m500_w5_madgraph",
-                "zprime_tt_m5000_w1500_madgraph",
+                "zprime_tt_m4000_w40_madgraph",
+                "zprime_tt_m4500_w45_madgraph",
                 "zprime_tt_m7000_w70_madgraph",
+                # 10% width samples
+                # "zprime_tt_m2000_w200_madgraph",
+                "zprime_tt_m8000_w800_madgraph",
+                # 30% width samples
+                "zprime_tt_m5000_w1500_madgraph",
             ],
         },
     }
