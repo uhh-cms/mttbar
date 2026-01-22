@@ -17,6 +17,7 @@ logger = law.logger.get_logger(__name__)
 
 
 PATH_TO_RUN2_LIMITS = "/data/dust/user/matthiej/run2_datacards/limits/limits_{model}.csv"
+PATH_TO_RUN3_LIMITS = "/data/dust/user/matthiej/mttbar/workflow_scripts/limits/run3_{model}_limits.csv"
 
 # Run 2 theory lines
 RUN2_THEORY_LINES = {
@@ -38,30 +39,32 @@ RUN2_THEORY_LINES = {
     }
 }
 
-# currently available Run 3 limits
-RUN3_LIMITS = {
-    "ZPrime_w1": {
-        "500": 49.8750,
-        "4000": 0.0591,
-        "4500": 0.0376,
-        "7000": 0.0254,
-    },
-}
 
-
-# load Run 2 limits from CSV
-def load_run2_limits(model: str) -> pd.DataFrame:
-    path = PATH_TO_RUN2_LIMITS.format(model=model)
+# load limits from CSV
+def load_limits(model: str, run: int) -> pd.DataFrame:
+    """
+    Load limits for a given model and Run from CSV file.
+    """
+    if run == 2:
+        path = PATH_TO_RUN2_LIMITS.format(model=model)
+    elif run == 3:
+        path = PATH_TO_RUN3_LIMITS.format(model=model)
+        logger.debug(f"Loading Run 3 limits for model '{model}': {path}")
+    else:
+        raise ValueError(f"Unknown run: {run}")
     df = pd.read_csv(path)
-    logger.debug(f"Loaded Run 2 limits from {path}:")
+    logger.debug(f"Loaded Run {run} limits from {path}:")
     logger.debug(f"{df}")
     return df
 
 
-def plot_limits(model: str, crosssection: float = 0.1):
+def plot_limits(model: str, crosssection: float = 1.0) -> None:
+    """
+    Plot limits for a given model and assumed signal cross-section.
+    """
     # load limits
-    run2_limits = load_run2_limits(model)
-    run3_limits = RUN3_LIMITS[model]
+    run2_limits = load_limits(model, run=2)
+    run3_limits = load_limits(model, run=3)
 
     # set up plot
     plt.style.use(hep.style.CMS)
@@ -94,11 +97,9 @@ def plot_limits(model: str, crosssection: float = 0.1):
     )
 
     # plot Run 3 limits
-    masses = list(float(m) for m in run3_limits.keys())
-    limits = list(float(v) * crosssection for v in run3_limits.values())
     ax.scatter(
-        masses,
-        limits,
+        run3_limits["m"],
+        run3_limits["exp"] * crosssection,
         label="Run 3 Expected",
         color="red",
         marker="o",
