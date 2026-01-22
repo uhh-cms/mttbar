@@ -13,7 +13,7 @@ from columnflow.production.categories import category_ids
 from columnflow.categorization import Categorizer, categorizer
 
 # from mtt.config.categories import add_categories_ml
-# from mtt.util import get_subclasses_deep  # for automated producer creation
+from mtt.util import get_subclasses_deep  # for automated producer creation
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -164,22 +164,21 @@ def add_ml_cats_init(self: Producer) -> None:
 
 # # get all the derived MLModels and instantiate a corresponding producer for each one
 # # FIXME to be tested again, currently disabled
-# from mtt.ml.base import MLClassifierBase
-# ml_model_names = get_subclasses_deep(MLClassifierBase)
-# logger.info(f"deriving {len(ml_model_names)} ML categorizer...")
+from mtt.ml.base import MLClassifierBase
+ml_model_names = get_subclasses_deep(MLClassifierBase)
+logger.info(f"deriving {len(ml_model_names)} ML categorizer...")
 
-# for ml_model_name in ml_model_names:
-#     add_ml_cats.derive(f"add_ml_cats_{ml_model_name}", cls_dict={"ml_model_name": ml_model_name})
+for ml_model_name in ml_model_names:
+    add_ml_cats.derive(f"add_ml_cats_{ml_model_name}", cls_dict={"ml_model_name": ml_model_name})
 # Create ML categorization producers manually
-# from mtt.ml.categories import add_ml_cats
 
-# Create producers for your specific models
-add_ml_cats_v1_mergedbkgs = add_ml_cats.derive("add_ml_cats_v1_mergedbkgs", cls_dict={
-    "ml_model_name": "v1_mergedbkgs"
-})
+# # Create producers for your specific models
+# add_ml_cats_v1_mergedbkgs = add_ml_cats.derive("add_ml_cats_v1_mergedbkgs", cls_dict={
+#     "ml_model_name": "v1_mergedbkgs"
+# })
 
-add_ml_cats_v1_AN_v12 = add_ml_cats.derive("add_ml_cats_v1_AN_v12", cls_dict={
-    "ml_model_name": "v1_AN_v12"
-})
+# add_ml_cats_v1_AN_v12 = add_ml_cats.derive("add_ml_cats_v1_AN_v12", cls_dict={
+#     "ml_model_name": "v1_AN_v12"
+# })
 
-logger.debug("Created ML categorization producers manually")
+# logger.debug("Created ML categorization producers manually")

@@ -265,13 +265,15 @@ v1_mergedbkgs = v1_251219.derive("v1_mergedbkgs", cls_dict={
 # also, using 5-fold cross validation as in other models (DIFFERENT FROM ANv12!)
 v1_AN_v12 = DenseClassifier.derive("v1_AN_v12", cls_dict={
     "training_configs": configs_config["24"],
-    "learning_rate": 0.0005,
+    "learningrate": 0.0005,
     "epochs": 500,
     "batchsize": 2 ** 15,
     "train_val_test_split": (0.6, 0.2, 0.2),
     "train_nodes": train_nodes_config.mergedbkgs,
     "dropout": 0.5,
     "reduce_lr_kwargs": {
+        # FIXME these were not used in current training, need to set them properly by removing 'reduce_lr_' prefix in keys
+        # but keep for now to reproduce old results
         "reduce_lr_factor": 0.5,
         "reduce_lr_patience": 50,
         "reduce_lr_min_delta": 0.001,
@@ -289,6 +291,23 @@ v1_AN_v12 = DenseClassifier.derive("v1_AN_v12", cls_dict={
     }
 })
 
+v2_AN_v12 = v1_AN_v12.derive("v2_AN_v12", cls_dict={
+    "learningrate": 0.0001,
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.5,
+        "patience": 5,
+        "min_delta": 0.01,
+        "mode": "min",
+    },
+    "early_stopping_kwargs": {
+        "monitor": "val_loss",
+        "min_delta": 0.0005,
+        "patience": 30,
+        "start_from_epoch": 20,
+        "mode": "min",
+    },
+})
 
 
 
@@ -304,51 +323,48 @@ v1_AN_v12 = DenseClassifier.derive("v1_AN_v12", cls_dict={
 
 
 
+# #
+# # grid search models
+# #
+
+# from mtt.util import build_param_product
 
 
-
-#
-# grid search models
-#
-
-from mtt.util import build_param_product
-
-
-def physics_weights(strategy="balanced"):
-    if strategy == "balanced":
-        return {"tt": 1, "st": 1, "w_lnu": 1, "dy": 1}
-    elif strategy == "benchmark_from_hbw":
-        return {"tt": 8, "st": 2, "w_lnu": 2, "dy": 1}
-    elif strategy == "benchmark_from_hbw_inverted":
-        return {"tt": 1, "st": 2, "w_lnu": 2, "dy": 8}
-    else:
-        raise ValueError(f"Unknown strategy: {strategy}")
+# def physics_weights(strategy="balanced"):
+#     if strategy == "balanced":
+#         return {"tt": 1, "st": 1, "w_lnu": 1, "dy": 1}
+#     elif strategy == "benchmark_from_hbw":
+#         return {"tt": 8, "st": 2, "w_lnu": 2, "dy": 1}
+#     elif strategy == "benchmark_from_hbw_inverted":
+#         return {"tt": 1, "st": 2, "w_lnu": 2, "dy": 8}
+#     else:
+#         raise ValueError(f"Unknown strategy: {strategy}")
 
 
-example_grid_search = {
-    "layers": [(64, 64), (128, 128), (256, 256), (512, 512)],
-    "learningrate": [0.00500, 0.00050],
-    "negative_weights": ["ignore"],
-    "epochs": [500],
-    "batchsize": [1024, 2048, 4096],
-    "dropout": [0.1, 0.3, 0.5],
-    "sub_process_class_factors": [
-        physics_weights("balanced"),
-        physics_weights("benchmark_from_hbw"),
-        physics_weights("benchmark_from_hbw_inverted"),
-    ],  # weighting should not change AUCs, so optimize it separately
-}
+# example_grid_search = {
+#     "layers": [(64, 64), (128, 128), (256, 256), (512, 512)],
+#     "learningrate": [0.00500, 0.00050],
+#     "negative_weights": ["ignore"],
+#     "epochs": [500],
+#     "batchsize": [1024, 2048, 4096],
+#     "dropout": [0.1, 0.3, 0.5],
+#     "sub_process_class_factors": [
+#         physics_weights("balanced"),
+#         physics_weights("benchmark_from_hbw"),
+#         physics_weights("benchmark_from_hbw_inverted"),
+#     ],  # weighting should not change AUCs, so optimize it separately
+# }
 
-param_product_v1 = build_param_product(example_grid_search, lambda i: f"dense_gridsearch_v1_{i}")
-param_product_v1_mergedbkgs = build_param_product(example_grid_search, lambda i: f"dense_gridsearch_v1_mergedbkgs_{i}")
+# param_product_v1 = build_param_product(example_grid_search, lambda i: f"dense_gridsearch_v1_{i}")
+# param_product_v1_mergedbkgs = build_param_product(example_grid_search, lambda i: f"dense_gridsearch_v1_mergedbkgs_{i}")
 
-# to use these derived models, include this file in the law.cfg (ml_modules)
-for model_name, params in param_product_v1.items():
-    dense_model = v1_251219.derive(model_name, cls_dict=params)
+# # to use these derived models, include this file in the law.cfg (ml_modules)
+# for model_name, params in param_product_v1.items():
+#     dense_model = v1_251219.derive(model_name, cls_dict=params)
 
-for model_name, params in param_product_v1_mergedbkgs.items():
-    dense_model = v1_mergedbkgs.derive(model_name, cls_dict=params)
+# for model_name, params in param_product_v1_mergedbkgs.items():
+#     dense_model = v1_mergedbkgs.derive(model_name, cls_dict=params)
 
-# store model names as tuple to be exportable for scripts
-grid_search_models = tuple(param_product_v1.keys())
-grid_search_models_mergedbkgs = tuple(param_product_v1_mergedbkgs.keys())
+# # store model names as tuple to be exportable for scripts
+# grid_search_models = tuple(param_product_v1.keys())
+# grid_search_models_mergedbkgs = tuple(param_product_v1_mergedbkgs.keys())
