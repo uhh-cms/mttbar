@@ -382,12 +382,16 @@ def st_datasets(
                 "st_twchannel_tbar_fh_powheg",
             ],
             "2024": [
-                # "st_tchannel_t_4f_powheg",
-                # "st_tchannel_tbar_4f_powheg",
+                # t channel
+                # "st_tchannel_t_had_4f_powheg",  # FIXME one broken file stuck at CalibrateEvents?
+                "st_tchannel_tbar_had_4f_powheg",
+                "st_tchannel_t_lep_4f_powheg",
+                "st_tchannel_tbar_lep_4f_powheg",
+                # tW channel
                 "st_twchannel_t_sl_powheg",
                 "st_twchannel_tbar_sl_powheg",
                 "st_twchannel_t_dl_powheg",
-                # "st_twchannel_tbar_dl_powheg",
+                "st_twchannel_tbar_dl_powheg",
                 "st_twchannel_t_fh_powheg",
                 "st_twchannel_tbar_fh_powheg",
             ],
