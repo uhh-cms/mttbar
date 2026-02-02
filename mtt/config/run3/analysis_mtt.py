@@ -42,6 +42,7 @@ ana_new.x.bash_sandboxes = [
     "$CF_BASE/sandboxes/venv_columnar.sh",
     # "$MTT_BASE/sandboxes/venv_columnar_tf.sh",
     "$CF_BASE/sandboxes/venv_ml_tf.sh",
+    "$MTT_BASE/sandboxes/venv_ml_plotting.sh",
 ]
 
 # cmssw sandboxes that should be bundled for remote jobs in case they are needed
@@ -307,4 +308,3 @@ config_2024_medium_limited_new = add_new_config(
     config_id=3_24_31,  # 3: Run3 24
     limit_dataset_files=10,
 )
-

@@ -3,13 +3,22 @@
 """
 Selection methods for ML categorization
 """
+import law
+
 from columnflow.ml import MLModel
 from columnflow.util import maybe_import
-from columnflow.columnar_util import Route
-from columnflow.selection import Selector, selector
+from columnflow.columnar_util import Route, set_ak_column
+from columnflow.production import Producer, producer
+from columnflow.production.categories import category_ids
+from columnflow.categorization import Categorizer, categorizer
+
+# from mtt.config.categories import add_categories_ml
+from mtt.util import get_subclasses_deep  # for automated producer creation
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
+
+logger = law.logger.get_logger(__name__)
 
 
 def register_ml_selectors(ml_model_inst: MLModel) -> None:
@@ -18,19 +27,21 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
     """
 
     ml_output_columns = {
-        f"{ml_model_inst.cls_name}.score_{proc}"
-        for proc in ml_model_inst.processes
+        # f"{ml_model_inst.cls_name}.score_{proc}"
+        f"mlscore.{proc}"
+        for proc in ml_model_inst.train_nodes.keys()
     }
 
-    for proc in ml_model_inst.processes:
-        @selector(
-            uses={"events"} | ml_output_columns,
+    for proc in ml_model_inst.train_nodes.keys():
+        @categorizer(
+            uses=ml_output_columns,
             cls_name=f"sel_dnn_{proc}",
         )
         def sel_dnn(
-            self: Selector,
+            self: Categorizer,
             events: ak.Array,
-            this_output_column=f"{ml_model_inst.cls_name}.score_{proc}",
+            # this_output_column=f"{ml_model_inst.cls_name}.score_{proc}",
+            this_output_column=f"mlscore.{proc}",
             all_output_columns=ml_output_columns,
             **kwargs,
         ) -> ak.Array:
@@ -47,4 +58,127 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
                     this_score > Route(other_col).apply(events)
                 )
 
-            return mask
+            return events, mask
+
+
+@producer(
+    # uses in init, produces should not be empty
+    produces={"category_ids", "mlscore.max_score"},
+    ml_model_name=None,
+    # version=law.config.get_expanded("analysis", "add_ml_cats_version", 5),
+)
+def add_ml_cats(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Reproduces category ids after ML Training. Calling this producer also
+    automatically adds `MLEvaluation` to the requirements.
+    """
+    max_score = ak.fill_none(ak.max([events.mlscore[f] for f in events.mlscore.fields], axis=0), 0)
+    events = set_ak_column(events, "mlscore.max_score", max_score, value_type=np.float32)
+    logger.debug("Set 'mlscore.max_score' column in events.")
+    # category ids
+    events = self[category_ids](events, **kwargs)
+
+    return events
+
+
+@add_ml_cats.requires
+def add_ml_cats_reqs(self: Producer, task: law.Task, reqs: dict) -> None:
+    if "ml" in reqs:
+        logger.debug("ML requirements already present, skipping addition of MLEvaluation.")
+        return
+
+    from columnflow.tasks.ml import MLTraining, MLEvaluation
+    if task.pilot:
+        logger.debug("Pilot task detected, skipping MLEvaluation requirement.")
+        # skip MLEvaluation in pilot, but ensure that MLTraining has already been run
+        reqs["mlmodel"] = MLTraining.req(task, ml_model=self.ml_model_name)
+    else:
+        logger.debug("Adding MLEvaluation requirement.")
+        reqs["ml"] = MLEvaluation.req(
+            task,
+            ml_model=self.ml_model_name,
+        )
+        # also ensure that ttbar production is present
+        logger.debug("Adding ttbar production requirement for MLEvaluation.")
+        producer_inst = task.build_producer_inst("ttbar", params={
+            "dataset": task.dataset,
+            "dataset_inst": task.dataset_inst,
+            "config": task.config,
+            "config_inst": task.config_inst,
+            "analysis": task.analysis,
+            "analysis_inst": task.analysis_inst,
+        })
+        from columnflow.tasks.production import ProduceColumns
+        reqs["ttbar"] = ProduceColumns.req(
+            task,
+            producer="ttbar",
+            producer_inst=producer_inst,
+        )
+
+
+@add_ml_cats.setup
+def add_ml_cats_setup(
+    self: Producer, task: law.Task, reqs: dict, inputs: dict, reader_targets: law.util.InsertableDict,
+) -> None:
+    # self.uses |= self[category_ids].uses
+    reader_targets["mlcolumns"] = inputs["ml"]["mlcolumns"]
+    reader_targets["columns"] = inputs["ttbar"]["columns"]
+
+
+@add_ml_cats.init
+def add_ml_cats_init(self: Producer) -> None:
+    logger.debug(f"Initializing ML categorization producer {self.cls_name}...")
+    if not self.ml_model_name:
+        raise ValueError(f"invalid ml_model_name {self.ml_model_name} for Producer {self.cls_name}")
+
+    # NOTE: if necessary, we could initialize the MLModel ourselves, e.g. via:
+    # MLModelMixinBase.get_ml_model_inst(self.ml_model_name, self.analysis_inst, requested_configs=[self.config_inst])
+
+    if not self.config_inst.has_variable("mlscore.max_score"):
+        self.config_inst.add_variable(
+            name="mlscore.max_score",
+            expression="mlscore.max_score",
+            binning=(1000, 0., 1.),
+            x_title="DNN max output score",
+            aux={
+                "rebin": 25,
+            },
+        )
+
+    # add categories to config inst
+    if getattr(self.config_inst.x, "added_categories_ml", False):
+        logger.debug("ML categories already present in config.")
+        return
+    if not self.config_inst.get_aux("has_categories_ml", False):
+        logger.debug(f"Adding ML categories to config using {self.cls_name}...")
+        from mtt.config.categories import add_categories_ml
+        add_categories_ml(self.config_inst, self.ml_model_name)
+        self.config_inst.x.has_categories_ml = True
+
+    self.uses |= {
+        "TTbar.chi2",
+        category_ids
+    }
+    self.produces.add(category_ids)
+
+
+# # get all the derived MLModels and instantiate a corresponding producer for each one
+# # FIXME to be tested again, currently disabled
+from mtt.ml.base import MLClassifierBase
+ml_model_names = get_subclasses_deep(MLClassifierBase)
+logger.info(f"deriving {len(ml_model_names)} ML categorizer...")
+
+for ml_model_name in ml_model_names:
+    add_ml_cats.derive(f"add_ml_cats_{ml_model_name}", cls_dict={"ml_model_name": ml_model_name})
+# Create ML categorization producers manually
+
+# # Create producers for your specific models
+# add_ml_cats_v1_mergedbkgs = add_ml_cats.derive("add_ml_cats_v1_mergedbkgs", cls_dict={
+#     "ml_model_name": "v1_mergedbkgs"
+# })
+
+# add_ml_cats_v1_AN_v12 = add_ml_cats.derive("add_ml_cats_v1_AN_v12", cls_dict={
+#     "ml_model_name": "v1_AN_v12"
+# })
+
+# logger.debug("Created ML categorization producers manually")

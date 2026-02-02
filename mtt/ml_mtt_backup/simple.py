@@ -236,7 +236,7 @@ class TTbarSimpleDNN(MLModel):
 
         logger.info("Dataset-process matching completed")
         for i, proc in enumerate(process_insts):
-            logger.info(f"Process {proc.name}: {proc_n_events[i]} events, sum_weights: {proc_sum_weights[i]:.2f}, custom_weight: {proc_custom_weights[i]}")
+            logger.info(f"Process {proc.name}: {proc_n_events[i]} events, sum_weights: {proc_sum_weights[i]:.2f}, custom_weight: {proc_custom_weights[i]}")  # noqa: E501
 
         #
         # set inputs, weights and targets for each datset and fold
@@ -296,7 +296,7 @@ class TTbarSimpleDNN(MLModel):
                 sum_nnweights_processes.setdefault(this_proc_name, 0)
                 sum_nnweights_processes[this_proc_name] += sum(weights)
 
-                logger.debug(f"  Weights: min={np.min(weights):.6f}, max={np.max(weights):.6f}, sum={np.sum(weights):.2f}")
+                logger.debug(f"  Weights: min={np.min(weights):.6f}, max={np.max(weights):.6f}, sum={np.sum(weights):.2f}")  # noqa: E501
 
                 # remove columns not used in training
                 input_features = events[self.input_features_namespace]
@@ -376,8 +376,8 @@ class TTbarSimpleDNN(MLModel):
             train[k] = DNN_inputs[k][n_validation_events:]
 
         logger.info("Input preparation completed successfully")
-        logger.info(f"Training set shapes: inputs={train['inputs'].shape}, weights={train['weights'].shape}, target={train['target'].shape}")
-        logger.info(f"Validation set shapes: inputs={validation['inputs'].shape}, weights={validation['weights'].shape}, target={validation['target'].shape}")
+        logger.info(f"Training set shapes: inputs={train['inputs'].shape}, weights={train['weights'].shape}, target={train['target'].shape}")  # noqa: E501
+        logger.info(f"Validation set shapes: inputs={validation['inputs'].shape}, weights={validation['weights'].shape}, target={validation['target'].shape}")  # noqa: E501
 
         return train, validation
 
@@ -593,7 +593,7 @@ class TTbarSimpleDNN(MLModel):
         logger.info("=" * 50)
         logger.info("STARTING MODEL EVALUATION")
         logger.info("=" * 50)
-        
+
         logger.info(f"Evaluating on {len(events)} events")
         logger.info(f"Number of models (folds): {len(models)}")
         logger.info(f"Events used in training: {events_used_in_training}")
@@ -610,7 +610,7 @@ class TTbarSimpleDNN(MLModel):
         logger.info("Removing unused input features...")
         input_features = inputs[self.input_features_namespace]
         logger.info(f"Available features: {list(input_features.fields)}")
-        
+
         for var in input_features.fields:
             if var not in self.input_features:
                 inputs = remove_ak_column(inputs, f"{self.input_features_namespace}.{var}")
@@ -635,10 +635,10 @@ class TTbarSimpleDNN(MLModel):
         for i, model in enumerate(models):
             logger.info(f"  Running prediction with model {i+1}/{len(models)}")
             prediction = ak.from_numpy(model.predict_on_batch(inputs))
-            
+
             if len(prediction[0]) != len(self.processes):
                 raise Exception("Number of output nodes should be equal to number of processes")
-                
+
             logger.info(f"  Model {i+1} prediction shape: {prediction.layout.form}")
             predictions.append(prediction)
 
@@ -647,12 +647,12 @@ class TTbarSimpleDNN(MLModel):
         # choose prediction from model that has not used the test dataset/fold
         logger.info("Selecting predictions based on fold indices...")
         outputs = ak.ones_like(predictions[0]) * -1
-        
+
         for i in range(self.folds):
             fold_mask = fold_indices == i
             n_events_in_fold = ak.sum(fold_mask)
             logger.info(f"  Fold {i}: {n_events_in_fold} events")
-            
+
             # reshape mask from N*bool to N*k*bool (TODO: simpler way?)
             idx = ak.to_regular(
                 ak_concatenate_safe(
@@ -687,11 +687,11 @@ class TTbarSimpleDNN(MLModel):
         #
 
         logger.info("Computing ML-based categories...")
-        
+
         # ML categorization on top of existing categories
         ml_categories = [cat for cat in self.config_inst.categories if "dnn_" in cat.name]
         ml_proc_to_id = {cat.name.replace("dnn_", ""): cat.id for cat in ml_categories}
-        
+
         logger.info(f"Available ML categories: {len(ml_categories)}")
         for cat_name, cat_id in ml_proc_to_id.items():
             logger.info(f"  {cat_name}: category ID {cat_id}")
@@ -701,19 +701,19 @@ class TTbarSimpleDNN(MLModel):
             f.replace("score_", ""): events[self.cls_name, f]
             for f in events[self.cls_name].fields if f.startswith("score_")
         })
-        
+
         logger.info(f"Score fields: {list(scores.fields)}")
 
         # compute max score per event and corresponding category
         logger.info("Computing maximum scores and corresponding categories...")
         ml_category_id = ak.Array(np.zeros(len(events)))
         max_score = ak.Array(np.zeros(len(events)))
-        
+
         for proc in scores.fields:
             larger_score = (scores[proc] > max_score)
             n_better = ak.sum(larger_score)
             logger.info(f"  Process {proc}: {n_better} events have this as max score")
-            
+
             ml_category_id = ak.where(larger_score, ml_proc_to_id[proc], ml_category_id)
             max_score = ak.where(larger_score, scores[proc], max_score)
 
@@ -723,16 +723,16 @@ class TTbarSimpleDNN(MLModel):
         logger.info("Updating category IDs with ML categories...")
         original_categories = ak.unique(events.category_ids)
         logger.info(f"Original category IDs: {original_categories}")
-        
+
         category_ids = ak.where(
             events.category_ids != 0,  # do not split inclusive category into DNN sub-categories
             events.category_ids + ak.values_astype(ml_category_id, np.int32),
             events.category_ids,
         )
-        
+
         new_categories = ak.unique(category_ids)
         logger.info(f"New category IDs: {new_categories}")
-        
+
         events = set_ak_column(events, "category_ids", category_ids)
 
         # sanity check that the produced category IDs are all valid leaf categories
@@ -740,17 +740,17 @@ class TTbarSimpleDNN(MLModel):
         leaf_category_ids = {c.id for c in self.config_inst.get_leaf_categories()}
         present_category_ids = set(ak.ravel(events.category_ids))
         invalid_categories = present_category_ids - leaf_category_ids
-        
+
         logger.info(f"Valid leaf category IDs: {sorted(leaf_category_ids)}")
         logger.info(f"Present category IDs: {sorted(present_category_ids)}")
-        
+
         if invalid_categories:
             invalid_categories = ", ".join(sorted(invalid_categories))
             raise RuntimeError(
                 f"ML evaluation produced category ids that are not defined as valid "
                 f"leaf categories in the config: {invalid_categories}",
             )
-            
+
         logger.info("Category validation passed")
         logger.info("=" * 50)
         logger.info("MODEL EVALUATION COMPLETED")
