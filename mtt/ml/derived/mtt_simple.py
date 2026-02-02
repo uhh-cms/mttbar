@@ -184,29 +184,6 @@ configs_config = DotDict({
     "24": lambda self, requested_configs: ["run3_mtt_2024_nano_v15_new"],
 })
 
-# general architecture/ml model parameters
-architecture_config = DotDict({
-    "learning_rate": {
-        "default": DenseClassifier._default__learningrate,
-        "v1_251219": 0.0001,
-    },
-    "layers": {
-        "default": DenseClassifier._default__layers,
-    },
-    "dropout": {
-        "default": DenseClassifier._default__dropout,
-    },
-    "batchsize": {
-        "default": DenseClassifier._default__batchsize,
-    },
-    "epochs": {
-        "default": DenseClassifier._default__epochs,
-    },
-    "train_val_test_split": {
-        "default": DenseClassifier._default__train_val_test_split,
-    },
-})
-
 #################################
 #                               #
 # derived MLModels              #
@@ -225,7 +202,7 @@ simple_from_hbw = DenseClassifier.derive("simple_from_hbw", cls_dict={
 # first try of gridsearching base -> odd validation weights
 v1_251219 = DenseClassifier.derive("v1_251219", cls_dict={
     "training_configs": configs_config["24"],
-    "learning_rate": 0.0001,
+    "learningrate": 0.0001,
     "epochs": 100,
     "batchsize": 2 ** 10,
     "dropout": 0.3,

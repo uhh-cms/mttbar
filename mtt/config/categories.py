@@ -40,7 +40,7 @@ import order as od
 from columnflow.ml import MLModel
 from columnflow.config_util import create_category_combinations, CategoryGroup
 
-# from mtt.ml.categories import register_ml_selectors
+from mtt.ml.categories import register_ml_selectors
 
 logger = law.logger.get_logger(__name__)
 
@@ -208,7 +208,6 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
         add_categories_production(config)
 
     # -- register category selectors
-    from mtt.ml.categories import register_ml_selectors
     # if not already done, get the ml_model instance
     if isinstance(ml_model_inst, str):
         ml_model_inst = MLModel.get_cls(ml_model_inst)(config)

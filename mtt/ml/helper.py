@@ -15,8 +15,8 @@ np = maybe_import("numpy")
 
 
 def assign_dataset_to_process(
-        dataset_inst: od.Dataset,
-        process_insts: list[od.Process],
+    dataset_inst: od.Dataset,
+    process_insts: list[od.Process],
 ) -> bool:
     """
     Assigns the dataset to exactly one process from a list of processes.
