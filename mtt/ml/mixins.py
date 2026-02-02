@@ -513,7 +513,7 @@ class ModelFitMixin(CallbacksBase):
             steps_per_epoch = max(
                 steps_to_see_all_data // 10,  # See 1/10th of all data per epoch
                 base_steps * 50,              # Or 50x the smallest process
-                200                           # Minimum 200 steps per epoch
+                200,                          # Minimum 200 steps per epoch
             )
 
             logger.debug(f"Base steps (smallest process): {base_steps}")
@@ -569,7 +569,7 @@ class ModelFitMixin(CallbacksBase):
                 label_counts = {}
 
                 for proc_name, proc_data in data.items():
-                    weight_attr = 'train_weights' if split_name == 'Training' else 'validation_weights'
+                    weight_attr = "train_weights" if split_name == "Training" else "validation_weights"
                     weights = getattr(proc_data, weight_attr)
                     labels = proc_data.labels
 
@@ -595,8 +595,8 @@ class ModelFitMixin(CallbacksBase):
         )
 
         # Log normalized losses for comparison
-        final_train_loss = model.history.history['loss'][-1]
-        final_val_loss = model.history.history['val_loss'][-1]
+        final_train_loss = model.history.history["loss"][-1]
+        final_val_loss = model.history.history["val_loss"][-1]
         logger.info(f"Final losses - Train: {final_train_loss:.4f}, Val: {final_val_loss:.4f}")
 
         # Explicit cleanup to prevent memory leaks

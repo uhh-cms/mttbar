@@ -265,7 +265,7 @@ v1_AN_v12 = DenseClassifier.derive("v1_AN_v12", cls_dict={
     "callbacks": {
         "backup", "checkpoint", "reduce_lr",
         "early_stopping",
-    }
+    },
 })
 
 v2_AN_v12 = v1_AN_v12.derive("v2_AN_v12", cls_dict={
