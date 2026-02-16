@@ -37,7 +37,7 @@ def btag_params(
                     "medium": 0.4506,
                     "tight": 0.7738,
                 },
-            }
+            },
         },
         3: {
             "2022preEE": {
@@ -100,8 +100,8 @@ def btag_params(
                     "medium": 0.1272,
                     "tight": 0.4648,
                 },
-            }
-        }
+            },
+        },
     }
 
     return DotDict.wrap(wp_values[run][tag])
@@ -177,7 +177,7 @@ def toptag_params(
                     "medium": 0.639,
                     "tight": 0.821,
                     "very_tight": 0.974,
-                }
+                },
             },
         },
     }

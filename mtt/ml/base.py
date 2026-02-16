@@ -21,7 +21,7 @@ from columnflow.columnar_util import Route, set_ak_column
 from columnflow.config_util import get_datasets_from_process
 
 from mtt.util import log_memory
-from mtt.ml.data_loader import MLDatasetLoader, MLProcessData, input_features_sanity_checks
+from mtt.ml.data_loader import MLDatasetLoader, MLProcessData
 from mtt.config.processes import prepare_ml_processes
 # from mtt.config.categories import add_categories_ml
 
@@ -652,10 +652,6 @@ class MLClassifierBase(MLModel):
             return events
 
         # events = self.patch_events(events)
-
-        # # check that the input features are the same for all models
-        # for model in models:
-        #     input_features_sanity_checks(self, model["input_features"])
 
         process = task.dataset_inst.x("ml_process", task.dataset_inst.processes.get_first().name)
         process_inst = task.config_inst.get_process(process)

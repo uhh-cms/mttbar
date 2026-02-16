@@ -3,17 +3,26 @@
 """
 mttbar inference model
 """
+from __future__ import annotations
 
-from columnflow.inference import inference_model, ParameterType, ParameterTransformation
+import law
+
+from columnflow.inference import inference_model, ParameterType, ParameterTransformation, InferenceModel, FlowStrategy
+
+logger = law.logger.get_logger(__name__)
 
 
 @inference_model
-def simple(self):
+def simple(
+    self: InferenceModel,
+) -> None:
     """
     Simple inference model intended as a baseline.
     """
+    logger.warning(f"Requested inference model {self.cls_name} is untested. It only works for a single config.")
+    config_inst = self.config_insts[0]
 
-    year = self.config_inst.campaign.x.year  # noqa; not used right now
+    year = config_inst.campaign.x.year  # noqa; not used right now
 
     #
     # regions/categories
@@ -37,13 +46,20 @@ def simple(self):
     # add categories to inference model
     for inference_cat, config_cat in categories:
         self.add_category(
-            inference_cat,
-            config_category=config_cat,
-            config_variable="ttbar_mass",
+            name=inference_cat,
+            config_data={
+                config_inst.name: self.category_config_spec(
+                    category=config_cat,
+                    variable="ttbar_mass",
+                    data_datasets=[],
+                )
+            },
             mc_stats=True,
-            # no real data yet, use sum of backgrounds as fake data
-            config_data_datasets=[],
-            data_from_processes=["tt"],  # TODO: add backgrounds
+            flow_strategy=FlowStrategy.warn,  # FIXME look for options!
+            rate_precision=5,  # FIXME default for now
+            data_from_processes=[
+                "tt",
+            ],
         )
 
     #
@@ -88,10 +104,14 @@ def simple(self):
 
         # add process to inference model
         self.add_process(
-            inference_processes.get(proc, proc),
-            config_process=proc,
+            name=inference_processes.get(proc, proc),
+            config_data={
+                config_inst.name: self.process_config_spec(
+                    process=proc,
+                    mc_datasets=datasets,
+                )
+            },
             is_signal=proc.startswith("zprime_tt"),
-            config_mc_datasets=datasets,
         )
 
     #
@@ -148,15 +168,21 @@ def simple(self):
     inference_pars = {
         "minbias_xs": "pu",
     }
+    param_kwargs = {}
 
     for proc in processes:
         for unc in uncertainty_shifts:
             par = inference_pars.get(unc, unc)
+            param_kwargs["config_data"] = {
+                config_inst.name: self.parameter_config_spec(
+                    shift_source=unc,
+                )
+            }
             self.add_parameter(
                 f"{par}_{proc}",
                 process=inference_processes.get(proc, proc),
                 type=ParameterType.shape,
-                config_shift_source=unc,
+                **param_kwargs,
             )
 
     self.cleanup()

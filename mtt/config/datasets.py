@@ -41,7 +41,7 @@ def data_datasets(
         "2022postEE": list("efg"),
         "2023preBPix": ["c1", "c2", "c3", "c4"],
         "2023postBPix": ["d1", "d2"],
-        "2024": list("cdefghi")
+        "2024": list("cdefghi"),
     }[config.x.cpn_tag]
 
     data_datasets = [
@@ -76,7 +76,7 @@ def data_datasets(
 def dy_datasets(
         config: od.Config,
         limit_dataset_files: int | None = None,
-        log: bool = False
+        log: bool = False,
 ) -> None:
     """
     Adds DY+jets datasets to the config based on the run number and campaign tag.
@@ -95,7 +95,7 @@ def dy_datasets(
                 "dy_m50toinf_ht800to1200_madgraph",
                 "dy_m50toinf_ht1200to2500_madgraph",
                 "dy_m50toinf_ht2500toinf_madgraph",
-            ]
+            ],
         },
         3: {
             "2022preEE": [
@@ -131,8 +131,8 @@ def dy_datasets(
                 "dy_4j_mumu_m50toinf_madgraph",
                 "dy_4j_ee_m50toinf_madgraph",
                 # "dy_4j_tautau_m50toinf_madgraph",
-            ]
-        }
+            ],
+        },
     }
 
     try:
@@ -173,7 +173,7 @@ def w_lnu_datasets(
                 "w_lnu_ht800to1200_madgraph",
                 "w_lnu_ht1200to2500_madgraph",
                 "w_lnu_ht2500toinf_madgraph",
-            ]
+            ],
         },
         3: {
             "2022preEE": [
@@ -211,8 +211,8 @@ def w_lnu_datasets(
                 "w_lnu_2j_madgraph",
                 "w_lnu_3j_madgraph",
                 "w_lnu_4j_madgraph",
-            ]
-        }
+            ],
+        },
     }
     try:
         datasets_list = datasets[run][tag]
@@ -255,7 +255,7 @@ def vv_datasets(
             "2023preBPix": diboson_names,
             "2023postBPix": diboson_names,
             "2024": diboson_names,
-        }
+        },
     }
     try:
         dataset_list = datasets[run][tag]
@@ -298,7 +298,7 @@ def tt_datasets(
             "2023preBPix": tt_names,
             "2023postBPix": tt_names,
             "2024": tt_names,
-        }
+        },
     }
     try:
         dataset_list = datasets[run][tag]
@@ -338,7 +338,7 @@ def st_datasets(
                 "st_tchannel_tbar_4f_powheg",
                 "st_twchannel_t_powheg",
                 "st_twchannel_tbar_powheg",
-            ]
+            ],
         },
         3: {
             "2022preEE": [
@@ -436,7 +436,7 @@ def qcd_datasets(
                 "qcd_ht1000to1500_madgraph",
                 "qcd_ht1500to2000_madgraph",
                 "qcd_ht2000toinf_madgraph",
-            ]
+            ],
         },
         3: {
             "2022preEE": [
@@ -475,7 +475,7 @@ def qcd_datasets(
                 "qcd_ht1200to1500_madgraph",
                 "qcd_ht1500to2000_madgraph",
                 "qcd_ht2000toinf_madgraph",
-            ]
+            ],
         },
     }
     try:
@@ -574,11 +574,18 @@ def zprime_datasets(
                 "zprime_tt_m7000_w2100_madgraph",
             ],
             "2024": [
+                # 1% width samples
                 "zprime_tt_m500_w5_madgraph",
-                "zprime_tt_m5000_w1500_madgraph",
+                "zprime_tt_m4000_w40_madgraph",
+                "zprime_tt_m4500_w45_madgraph",
                 "zprime_tt_m7000_w70_madgraph",
+                # 10% width samples
+                # "zprime_tt_m2000_w200_madgraph",
+                "zprime_tt_m8000_w800_madgraph",
+                # 30% width samples
+                "zprime_tt_m5000_w1500_madgraph",
             ],
-        }
+        },
     }
 
     try:
@@ -637,7 +644,7 @@ def hpseudo_datasets(
         3: {
             "2022preEE": hpseudo_datasets,
             "2022postEE": hpseudo_datasets,
-        }
+        },
     }
     try:
         dataset_list = datasets[run][tag]
@@ -696,7 +703,7 @@ def hscalar_datasets(
         3: {
             "2022preEE": hscalar_datasets,
             "2022postEE": hscalar_datasets,
-        }
+        },
     }
     try:
         dataset_list = datasets[run][tag]
@@ -753,7 +760,7 @@ def rsgluon_datasets(
         3: {
             "2022preEE": rsgluon_datasets,
             "2022postEE": rsgluon_datasets,
-        }
+        },
     }
     try:
         dataset_list = datasets[run][tag]

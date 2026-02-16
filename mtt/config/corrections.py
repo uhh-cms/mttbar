@@ -324,12 +324,12 @@ def btag_sf_cfg(
         "SinglePionHCAL",
         "TimePtEta",
     ]
-    if year == 2024:
-        systematics = [
-            "central",
-            # "fsrdef", "hdamp", "isrdef", "jer", "jes", "mass",
-            # "statistic", "tune",
-        ]
+    # if year == 2024:
+    #     systematics = [
+    #         "central",
+    #         # "fsrdef", "hdamp", "isrdef", "jer", "jes", "mass",
+    #         # "statistic", "tune",
+    #     ]
     btag_sf_config = BTagSFConfig(
         correction_set=name,
         jec_sources=jec_sources,
@@ -367,7 +367,7 @@ def lepton_sf_cfg(
                         "Electron-ID-SF",
                         "2022Re-recoBCD",
                         "Tight",
-                    )
+                    ),
                 },
                 "muon": {
                     "sf_names": (
@@ -382,7 +382,7 @@ def lepton_sf_cfg(
                         "NUM_TightPFIso_DEN_TightID",
                         "2022preEE",
                     ),
-                }
+                },
             },
             "2022postEE": {
                 "electron": {
@@ -390,7 +390,7 @@ def lepton_sf_cfg(
                         "Electron-ID-SF",
                         "2022Re-recoE+PromptFG",
                         "Tight",
-                    )
+                    ),
                 },
                 "muon": {
                     "sf_names": (
@@ -413,7 +413,7 @@ def lepton_sf_cfg(
                         "Electron-ID-SF",
                         "2023PromptC",
                         "Tight",
-                    )
+                    ),
                 },
                 "muon": {
                     "sf_names": (
@@ -436,7 +436,7 @@ def lepton_sf_cfg(
                         "Electron-ID-SF",
                         "2023PromptD",
                         "Tight",
-                    )
+                    ),
                 },
                 "muon": {
                     "sf_names": (
@@ -481,7 +481,7 @@ def lepton_sf_cfg(
                     ),
                 },
             },
-        }
+        },
     }
 
     if lepton == "electron":
@@ -519,7 +519,7 @@ def lepton_sf_cfg(
 
 
 def met_phi_cfg(
-        config: od.Config
+    config: od.Config,
 ):
     met_column = config.x.met_selection.column
     # raw_met_column = config.x.met_selection.raw_column
@@ -547,10 +547,10 @@ def met_phi_cfg(
 def jet_id_cfg():
     from columnflow.production.cms.jet import JetIdConfig
     jet_id_config = JetIdConfig(
-        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3}
+        corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3},
     )
     fatjet_id_config = JetIdConfig(
-        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3}
+        corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3},
     )
 
     return DotDict.wrap({

@@ -3,21 +3,10 @@
 """
 Collection of patches of underlying columnflow tasks.
 """
-
-import getpass
-import inspect
-
 import law
-import luigi
+
 from columnflow.util import memoize
-from columnflow.tasks.framework.base import AnalysisTask
-from columnflow.tasks.selection import SelectEvents
-from columnflow.tasks.cutflow import CreateCutflowHistograms
-from columnflow.tasks.reduction import ReduceEvents
-from columnflow.tasks.production import ProduceColumns
-from columnflow.tasks.histograms import CreateHistograms
-from columnflow.tasks.ml import MLTraining, PrepareMLEvents, MLEvaluation
-from columnflow.columnar_util import TaskArrayFunction
+from columnflow.tasks.ml import MLTraining
 
 logger = law.logger.get_logger(__name__)
 

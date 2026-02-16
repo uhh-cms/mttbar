@@ -25,15 +25,15 @@ jec_ak4_nominal = jec_ak4.derive(
         "uncertainty_sources": [],
         "met_name": "PuppiMET",
         "raw_met_name": "RawPuppiMET",
-    }
+    },
 )
 jer_ak4_nominal = jer_ak4.derive(
     "jer_ak4_nominal",
     cls_dict={
         "jec_uncertainty_sources": [],
         "met_name": "PuppiMET",
-        "raw_met_name": "RawPuppiMET"
-    }
+        "raw_met_name": "RawPuppiMET",
+    },
 )
 
 # MET propagation disabled for AK8 jets as it's already handled by AK4 jet calibrators above
@@ -44,7 +44,7 @@ jec_ak8_nominal = jec_ak8.derive(
         "propagate_met": False,
         "met_name": "DO_NOT_USE",
         "raw_met_name": "DO_NOT_USE",
-    }
+    },
 )
 jer_ak8_nominal = jer_ak8.derive(
     "jer_ak8_nominal",
@@ -53,7 +53,7 @@ jer_ak8_nominal = jer_ak8.derive(
         "propagate_met": False,
         "met_name": "DO_NOT_USE",
         "raw_met_name": "DO_NOT_USE",
-    }
+    },
 )
 
 

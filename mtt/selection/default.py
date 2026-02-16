@@ -50,7 +50,7 @@ ak = maybe_import("awkward")
         # gen_parton_top,
         # gen_v_boson,
         json_filter,
-        jet_veto_map
+        jet_veto_map,
     },
     produces={
         jet_selection, lepton_selection, met_selection, top_tagged_jets, lepton_jet_2d_selection,
@@ -64,7 +64,7 @@ ak = maybe_import("awkward")
         # gen_parton_top,
         # gen_v_boson,
         json_filter,
-        jet_veto_map
+        jet_veto_map,
     },
     shifts={
         jet_energy_shifts,

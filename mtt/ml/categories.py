@@ -157,7 +157,7 @@ def add_ml_cats_init(self: Producer) -> None:
 
     self.uses |= {
         "TTbar.chi2",
-        category_ids
+        category_ids,
     }
     self.produces.add(category_ids)
 
