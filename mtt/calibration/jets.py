@@ -6,7 +6,7 @@ Custom jet energy calibration methods that disable data uncertainties (for searc
 
 from columnflow.calibration import Calibrator, calibrator
 # from columnflow.calibration.cms.jets import jec, jer
-from columnflow.calibration.cms.jets import jec_ak4, jer_ak4, jec_ak8, jer_ak8
+from columnflow.calibration.cms.jets import jec_ak4, jer_ak4, jec_ak8, jer_ak8, get_jerc_file_default
 from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
 from columnflow.columnar_util import set_ak_column
@@ -55,6 +55,12 @@ jer_ak8_nominal = jer_ak8.derive(
         "raw_met_name": "DO_NOT_USE",
     },
 )
+
+
+get_jerc_file_default.map_jet_name_file_key["SubJet"] = "jet_jerc"
+jer_subjets = jer_ak8_nominal.derive("jer_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
+jec_subjets = jec_ak8_nominal.derive("jec_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
+jec_subjets_nominal = jec_subjets.derive("jec_subjets", cls_dict={"uncertainty_sources": []})
 
 
 @calibrator
