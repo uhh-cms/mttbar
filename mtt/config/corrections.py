@@ -343,7 +343,7 @@ def btag_sf_cfg(
 
         def dataset_groups(dataset_inst: od.Dataset) -> list[od.Dataset]:
             # check which group the dataset belongs to
-            for group_index in range(1, len(config.x.btag_wp_eff_groups) + 1):
+            for group_index in range(0, len(config.x.btag_wp_eff_groups)):
                 group_tag = f"btag_wp_eff_group_{group_index}"
                 if dataset_inst.has_tag(group_tag):
                     return [
