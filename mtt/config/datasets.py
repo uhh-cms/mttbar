@@ -383,7 +383,7 @@ def st_datasets(
             ],
             "2024": [
                 # t channel
-                # "st_tchannel_t_had_4f_powheg",  # FIXME one broken file stuck at CalibrateEvents?
+                "st_tchannel_t_had_4f_powheg",  # FIXME one broken file stuck at CalibrateEvents?
                 "st_tchannel_tbar_had_4f_powheg",
                 "st_tchannel_t_lep_4f_powheg",
                 "st_tchannel_tbar_lep_4f_powheg",
@@ -464,9 +464,9 @@ def qcd_datasets(
                 "qcd_ht2000toinf_madgraph",
             ],
             "2024": [
-                # "qcd_ht40to70_madgraph",  # FIXME empty after selection (lim. config)
-                # "qcd_ht70to100_madgraph",  # FIXME empty after selection (lim. config)
-                # "qcd_ht100to200_madgraph",  # FIXME empty after selection (lim. config)
+                "qcd_ht40to70_madgraph",  # FIXME empty after selection (lim. config)
+                "qcd_ht70to100_madgraph",  # FIXME empty after selection (lim. config)
+                "qcd_ht100to200_madgraph",  # FIXME empty after selection (lim. config)
                 "qcd_ht200to400_madgraph",
                 "qcd_ht400to600_madgraph",
                 "qcd_ht600to800_madgraph",
