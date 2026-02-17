@@ -8,7 +8,7 @@ from operator import and_
 from functools import reduce
 from collections import defaultdict
 
-from columnflow.util import maybe_import
+from columnflow.util import maybe_import, DotDict
 from columnflow.production.util import attach_coffea_behavior
 
 from columnflow.selection import Selector, SelectionResult, selector
@@ -16,6 +16,7 @@ from columnflow.selection.stats import increment_stats
 from columnflow.selection.cms.met_filters import met_filters
 from columnflow.selection.cms.json_filter import json_filter
 from columnflow.selection.cms.jets import jet_veto_map
+from columnflow.selection.cms.btag import fill_btag_wp_count_hists
 from columnflow.production.categories import category_ids
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.processes import process_ids
@@ -35,6 +36,7 @@ from mtt.util import print_log_msg
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
+hist = maybe_import("hist")
 
 
 @selector(
@@ -75,6 +77,7 @@ def default(
     self: Selector,
     events: ak.Array,
     stats: defaultdict,
+    hists: DotDict[str, hist.Hist],
     **kwargs,
 ) -> tuple[ak.Array, SelectionResult]:
     # ensure coffea behavior
@@ -138,6 +141,12 @@ def default(
 
     n_sel = ak.sum(event_sel, axis=-1)
     print_log_msg(f"__all__: {n_sel}", print_msg=True)
+
+    # fill btagging efficiency histograms (in-place, so no return value)
+    # ! note that this uses selected jets only of selected events with the full "event_sel", so selecting a subset
+    # of selection-steps later on will not affect these histograms
+    if self.dataset_inst.is_mc and self.has_dep(fill_btag_wp_count_hists):
+        self[fill_btag_wp_count_hists](events, results.event, results.objects.Jet.Jet, hists, **kwargs)
 
     # # produce features relevant for selection and event weights
     # if self.dataset_inst.has_tag("is_sm_ttbar"):
@@ -224,3 +233,11 @@ def default_init(self: Selector) -> None:
     if hasattr(self, "dataset_inst") and not self.dataset_inst.is_mc:
         self.uses |= {data_trigger_veto}
         self.produces |= {data_trigger_veto}
+
+    if hasattr(self, "dataset_inst") and self.dataset_inst.is_mc:
+        self.uses |= {
+            fill_btag_wp_count_hists,
+        }
+        self.produces |= {
+            fill_btag_wp_count_hists,
+        }

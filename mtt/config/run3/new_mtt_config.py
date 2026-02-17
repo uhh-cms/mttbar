@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import functools
 import os
+import law
 
 import yaml
 from scinum import Number
@@ -684,7 +685,9 @@ def add_new_config(
     # add the shifts
     add_shifts(cfg)
 
-    cfg.x.btag_sf = btag_sf_cfg(year)
+    # cfg.x.btag_sf = btag_sf_cfg(year)
+    cfg.x.btag_wp_count_config = btag_sf_cfg(cfg, 2024)["btag_wp_count_config"]
+    cfg.x.btag_wp_sf_config = btag_sf_cfg(cfg, 2024)["btag_wp_sf_config"]
     cfg.x.toptag_sf = toptag_sf_cfg()
 
     cfg.x.electron_sf = lepton_sf_cfg(cfg, "electron")
@@ -722,9 +725,37 @@ def add_new_config(
         # "pdf_weight": ???,
     })
 
-    # event weights only present in certain datasets
     for dataset in cfg.datasets:
+        # event weights only present in certain datasets
         dataset.x.event_weights = DotDict()
+
+        # group datasets together for btag WP efficiency calculation in 2024
+        if year == 2024:
+            # TODO figure out which datasets should be grouped together;
+            # for now, don't group any datasets together and treat each type of dataset separately
+            cfg.x.btag_wp_eff_groups = [
+                ["tt_*"],
+                ["st_*"],
+                ["dy_*"],
+                ["w_lnu_*"],
+                ["ww_*", "wz_*", "zz_*"],
+                ["qcd_*"],
+                ["zprime_tt_*"],
+            ]
+            group_matched = False
+            for i, dataset_pattern in enumerate(cfg.x.btag_wp_eff_groups):
+                if law.util.multi_match(dataset.name, dataset_pattern):
+                    if group_matched:
+                        raise ValueError(
+                            f"dataset '{dataset.name}' already has a btag WP group assigned! Cannot assign it to more "
+                            "than one group",
+                        )
+                    group_matched = True
+                    dataset.add_tag(f"btag_wp_eff_group_{i}")
+            if not group_matched and dataset.is_mc:
+                raise ValueError(f"no btag_wp_eff_group_* assigned to dataset '{dataset.name}'")
+            if group_matched and dataset.is_data:
+                raise ValueError(f"must not assign btag_wp_eff_group_* to dataset '{dataset.name}'")
 
         # TTbar: top pt reweighting
         if dataset.has_tag("is_ttbar"):
@@ -785,7 +816,7 @@ def add_new_config(
             vnano=15,
             era="24CDEReprocessingFGHIPrompt-Summer24",
             pog_directories={"dc": "Collisions24"},
-            snapshot=CATSnapshot(btv="2025-12-03", dc="2025-07-25", egm="2025-12-03", jme="2025-12-02", muo="2025-11-27", lum="2025-12-02"),  # noqa: E501
+            snapshot=CATSnapshot(btv="2026-01-30", dc="2025-07-25", egm="2025-12-15", jme="2025-12-02", muo="2025-11-27", lum="2025-12-02"),  # noqa: E501
         ),
     }[(year, campaign.x.postfix, vnano)]
     cfg.x.cat_info = cat_info
@@ -832,8 +863,10 @@ def add_new_config(
     if year != 2024:
         add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
     else:
-        # SF stored in preliminary file for 2024 for now?
-        add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging_preliminary.json.gz"), "v1"))  # noqa: E501
+        # SF stored in preliminary file for 2024 for now
+        # add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging_preliminary.json.gz"), "v1"))  # noqa: E501
+        # use custom file with merged SF for both b/c and light jets
+        add_external("btag_wp_sf_corr", ("/data/dust/user/matthiej/mttbar/mtt/config/run3/btagging_preliminary_merged.json.gz", "v1"))  # noqa: E501
 
     # updated jet id
     add_external("jet_id", (cat_info.get_file("jme", "jetid.json.gz"), "v1"))

@@ -5,7 +5,7 @@ Producers related to event weights.
 """
 
 from columnflow.production import Producer, producer
-from columnflow.production.cms.btag import btag_weights
+from columnflow.production.cms.btag import btag_weights, btag_wp_weights
 from columnflow.production.cms.electron import electron_weights
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.muon import muon_weights
@@ -19,18 +19,6 @@ from mtt.production.gen_v import vjets_weight
 from mtt.production.toptag import toptag_weights
 
 ak = maybe_import("awkward")
-
-btag_uncs = {
-    "fsrdef": "fsrdef",
-    "hdamp": "hdamp",
-    "isrdef": "isrdef",
-    "jer": "jer",
-    "jes": "jes",
-    "mass": "mass",
-    "statistic": "statistic",
-    "tune": "tune",
-}
-upart_btag_weights = btag_weights.derive("upart_btag_weights", cls_dict={"btag_uncs": btag_uncs})
 
 
 @producer
@@ -55,7 +43,7 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         if self.config_inst.x.year in [2022, 2023]:
             events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
         elif self.config_inst.x.year == 2024:
-            events = self[upart_btag_weights](events, jet_mask=jet_mask, **kwargs)
+            events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
 
         # FIXME: not all weights are available for run 3
         if self.config_inst.x.run == 2:
@@ -127,8 +115,8 @@ def weights_init(self: Producer) -> None:
             }
         elif self.config_inst.x.year == 2024:
             self.uses |= {
-                upart_btag_weights,
+                btag_wp_weights,
             }
             self.produces |= {
-                upart_btag_weights,
+                btag_wp_weights,
             }

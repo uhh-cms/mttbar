@@ -281,7 +281,8 @@ def jerc_cfg(
 
 
 def btag_sf_cfg(
-        year: int = None,
+    config: od.Config,
+    year: int = None,
 ) -> list[tuple, list]:
     name = ("deepJet_shape") if year != 2024 else ("UParTAK4_kinfit")
     discr = "btagPNetB" if year != 2024 else "btagUParTAK4B"
@@ -324,20 +325,50 @@ def btag_sf_cfg(
         "SinglePionHCAL",
         "TimePtEta",
     ]
-    # if year == 2024:
-    #     systematics = [
-    #         "central",
-    #         # "fsrdef", "hdamp", "isrdef", "jer", "jes", "mass",
-    #         # "statistic", "tune",
-    #     ]
-    btag_sf_config = BTagSFConfig(
-        correction_set=name,
-        jec_sources=jec_sources,
-        discriminator=discr,
-        corrector_kwargs={"working_point": "M", "flavor": 5} if year == 2024 else {"working_point": "medium"},
-    )
+    if year == 2024:
+        # TODO: use shape based BTagSFConfig when available
+        # currently, one fixed WP is available for b tagging SF in 2024
+        # implementation from hbt analysis:
+        # https://github.com/uhh-cms/hh2bbtautau/blob/4b2f1bc57a9c2ada18776e5ac6f0372269e1e26c/hbt/config/configs_hbt.py#L1410 # noqa
+        from columnflow.selection.cms.btag import BTagWPCountConfig
+        btag_wp_count_config = BTagWPCountConfig(
+            jet_name="Jet",
+            btag_column=discr,
+            btag_wps=config.x.btag_wp_names.UParTAK4,
+            pt_edges=(0, 20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000),
+            abs_eta_edges=(0.0, 1.0, 1.5, 2.0, 5.0),
+        )
 
-    return btag_sf_config
+        from columnflow.production.cms.btag import BTagWPSFConfig
+
+        def dataset_groups(dataset_inst: od.Dataset) -> list[od.Dataset]:
+            # check which group the dataset belongs to
+            for group_index in range(1, len(config.x.btag_wp_eff_groups) + 1):
+                group_tag = f"btag_wp_eff_group_{group_index}"
+                if dataset_inst.has_tag(group_tag):
+                    return [
+                        _dataset_inst
+                        for _dataset_inst in config.datasets
+                        if _dataset_inst.has_tag(group_tag)
+                    ]
+            raise NotImplementedError(f"btag WP efficiency group not implemented for dataset {dataset_inst.name}")
+
+        btag_wp_sf_config = BTagWPSFConfig(
+            jet_name="Jet",
+            btag_column="btagUParTAK4B",
+            correction_set="UParTAK4_merged",
+            btag_wps=config.x.btag_wp_names.UParTAK4,
+            dataset_groups=dataset_groups,
+        )
+    else:
+        raise NotImplementedError("B-tagging SFs for 2022 and 2023 not implemented yet.")
+
+    configs = {
+        "btag_wp_count_config": btag_wp_count_config,
+        "btag_wp_sf_config": btag_wp_sf_config,
+    }
+
+    return configs
 
 
 def toptag_sf_cfg(

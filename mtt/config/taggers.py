@@ -93,6 +93,8 @@ def btag_params(
                     "loose": 0.0246,
                     "medium": 0.1272,
                     "tight": 0.4648,
+                    "xtight": 0.6298,
+                    "xxtight": 0.9739,
                 },
                 "particle_net": {
                     # FIXME: placeholder values, need to be updated when official values are available
