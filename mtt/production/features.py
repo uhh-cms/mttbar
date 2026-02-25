@@ -120,7 +120,7 @@ def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         attach_coffea_behavior,
         jj_features,
         jet_lepton_features,
-        "Electron.pt", "Muon.pt", "FatJet.pt", "Jet.pt",
+        "Electron.pt", "Muon.pt", "FatJet.pt", "Jet.pt", "BJet.pt", "LightJet.pt",
     },
     produces={
         attach_coffea_behavior,
@@ -129,6 +129,8 @@ def jet_lepton_features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         "ht",
         "n_jet",
         "n_fatjet",
+        "n_bjet",
+        "n_lightjet",
         "n_muon",
         "n_electron",
     },
@@ -144,12 +146,16 @@ def features(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # before evaluating `ak.num`
     jet = ak.without_parameters(events.Jet)
     fatjet = ak.without_parameters(events.FatJet)
+    bjet = ak.without_parameters(events.BJet)
+    lightjet = ak.without_parameters(events.LightJet)
     muon = ak.without_parameters(events.Muon)
     electron = ak.without_parameters(events.Electron)
 
     # count objects using `pt` fields as a proxy
     events = set_ak_column(events, "n_jet", ak.num(jet.pt, axis=-1))
     events = set_ak_column(events, "n_fatjet", ak.num(fatjet.pt, axis=-1))
+    events = set_ak_column(events, "n_bjet", ak.num(bjet.pt, axis=-1))
+    events = set_ak_column(events, "n_lightjet", ak.num(lightjet.pt, axis=-1))
     events = set_ak_column(events, "n_muon", ak.num(muon.pt, axis=-1))
     events = set_ak_column(events, "n_electron", ak.num(electron.pt, axis=-1))
 

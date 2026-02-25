@@ -383,7 +383,7 @@ def st_datasets(
             ],
             "2024": [
                 # t channel
-                "st_tchannel_t_had_4f_powheg",  # FIXME one broken file stuck at CalibrateEvents?
+                "st_tchannel_t_had_4f_powheg",
                 "st_tchannel_tbar_had_4f_powheg",
                 "st_tchannel_t_lep_4f_powheg",
                 "st_tchannel_tbar_lep_4f_powheg",
@@ -464,9 +464,9 @@ def qcd_datasets(
                 "qcd_ht2000toinf_madgraph",
             ],
             "2024": [
-                "qcd_ht40to70_madgraph",  # FIXME empty after selection (lim. config)
-                "qcd_ht70to100_madgraph",  # FIXME empty after selection (lim. config)
-                "qcd_ht100to200_madgraph",  # FIXME empty after selection (lim. config)
+                # "qcd_ht40to70_madgraph",  # FIXME empty after selection (both full & lim. config)
+                # "qcd_ht70to100_madgraph",  # FIXME empty after selection (both full & lim. config)
+                # "qcd_ht100to200_madgraph",  # FIXME empty after selection (both full & lim. config)
                 "qcd_ht200to400_madgraph",
                 "qcd_ht400to600_madgraph",
                 "qcd_ht600to800_madgraph",
@@ -579,11 +579,11 @@ def zprime_datasets(
                 "zprime_tt_m4000_w40_madgraph",
                 "zprime_tt_m4500_w45_madgraph",
                 "zprime_tt_m7000_w70_madgraph",
-                # 10% width samples
-                # "zprime_tt_m2000_w200_madgraph",
-                "zprime_tt_m8000_w800_madgraph",
-                # 30% width samples
-                "zprime_tt_m5000_w1500_madgraph",
+                # # 10% width samples
+                # # "zprime_tt_m2000_w200_madgraph",
+                # "zprime_tt_m8000_w800_madgraph",
+                # # 30% width samples
+                # "zprime_tt_m5000_w1500_madgraph",
             ],
         },
     }

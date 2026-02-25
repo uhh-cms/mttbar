@@ -60,7 +60,7 @@ def add_variables(config: od.Config) -> None:
 
     # Jets (4 pt-leading jets)
     for i in range(4):
-        for obj in ("Jet", "FatJet"):
+        for obj in ("Jet", "FatJet", "BJet", "LightJet"):
             config.add_variable(
                 name=f"{obj.lower()}{i+1}_pt",
                 expression=f"{obj}.pt[:,{i}]",
@@ -785,6 +785,12 @@ def add_variables_ml(config: od.Config) -> None:
             name=f"AN_v12_mli_jet_btagUParTAK4B_{i}",
             expression=f"{ns}.jet_btagUParTAK4B_{i}",
             binning=v12_btag_binning,
+            x_title=f"ML input (AK4 jet #{i} UParTAK4B b tag score) - ANv12",
+        )
+        config.add_variable(
+            name=f"AN_v12_mli_jet_btagUParTAK4B_{i}_rebinned",
+            expression=f"{ns}.jet_btagUParTAK4B_{i}",
+            binning=[0.0, 0.0246, 0.1272, 0.4648, 0.6298, 0.9739, 1.0],
             x_title=f"ML input (AK4 jet #{i} UParTAK4B b tag score) - ANv12",
         )
 

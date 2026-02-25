@@ -269,6 +269,7 @@ v1_AN_v12 = DenseClassifier.derive("v1_AN_v12", cls_dict={
 })
 
 v2_AN_v12 = v1_AN_v12.derive("v2_AN_v12", cls_dict={
+    # training without t channel single top
     "learningrate": 0.0001,
     "reduce_lr_kwargs": {
         "monitor": "val_loss",
@@ -284,6 +285,44 @@ v2_AN_v12 = v1_AN_v12.derive("v2_AN_v12", cls_dict={
         "start_from_epoch": 20,
         "mode": "min",
     },
+})
+
+# same parameters as v2_AN_v12 but with t channel single top included
+# renaming to keep output files separate from v2_AN_v12
+v3_AN_v12 = v2_AN_v12.derive("v3_AN_v12")
+
+# new training without b tagging scores
+# drop `AN_v12` from name since this is now different from the original ANv12 model
+# also, learningrate and callbacks need to be adapted differently without b tagging scores
+v4_no_btag = v3_AN_v12.derive("v4_no_btag", cls_dict={
+    "input_features": tuple([
+        "n_jet",
+        "n_fatjet",
+    ]) + tuple([
+        f"jet_{var}_{i + 1}"
+        for var in ("energy", "pt", "eta", "phi", "mass")
+        for i in range(5)
+    ]) + tuple([
+        f"fatjet_{var}_{i + 1}"
+        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]) + tuple([
+        f"lepton_{var}"
+        for var in ("energy", "pt", "eta", "phi")
+    ]) + tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+    "learningrate": 0.0005,
+    "batchsize": 2 ** 13,
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.5,
+        "patience": 5,
+        "min_delta": 0.001,
+        "mode": "min",
+    },
+    "steps_per_epoch": 400.0,
 })
 
 
