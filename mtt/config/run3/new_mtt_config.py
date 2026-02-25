@@ -579,15 +579,21 @@ def add_new_config(
 
         # event weights due to muon scale factors
         if not cfg.has_tag("skip_muon_weights"):
-            cfg.add_shift(name="muon_up", id=111, type="shape")
-            cfg.add_shift(name="muon_down", id=112, type="shape")
-            add_shift_aliases(cfg, "muon", {"muon_weight": "muon_weight_{direction}"})
+            cfg.add_shift(name="muon_id_up", id=111, type="shape")
+            cfg.add_shift(name="muon_id_down", id=112, type="shape")
+            add_shift_aliases(cfg, "muon_id", {"muon_id_weight": "muon_id_weight_{direction}"})
+            cfg.add_shift(name="muon_iso_up", id=113, type="shape")
+            cfg.add_shift(name="muon_iso_down", id=114, type="shape")
+            add_shift_aliases(cfg, "muon_iso", {"muon_iso_weight": "muon_iso_weight_{direction}"})
 
         # event weights due to electron scale factors
         if not cfg.has_tag("skip_electron_weights"):
-            cfg.add_shift(name="electron_up", id=121, type="shape")
-            cfg.add_shift(name="electron_down", id=122, type="shape")
-            add_shift_aliases(cfg, "electron", {"electron_weight": "electron_weight_{direction}"})
+            cfg.add_shift(name="electron_reco_up", id=121, type="shape")
+            cfg.add_shift(name="electron_reco_down", id=122, type="shape")
+            add_shift_aliases(cfg, "electron_reco", {"electron_reco_weight": "electron_reco_weight_{direction}"})
+            cfg.add_shift(name="electron_id_iso_up", id=123, type="shape")
+            cfg.add_shift(name="electron_id_iso_down", id=124, type="shape")
+            add_shift_aliases(cfg, "electron_id_iso", {"electron_id_iso_weight": "electron_id_iso_weight_{direction}"})
 
         # V+jets reweighting
         cfg.add_shift(name="vjets_up", id=201, type="shape")
@@ -690,11 +696,11 @@ def add_new_config(
     cfg.x.btag_wp_sf_config = btag_sf_cfg(cfg, 2024)["btag_wp_sf_config"]
     cfg.x.toptag_sf = toptag_sf_cfg()
 
-    cfg.x.electron_sf = lepton_sf_cfg(cfg, "electron")
+    cfg.x.electron_reco_sf_config = lepton_sf_cfg(cfg, "electron")["electron_reco_sf_config"]
+    cfg.x.electron_id_iso_sf_config = lepton_sf_cfg(cfg, "electron")["electron_id_iso_sf_config"]
 
-    cfg.x.muon_sf_names = lepton_sf_cfg(cfg, "muon")[0]
-    cfg.x.muon_id_sf_names = lepton_sf_cfg(cfg, "muon")[1]
-    cfg.x.muon_iso_sf_names = lepton_sf_cfg(cfg, "muon")[2]
+    cfg.x.muon_iso_sf_config = lepton_sf_cfg(cfg, "muon")["muon_iso_config"]
+    cfg.x.muon_id_sf_config = lepton_sf_cfg(cfg, "muon")["muon_id_config"]
 
     cfg.x.met_phi_correction = met_phi_cfg(cfg)  # METPhiConfig object
     cfg.x.jet_id = jet_id_cfg()["Jet"]  # JetIdConfig object
@@ -716,8 +722,11 @@ def add_new_config(
     cfg.x.event_weights = DotDict({
         "normalization_weight": [],
         "pu_weight": get_shifts("minbias_xs"),
-        "muon_weight": get_shifts("muon"),
-        "electron_weight": get_shifts("electron"),
+        "muon_id_weight": get_shifts("muon_id"),
+        "muon_iso_weight": get_shifts("muon_iso"),
+        "electron_reco_weight": get_shifts("electron_reco"),
+        "electron_id_iso_weight": get_shifts("electron_id_iso"),
+        "btag_weight": get_shifts("btag_bc", "btag_light"),
         # "ISR": get_shifts("ISR"),
         # "FSR": get_shifts("FSR"),
         # TODO: add scale and PDF weights, where available

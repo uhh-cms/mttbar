@@ -516,40 +516,40 @@ def lepton_sf_cfg(
     }
 
     if lepton == "electron":
-        lep_selection = config.x.lepton_selection["e"]
-        # electron_id_sf_config = ElectronSFConfig(
-        #     correction=lepton_sf_dict[run][tag][lepton]["id_sf_names"][0],
-        #     campaign=lepton_sf_dict[run][tag][lepton]["id_sf_names"][1],
-        #     working_point="wp80iso",  # taken from hbt config
-        # )
-        electron_reco_id_sf_config = ElectronSFConfig(
+        electron_id_iso_sf_config = ElectronSFConfig(
             correction=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][0],
             campaign=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][1],
             working_point={
-                "wp80iso": (lambda variables: (variables["pt"] >= lep_selection["min_pt"]["low_pt"]) & (variables["pt"] < lep_selection["min_pt"]["high_pt"])),
-                "RecoBelow20": (lambda variables: variables["pt"] < lep_selection["min_pt"]["low_pt"]),
-                "Reco20to75": (lambda variables: (variables["pt"] >= lep_selection["min_pt"]["low_pt"]) & (variables["pt"] < 75.0)),
+                "wp80iso": (lambda variables: variables["pt"] > 10),
+            },
+        )
+        electron_reco_sf_config = ElectronSFConfig(
+            correction=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][0],
+            campaign=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][1],
+            working_point={
+                "RecoBelow20": (lambda variables: variables["pt"] < 20),
+                "Reco20to75": (lambda variables: (variables["pt"] >= 20) & (variables["pt"] < 75.0)),
                 "RecoAbove75": (lambda variables: variables["pt"] >= 75.0),
             },
         )
-        return electron_reco_id_sf_config
+        configs = {
+            "electron_id_iso_sf_config": electron_id_iso_sf_config,
+            "electron_reco_sf_config": electron_reco_sf_config,
+        }
+        return configs
 
     elif lepton == "muon":
-        lep_selection = config.x.lepton_selection["mu"]
-        muon_sf_config = MuonSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["sf_names"][0],
-            # campaign=run,
-        )
         muon_id_config = MuonSFConfig(
             correction=lepton_sf_dict[run][tag][lepton]["id_sf_names"][0],
-            # campaign=run,
         )
         muon_iso_config = MuonSFConfig(
             correction=lepton_sf_dict[run][tag][lepton]["iso_sf_names"][0],
-            min_pt=lep_selection["min_pt"]["low_pt"],  # isolation requirement only for low pt muons
-            max_pt=lep_selection["min_pt"]["high_pt"],  # isolation requirement only for low pt muons
         )
-        return [muon_sf_config, muon_id_config, muon_iso_config]
+        configs = {
+            "muon_id_config": muon_id_config,
+            "muon_iso_config": muon_iso_config,
+        }
+        return configs
 
 
 def met_phi_cfg(
