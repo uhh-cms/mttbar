@@ -633,18 +633,42 @@ def add_new_config(
                 "tune",
             ]
             for i, unc in enumerate(btag_uncs):
-                cfg.add_shift(name=f"btag_{unc}_up", id=501 + 2 * i, type="shape")
-                cfg.add_shift(name=f"btag_{unc}_down", id=502 + 2 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_bc_up", id=501 + 4 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_bc_down", id=502 + 4 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_light_up", id=503 + 4 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_light_down", id=504 + 4 * i, type="shape")
                 add_shift_aliases(
                     cfg,
-                    f"btag_{unc}",
+                    f"btag_{unc}_bc",
                     {
-                        # UPDATED FOR 2024 USING UParTAK4B for b-tagging
-                        "normalized_btag_weight_upart": f"btagUParTAK4B_shape_weight_{unc}_" + "{direction}",
-                        "normalized_njet_btag_weight_upart": f"btagUParTAK4B_shape_weight_{unc}_" + "{direction}",
+                        f"btag_weight_{unc}_bc": f"btag_weight_{unc}_bc_" + "{direction}",
                     },
                 )
-
+                add_shift_aliases(
+                    cfg,
+                    f"btag_{unc}_light",
+                    {
+                        f"btag_weight_{unc}_light": f"btag_weight_{unc}_light_" + "{direction}",
+                    },
+                )
+            cfg.add_shift(name="btag_bc_up", id=501 + 4 * len(btag_uncs), type="shape")
+            cfg.add_shift(name="btag_bc_down", id=502 + 4 * len(btag_uncs), type="shape")
+            cfg.add_shift(name="btag_light_up", id=503 + 4 * len(btag_uncs), type="shape")
+            cfg.add_shift(name="btag_light_down", id=504 + 4 * len(btag_uncs), type="shape")
+            add_shift_aliases(
+                cfg,
+                "btag_bc",
+                {
+                    "btag_weight_bc": "btag_weight_bc_" + "{direction}",
+                },
+            )
+            add_shift_aliases(
+                cfg,
+                "btag_light",
+                {
+                    "btag_weight_light": "btag_weight_light_" + "{direction}",
+                },
+            )
         # jet energy scale (JEC) uncertainty variations
         for jec_source in cfg.x.jec.Jet.uncertainty_sources:
             idx = all_jec_sources.index(jec_source)
@@ -743,13 +767,13 @@ def add_new_config(
             # TODO figure out which datasets should be grouped together;
             # for now, don't group any datasets together and treat each type of dataset separately
             cfg.x.btag_wp_eff_groups = [
-                ["tt_*"],
-                ["st_*"],
-                ["dy_*"],
-                ["w_lnu_*"],
-                ["ww_*", "wz_*", "zz_*"],
-                ["qcd_*"],
-                ["zprime_tt_*"],
+                ["tt_*", "st_*", "zprime_tt_*", "qcd_*", "ww_*", "dy_*", "w_lnu_*", "wz_*", "zz_*"],
+                # ["dy_*"],
+                # ["w_lnu_*"],
+                # ["ww_*", "wz_*", "zz_*"],
+                # ["qcd_*"],
+                # ["zprime_tt_*"],
+                # ["dy_*", "w_lnu_*", "wz_*", "zz_*"],
             ]
             group_matched = False
             for i, dataset_pattern in enumerate(cfg.x.btag_wp_eff_groups):

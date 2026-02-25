@@ -104,10 +104,12 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         events = self[muon_id_iso_weights](events, **kwargs)
 
         # compute btag weights
-        jet_mask = (events.Jet["pt"] >= 100) & (abs(events.Jet["eta"]) < 2.5)
         if self.config_inst.x.year in [2022, 2023]:
+            jet_mask = (events.Jet["pt"] >= 100) & (abs(events.Jet["eta"]) < 2.5)
             events = self[btag_weights](events, jet_mask=jet_mask, **kwargs)
+        # different for 2024 and not for qcd datasets
         elif self.config_inst.x.year == 2024:
+            jet_mask = (events.Jet["pt"] < 10_000) & (abs(events.Jet["eta"]) < 2.5)
             events = self[btag_wp_weights](events, jet_mask=jet_mask, **kwargs)
 
         # FIXME: not all weights are available for run 3
