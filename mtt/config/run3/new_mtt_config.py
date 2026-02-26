@@ -626,17 +626,18 @@ def add_new_config(
                 )
         else:
             # https://cms-analysis-corrections.docs.cern.ch/corrections_era/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/BTV/2025-08-19/#btagging_preliminaryjsongz  # noqa
-            btag_uncs = [
+            btag_uncs_bc = [
                 "fsrdef", "isrdef",
                 "hdamp", "jer", "jes",
                 "mass", "statistic",
                 "tune",
             ]
-            for i, unc in enumerate(btag_uncs):
+            btag_uncs_light = [
+                "correlated", "uncorrelated",
+            ]
+            for i, unc in enumerate(btag_uncs_bc):
                 cfg.add_shift(name=f"btag_{unc}_bc_up", id=501 + 4 * i, type="shape")
                 cfg.add_shift(name=f"btag_{unc}_bc_down", id=502 + 4 * i, type="shape")
-                cfg.add_shift(name=f"btag_{unc}_light_up", id=503 + 4 * i, type="shape")
-                cfg.add_shift(name=f"btag_{unc}_light_down", id=504 + 4 * i, type="shape")
                 add_shift_aliases(
                     cfg,
                     f"btag_{unc}_bc",
@@ -644,6 +645,9 @@ def add_new_config(
                         f"btag_weight_{unc}_bc": f"btag_weight_{unc}_bc_" + "{direction}",
                     },
                 )
+            for i, unc in enumerate(btag_uncs_light):
+                cfg.add_shift(name=f"btag_{unc}_light_up", id=503 + 4 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_light_down", id=504 + 4 * i, type="shape")
                 add_shift_aliases(
                     cfg,
                     f"btag_{unc}_light",
@@ -651,10 +655,11 @@ def add_new_config(
                         f"btag_weight_{unc}_light": f"btag_weight_{unc}_light_" + "{direction}",
                     },
                 )
-            cfg.add_shift(name="btag_bc_up", id=501 + 4 * len(btag_uncs), type="shape")
-            cfg.add_shift(name="btag_bc_down", id=502 + 4 * len(btag_uncs), type="shape")
-            cfg.add_shift(name="btag_light_up", id=503 + 4 * len(btag_uncs), type="shape")
-            cfg.add_shift(name="btag_light_down", id=504 + 4 * len(btag_uncs), type="shape")
+
+            cfg.add_shift(name="btag_bc_up", id=501 + 4 * len(btag_uncs_bc), type="shape")
+            cfg.add_shift(name="btag_bc_down", id=502 + 4 * len(btag_uncs_bc), type="shape")
+            cfg.add_shift(name="btag_light_up", id=503 + 4 * len(btag_uncs_light), type="shape")
+            cfg.add_shift(name="btag_light_down", id=504 + 4 * len(btag_uncs_light), type="shape")
             add_shift_aliases(
                 cfg,
                 "btag_bc",
