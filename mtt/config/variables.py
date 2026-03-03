@@ -345,9 +345,10 @@ def add_variables(config: od.Config) -> None:
         y_title="Events",
     )
     config.add_variable(
-        name="gen_ttbar_mass_narrow",
+        name="gen_ttbar_mass_narrow_ext",
         expression="TTbar.gen_mass",
-        binning=config.get_variable("ttbar_mass_narrow").binning,
+        # binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 0, 9000),
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
         y_title="Events",

@@ -198,9 +198,11 @@ def add_new_config(
         "dy": "#FBFF36",  # yellow
         "vv": "#B900FC",  # pink
         "other": "#999999",  # grey
-        "zprime_m500_w5": "#000000",  # black
-        "zprime_m1000_w???": "#CCCCCC",  # light gray
-        "zprime_m3000_w???": "#666666",  # dark gray
+    }
+    zprime_colors = {
+        "zprime_tt_m500_w5": "#006400",  # black
+        "zprime_tt_m4000_w40": "#98FB98",  # light gray
+        "zprime_tt_m7000_w70": "#aaaaaa",  # very dark gray
     }
 
     # process settings groups to quickly define settings for ProcessPlots
@@ -214,21 +216,25 @@ def add_new_config(
             ],
         }
 
-        # zprime_base_label = r"Z'$\rightarrow$ $t\overline{t}$"
-        # zprime_mass_labels = {
-        #     # "zprime_tt_m500_w50": "$m$ = 0.5 TeV",
-        #     # "zprime_tt_m1000_w100": "$m$ = 1 TeV",
-        #     # "zprime_tt_m3000_w300": "$m$ = 3 TeV",
-        #     "zprime_tt_m7000_w70": "$m$ = 7 TeV",
-        # }
+        zprime_base_label = r"Z'"
+        zprime_mass_labels = {
+            "zprime_tt_m500_w5": "$m$ = 0.5 TeV, $\Gamma$/$m$ = 1%",
+            "zprime_tt_m4000_w40": "$m$ = 4 TeV, $\Gamma$/$m$ = 1%",
+            "zprime_tt_m7000_w70": "$m$ = 7 TeV, $\Gamma$/$m$ = 1%",
+        }
 
-        # for proc, zprime_mass_label in zprime_mass_labels.items():
-        #     proc_inst = cfg.get_process(proc)
-        #     proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
+        for proc, zprime_mass_label in zprime_mass_labels.items():
+            proc_inst = cfg.get_process(proc)
+            proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
+            if proc in zprime_colors:
+                proc_inst.color1 = zprime_colors[proc]
+                proc_inst.color2 = zprime_colors[proc]
 
         for proc in cfg.processes:
-            cfg.get_process(proc).color1 = colors.get(proc.name, "#aaaaaa")
-            cfg.get_process(proc).color2 = colors.get(proc.name, "#000000")
+            proc_inst = cfg.get_process(proc)
+            if proc.name not in zprime_colors.keys():
+                proc_inst.color1 = colors.get(proc.name, "#aaaaaa")
+                proc_inst.color2 = colors.get(proc.name, "#000000")
 
     # verify that the root processes of each dataset (or one of their
     # ancestor processes) are registered in the config

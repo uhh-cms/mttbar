@@ -25,7 +25,7 @@ def set_defaults(
         "reducer": "default",
         "producer": None,
         "weight_producer": "all_weights",
-        "hist_producer": "cf_default",
+        "hist_producer": "all_weights",
         "ml_model": None,
         "inference_model": "an_v12_simplified__m7000_w70",
         "categories": [

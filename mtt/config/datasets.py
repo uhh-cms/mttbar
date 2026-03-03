@@ -574,16 +574,46 @@ def zprime_datasets(
                 "zprime_tt_m7000_w2100_madgraph",
             ],
             "2024": [
+                # SIGNAL SAMPLES AVAILABLE AS OF 27.02.26
+                # currently only a subset of the full mass-width grid is included in the analysis, the main reason
+                # for that being that the b tagging SF calculation currently relies on a generic string ('zprime_tt*')
+                # to include all available Z' samples. For the final analysis, a smart grouping needs to be implemented
+                # as it probably isn't correct to mix between the different widths samples. It might also be that
+                # we can only include one sample at a time.
+                # Commenting out the samples currently triggers the entire workflow to run for all samples
+                # for the weights producer, so be careful!
                 # 1% width samples
                 "zprime_tt_m500_w5_madgraph",
+                # "zprime_tt_m900_w9_madgraph",
+                # "zprime_tt_m1400_w14_madgraph",
+                # "zprime_tt_m1600_w16_madgraph",
+                # "zprime_tt_m2000_w20_madgraph",
+                # "zprime_tt_m2500_w25_madgraph",
                 "zprime_tt_m4000_w40_madgraph",
                 "zprime_tt_m4500_w45_madgraph",
+                # "zprime_tt_m5000_w50_madgraph",
                 "zprime_tt_m7000_w70_madgraph",
-                # # 10% width samples
-                # # "zprime_tt_m2000_w200_madgraph",
+                # # # 10% width samples
+                # "zprime_tt_m500_w50_madgraph",
+                # "zprime_tt_m600_w60_madgraph",
+                # "zprime_tt_m1200_w120_madgraph",
+                # "zprime_tt_m1600_w160_madgraph",
+                # "zprime_tt_m1800_w180_madgraph",
+                # "zprime_tt_m2000_w200_madgraph",
+                # "zprime_tt_m2500_w250_madgraph",
+                # "zprime_tt_m5000_w500_madgraph",
+                # "zprime_tt_m6000_w600_madgraph",
+                # "zprime_tt_m7000_w700_madgraph",
                 # "zprime_tt_m8000_w800_madgraph",
                 # # 30% width samples
+                # "zprime_tt_m400_w120_madgraph",
+                # "zprime_tt_m800_w240_madgraph",
+                # "zprime_tt_m900_w270_madgraph",
+                # "zprime_tt_m1000_w300_madgraph",
+                # "zprime_tt_m2000_w600_madgraph",
+                # "zprime_tt_m3500_w1050_madgraph",
                 # "zprime_tt_m5000_w1500_madgraph",
+                # "zprime_tt_m6000_w1800_madgraph",
             ],
         },
     }
