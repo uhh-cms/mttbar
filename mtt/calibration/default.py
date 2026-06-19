@@ -48,7 +48,7 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
         msoftdrop,
         jec_subjets,
         # jer_subjets,
-        met_phi
+        # met_phi
     },
     produces={
         mc_weight,
@@ -58,7 +58,7 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
         msoftdrop,
         jec_subjets,
         # jer_subjets,
-        met_phi
+        # met_phi
     },
 )
 def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
@@ -79,7 +79,7 @@ def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     #     events = self[jer_subjets](events, **kwargs)
     events = self[msoftdrop](events, **kwargs)
 
-    events = self[met_phi](events, **kwargs)
+    # events = self[met_phi](events, **kwargs)
 
     return events
 
