@@ -131,6 +131,7 @@ class MLDatasetLoader:
         else:
             self._events = events[proc_mask]
             self._events = events[events.event_weight >= 0.0]
+            # self._events = events[:10_000]
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.ml_model_inst.cls_name}, {self.process})"
@@ -236,8 +237,8 @@ class MLDatasetLoader:
 
             input_features_sanity_checks(temp_ml_model, mapped_features_for_check)
 
-        except Exception as e:
-            logger.error(f"Input features sanity check failed: {e}")
+        except:
+            logger.error("Input features sanity check failed")
             logger.error(f"Expected (with MLInput prefix): {expected_with_prefix}")
             logger.error(f"Got (with MLInput prefix): {set(mapped_features_for_check)}")
 
@@ -532,7 +533,7 @@ class MLDatasetLoader:
 
         if self.shuffle:
             data = data[self.shuffle_indices]
-        logger.debug(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa
+        logger.info(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa
 
         return data[:train_end], data[train_end:val_end], data[val_end:]
 

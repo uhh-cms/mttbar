@@ -47,11 +47,11 @@ class DenseClassifier(DenseModelMixin, ModelFitMixin, MLClassifierBase):
         "n_jet",
         "n_fatjet",
     ) + tuple([
-        f"jet_{var}_{i + 1}"
+        f"jet_{i + 1}_{var}"
         for var in ("energy", "pt", "eta", "phi", "mass", "btagUParTAK4B")
         for i in range(5)
     ]) + tuple([
-        f"fatjet_{var}_{i + 1}"
+        f"fatjet_{i + 1}_{var}"
         for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
         for i in range(3)
     ]) + tuple([
@@ -142,7 +142,137 @@ procs_config = DotDict({
 
 # which input features should be used for training
 input_features_config = DotDict({
+    # full feature lists
     "default": DenseClassifier.input_features,
+    "no_btag_scores": tuple([
+        "n_jet",
+        "n_fatjet",
+        "n_bjet",
+    ]) + tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "mass")
+        for i in range(5)
+    ]) + tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]) + tuple([
+        f"lepton_{var}"
+        for var in ("energy", "pt", "eta", "phi")
+    ]) + tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+    "btag_buckets": tuple([
+        "n_jet",
+        "n_fatjet",
+        "n_bjet",
+    ]) + tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "mass", "btagUParTAK4B_buckets")
+        for i in range(5)
+    ]) + tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]) + tuple([
+        f"lepton_{var}"
+        for var in ("energy", "pt", "eta", "phi")
+    ]) + tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+    "highlevel": tuple([
+        "n_jet",
+        "n_fatjet",
+        "n_bjet",
+        "ht_jets",
+        "ht_fatjets",
+        "ht_sum",
+        "st",
+        "leading_jets_deltar",
+        "leading_fatjets_deltar",
+        "leading_jetfatjet_deltar",
+    ]) + tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("pt", "eta", "mass")
+        for i in range(5)
+    ]) + tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("pt", "eta", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]) + tuple([
+        f"lepton_{var}"
+        for var in ("pt", "eta",)
+    ]) + tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+    # atomic feature lists
+    "ak4_jets_all": tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "mass")
+        for i in range(5)
+    ]),
+    "ak4_jets_minimal": tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("pt", "eta", "mass")
+        for i in range(5)
+    ]),
+    "ak8_fatjets_all": tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]),
+    "ak8_fatjets_minimal": tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("pt", "eta", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]),
+    "lepton_all": tuple([
+        f"lepton_{var}"
+        for var in ("energy", "pt", "eta", "phi")
+    ]),
+    "lepton_minimal": tuple([
+        f"lepton_{var}"
+        for var in ("pt", "eta")
+    ]),
+    "met_all": tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+    "btag_scores": tuple([
+        f"jet_{i + 1}_btagUParTAK4B_buckets"
+        for i in range(5)
+    ]),
+    "event_level_all": (
+        "n_jet",
+        "n_fatjet",
+        "n_bjet",
+        "ht_jets",
+        "ht_fatjets",
+        "ht_sum",
+        "st",
+        "leading_jets_deltar",
+        "leading_fatjets_deltar",
+        "leading_jetfatjet_deltar",
+    ),
+    "jet_multiplicity": (
+        "n_jet",
+        "n_fatjet",
+        "n_bjet",
+    ),
+    "ht_variables": (
+        "ht_jets",
+        "ht_fatjets",
+        "ht_sum",
+        "st",
+    ),
+    "deltaR_variables": (
+        "leading_jets_deltar",
+        "leading_fatjets_deltar",
+        "leading_jetfatjet_deltar",
+    ),
 })
 
 # how to setup the train nodes (aka output classes)
@@ -174,6 +304,19 @@ class_factors_config = DotDict({
     "benchmark_from_hbw": {
         "tt": 8,
         "st": 2,
+        "dy": 2,
+        "w_lnu": 1,
+    },
+    "naive_balanced": {
+        # not reasonable, don't use
+        "tt": 250,
+        "st": 20,
+        "dy": 2,
+        "w_lnu": 1,
+    },
+    "more_balanced": {
+        "tt": 10,
+        "st": 4,
         "dy": 2,
         "w_lnu": 1,
     },
@@ -325,8 +468,266 @@ v4_no_btag = v3_AN_v12.derive("v4_no_btag", cls_dict={
     "steps_per_epoch": 400.0,
 })
 
+v5 = v2_AN_v12.derive("v5", cls_dict={
+    "steps_per_epoch": 20.0,
+    "input_features": tuple([
+        "n_jet",
+        "n_fatjet",
+    ]) + tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "mass", "btagUParTAK4B_buckets")
+        for i in range(5)
+    ]) + tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]) + tuple([
+        f"lepton_{var}"
+        for var in ("energy", "pt", "eta", "phi")
+    ]) + tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+})
 
+v6 = v2_AN_v12.derive("v6", cls_dict={
+    "steps_per_epoch": 20.0,
+    "input_features": input_features_config.no_btag_scores,
+    "learningrate": 0.0001,
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.5,
+        "patience": 5,
+        "min_delta": 0.001,
+        "mode": "min",
+    },
+    "early_stopping_kwargs": {
+        "monitor": "val_loss",
+        "min_delta": 0.001,
+        "patience": 8,
+        "start_from_epoch": 20,
+        "mode": "min",
+    },
+})
 
+chatties_baseline = DenseClassifier.derive("chatties_baseline", cls_dict={
+    "training_configs": configs_config["24"],
+    "layers": (128, 64, 32),
+    "learningrate": 1e-3,
+    "batchsize": 4096,
+    "dropout": 0.3,
+    "train_nodes": train_nodes_config.mergedbkgs,
+    "epochs": 100,
+    "early_stopping_kwargs": {
+        "monitor": "val_f1_score",
+        "min_delta": 0.001,
+        "patience": 10,
+        "start_from_epoch": 20,
+        "mode": "max",
+    },
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.5,
+        "patience": 5,
+        "min_delta": 0.001,
+        "mode": "min",
+    },
+    "steps_per_epoch": 200.0,
+    "callbacks": {
+        "backup", "checkpoint", "reduce_lr",
+        "early_stopping",
+    },
+    "train_val_test_split": (0.6, 0.2, 0.2),
+    "input_features": input_features_config.no_btag_scores,
+    "loss": "focal_loss",
+    "focal_loss_alpha": 1.0,
+    "focal_loss_gamma": 2.0,
+})
+
+tt_st_classifier = DenseClassifier.derive("tt_st_classifier", cls_dict={
+    "training_configs": configs_config["24"],
+    "processes": ["tt", "st"],
+    "input_features": input_features_config.no_btag_scores,
+    "class_factors": class_factors_config.default,
+    "train_nodes": {
+        "tt": {"ml_id": 0},
+        "st": {"ml_id": 1},
+    },
+    "learningrate": 0.0001,
+    "epochs": 100,
+    "batchsize": 2 ** 10,
+    "dropout": 0.3,
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.5,
+        "patience": 5,
+        "min_delta": 0.001,
+        "mode": "min",
+    },
+    "early_stopping_kwargs": {
+        "monitor": "val_loss",
+        "min_delta": 0.001,
+        "patience": 8,
+        "start_from_epoch": 20,
+        "mode": "min",
+    },
+    "layers": (512, 512),
+    "train_val_test_split": (0.6, 0.2, 0.2),
+    "steps_per_epoch": 100.0,
+    "callbacks": {
+        "backup", "checkpoint", "reduce_lr",
+        "early_stopping",
+    },
+})
+
+tt_st_highlevel = tt_st_classifier.derive("tt_st_highlevel", cls_dict={
+    "input_features": tuple([
+        "n_jet",
+        "n_fatjet",
+        "n_bjet",
+        "ht_jets",
+        "ht_fatjets",
+        "ht_sum",
+        "st",
+        "leading_jets_deltar",
+        "leading_fatjets_deltar",
+        "leading_jetfatjet_deltar",
+    ]) + tuple([
+        f"jet_{i + 1}_{var}"
+        for var in ("pt", "eta", "mass")
+        for i in range(5)
+    ]) + tuple([
+        f"fatjet_{i + 1}_{var}"
+        for var in ("pt", "eta", "msoftdrop", "tau21", "tau32")
+        for i in range(3)
+    ]) + tuple([
+        f"lepton_{var}"
+        for var in ("pt", "eta",)
+    ]) + tuple([
+        f"met_{var}"
+        for var in ("pt", "phi")
+    ]),
+    "batchsize": 4096,
+})
+
+v5_red_stats = v5.derive("v5_red_stats", cls_dict={
+    # "steps_per_epoch": 10.0,
+    "batchsize": 4096,
+})
+
+v5_balanced = v5.derive("v5_balanced", cls_dict={
+    "class_factors": class_factors_config.naive_balanced,
+    "input_features": (
+        input_features_config.ak4_jets_all
+        + input_features_config.ak8_fatjets_all
+        + input_features_config.lepton_all
+        + input_features_config.met_all
+        + input_features_config.jet_multiplicity
+    ),
+})
+
+v5_more_balanced = v5.derive("v5_more_balanced", cls_dict={
+    "class_factors": class_factors_config.more_balanced,
+    "input_features": (
+        input_features_config.ak4_jets_all
+        + input_features_config.ak8_fatjets_all
+        + input_features_config.lepton_all
+        + input_features_config.met_all
+        + input_features_config.jet_multiplicity
+    ),
+})
+
+# first optuna run results 11.03.26
+# {
+# 'n_layers': 2,
+# 'units_l0': 1024, 'dropout_l0': 0.15000000000000002,
+# 'units_l1': 128, 'dropout_l1': 0.05,
+# 'learning_rate': 0.002725378204287723, 'batch_size': 512, 'epochs': 90,
+# 'early_stopping_patience': 9,
+# 'learning_rate_reduction_factor': 0.1, 'learning_rate_reduction_patience': 3
+# }
+
+v6_optuna = DenseClassifier.derive("v6_optuna", cls_dict={
+    "class_factors": class_factors_config.default,
+    "input_features": (
+        input_features_config.ak4_jets_all
+        + input_features_config.btag_scores
+        + input_features_config.ak8_fatjets_all
+        + input_features_config.lepton_all
+        + input_features_config.met_all
+        + input_features_config.jet_multiplicity
+    ),
+    "layers": (1024, 128),
+    "dropout": 0.15,
+    "learningrate": 0.002725378204287723,
+    "batchsize": 512,
+    "epochs": 90,
+    "early_stopping_kwargs": {
+        "monitor": "val_loss",
+        "min_delta": 0.001,
+        "patience": 9,
+        "start_from_epoch": 20,
+        "mode": "min",
+    },
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.1,
+        "patience": 3,
+        "min_delta": 0.001,
+        "mode": "min",
+    },
+    "steps_per_epoch": 50.0,
+    "train_val_test_split": (0.6, 0.2, 0.2),
+})
+
+v7 = v2_AN_v12.derive("v7", cls_dict={
+    "steps_per_epoch": 50.0,
+    "batchsize": 4096,
+    "input_features": (
+        input_features_config.ak4_jets_all
+        + input_features_config.btag_scores
+        + input_features_config.ak8_fatjets_all
+        + input_features_config.lepton_all
+        + input_features_config.met_all
+        + input_features_config.jet_multiplicity
+    ),
+    "folds": 3,
+})
+
+v8 = DenseClassifier.derive("v8", cls_dict={
+    "steps_per_epoch": 50.0,
+    "batchsize": 4096,
+    "input_features": (
+        input_features_config.ak4_jets_all
+        + input_features_config.btag_scores
+        + input_features_config.ak8_fatjets_all
+        + input_features_config.lepton_all
+        + input_features_config.met_all
+        + input_features_config.jet_multiplicity
+    ),
+    "folds": 5,
+    "class_factors": {
+        "tt": 1,
+        "dy": 1,
+        "w_lnu": 1,
+    },
+    "train_nodes": {
+        "tt": {"ml_id": 0},
+        "other": {
+            "ml_id": 1,
+            "sub_processes": ["dy", "w_lnu"],
+            "label": "Other",
+            "color": "#5E8FFC",  # blue
+            "class_factor_mode": "xsec",
+        },
+    },
+    "train_val_test_split": (0.6, 0.2, 0.2),
+    "processes": [
+        "tt",
+        "dy",
+        "w_lnu",
+    ],
+})
 
 
 
