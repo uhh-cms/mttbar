@@ -7,6 +7,7 @@ import functools
 
 from columnflow.calibration import Calibrator, calibrator
 from columnflow.calibration.cms.jets import jets
+from columnflow.calibration.cms.met import met_phi
 # TODO should we add these later?
 # from columnflow.calibration.cms.egamma import electron_scale_smear
 # from columnflow.calibration.cms.muon import muon_sr
@@ -29,6 +30,7 @@ set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
     produces={mc_weight, deterministic_seeds, jets},
 )
 def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
+    raise NotImplementedError("This is not a real calibrator, just a placeholder for the default sequence of calibrators to be applied. Please implement the actual calibrator functions and replace this with the correct sequence of calls to those functions.")
     if self.dataset_inst.is_mc:
         events = self[mc_weight](events, **kwargs)
     events = self[deterministic_seeds](events, **kwargs)
@@ -45,7 +47,8 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
         jet_energy,
         msoftdrop,
         jec_subjets,
-        # jer_subjets
+        # jer_subjets,
+        met_phi
     },
     produces={
         mc_weight,
@@ -54,7 +57,8 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
         jet_energy,
         msoftdrop,
         jec_subjets,
-        # jer_subjets
+        # jer_subjets,
+        met_phi
     },
 )
 def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
@@ -74,6 +78,8 @@ def skip_jecunc(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     # if self.dataset_inst.is_mc:
     #     events = self[jer_subjets](events, **kwargs)
     events = self[msoftdrop](events, **kwargs)
+
+    events = self[met_phi](events, **kwargs)
 
     return events
 

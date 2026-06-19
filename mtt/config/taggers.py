@@ -89,7 +89,7 @@ def btag_params(
                 # },
             },
             "2024": {
-                "UParTAK4": {
+                "btagUParTAK4B": {
                     "loose": 0.0246,
                     "medium": 0.1272,
                     "tight": 0.4648,

@@ -241,7 +241,7 @@ def add_new_config(
     verify_config_processes(cfg, warn=True)
 
     # add tagger working points
-    cfg.x.btag_wp_names = btag_params(cfg)
+    cfg.x.btag_wp = btag_params(cfg)
     cfg.x.toptag_wp = toptag_params(cfg)
 
     #
@@ -314,7 +314,7 @@ def add_new_config(
             "btagger": {
                 "column": "btagDeepFlavB" if year != 2024 else "btagUParTAK4B",
                 # "column": "btagDeepFlavB" if year != 2024 else "btagPNetB",
-                "wp": cfg.x.btag_wp_names.deepjet.medium if year != 2024 else cfg.x.btag_wp_names.UParTAK4.medium,
+                "wp": cfg.x.btag_wp.deepjet.medium if year != 2024 else cfg.x.btag_wp.btagUParTAK4B.medium,
                 # "wp": cfg.x.btag_wp.deepjet.medium if year != 2024 else cfg.x.btag_wp.particle_net.medium,
             },
         },
@@ -427,9 +427,12 @@ def add_new_config(
             "lumi_13p6TeV_2023": 0.013j,
         })
     elif year == 2024:
-        cfg.x.luminosity = Number(109_080.0, {  # TODO: update number
+        cfg.x.luminosity = Number(109_080.0, {
             "lumi_13p6TeV_2024": 0.013j,
         })
+        # cfg.x.luminosity = Number(109_095.0, {  # FIXME: SWITCH WHEN RERUNNING
+        #     "lumi_13p6TeV_2024": 0.013j,  # check error
+        # })
         # processed lumi for limited configs
         # cfg.x.luminosity = Number(995.223558512, {
         #     "lumi_13p6TeV_2024": 0.013j,
@@ -532,6 +535,18 @@ def add_new_config(
     # read in JEC sources from file
     with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
         all_jec_sources = yaml.load(f, yaml.Loader)["names"]
+    btag_uncs_bc = [
+        "fsrdef", "isrdef",
+        "hdamp", "jer", "jes",
+        "mass", "statistic",
+        "tune",
+    ]
+    btag_uncs_bc_full = [f"{unc}_bc" for unc in btag_uncs_bc] + ["bc"]
+    btag_uncs_light = [
+        "",
+        "correlated", "uncorrelated",
+    ]
+    btag_uncs_light_full = [f"{unc}_light" for unc in btag_uncs_light] + ["light"]
 
     # declare the shifts
     def add_shifts(cfg):
@@ -632,15 +647,6 @@ def add_new_config(
                 )
         else:
             # https://cms-analysis-corrections.docs.cern.ch/corrections_era/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/BTV/2025-08-19/#btagging_preliminaryjsongz  # noqa
-            btag_uncs_bc = [
-                "fsrdef", "isrdef",
-                "hdamp", "jer", "jes",
-                "mass", "statistic",
-                "tune",
-            ]
-            btag_uncs_light = [
-                "correlated", "uncorrelated",
-            ]
             for i, unc in enumerate(btag_uncs_bc):
                 cfg.add_shift(name=f"btag_{unc}_bc_up", id=501 + 4 * i, type="shape")
                 cfg.add_shift(name=f"btag_{unc}_bc_down", id=502 + 4 * i, type="shape")
@@ -648,7 +654,7 @@ def add_new_config(
                     cfg,
                     f"btag_{unc}_bc",
                     {
-                        f"btag_weight_{unc}_bc": f"btag_weight_{unc}_bc_" + "{direction}",
+                        f"btag_weight": f"btag_weight_{unc}_bc_" + "{direction}",
                     },
                 )
             for i, unc in enumerate(btag_uncs_light):
@@ -658,7 +664,7 @@ def add_new_config(
                     cfg,
                     f"btag_{unc}_light",
                     {
-                        f"btag_weight_{unc}_light": f"btag_weight_{unc}_light_" + "{direction}",
+                        f"btag_weight": f"btag_weight_{unc}_light_" + "{direction}",
                     },
                 )
 
@@ -670,14 +676,14 @@ def add_new_config(
                 cfg,
                 "btag_bc",
                 {
-                    "btag_weight_bc": "btag_weight_bc_" + "{direction}",
+                    "btag_weight": "btag_weight_bc_" + "{direction}",
                 },
             )
             add_shift_aliases(
                 cfg,
                 "btag_light",
                 {
-                    "btag_weight_light": "btag_weight_light_" + "{direction}",
+                    "btag_weight": "btag_weight_light_" + "{direction}",
                 },
             )
         # jet energy scale (JEC) uncertainty variations
@@ -754,6 +760,7 @@ def add_new_config(
 
     # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
     get_shifts = functools.partial(get_shifts_from_sources, cfg)
+    full_btag_uncs = btag_uncs_bc_full + btag_uncs_light_full
     cfg.x.event_weights = DotDict({
         "normalization_weight": [],
         "pu_weight": get_shifts("minbias_xs"),
@@ -761,7 +768,7 @@ def add_new_config(
         "muon_iso_weight": get_shifts("muon_iso"),
         "electron_reco_weight": get_shifts("electron_reco"),
         "electron_id_iso_weight": get_shifts("electron_id_iso"),
-        "btag_weight": get_shifts("btag_bc", "btag_light"),
+        "btag_weight": get_shifts(*(f"btag_{unc}" for unc in full_btag_uncs)),
         # "ISR": get_shifts("ISR"),
         # "FSR": get_shifts("FSR"),
         # TODO: add scale and PDF weights, where available
