@@ -1017,42 +1017,8 @@ def add_new_config(
             {
                 "Jet.pt": "Jet.pt_{name}",
                 "Jet.mass": "Jet.mass_{name}",
-                "MET.pt": "MET.pt_{name}",
-            },
-        )
-
-        # PSWeight variations
-        cfg.add_shift(name="ISR_up", id=7001, type="shape")  # PS weight [0] ISR=2 FSR=1
-        cfg.add_shift(name="ISR_down", id=7002, type="shape")  # PS weight [2] ISR=0.5 FSR=1
-        add_shift_aliases(cfg, "ISR", {"ISR": "ISR_{direction}"})
-
-        cfg.add_shift(name="FSR_up", id=7003, type="shape")  # PS weight [1] ISR=1 FSR=2
-        cfg.add_shift(name="FSR_down", id=7004, type="shape")  # PS weight [3] ISR=1 FSR=0.5
-        add_shift_aliases(cfg, "FSR", {"FSR": "FSR_{direction}"})
-
-    #
-    # corrections
-    #
-
-    cfg.x.vjets_reweighting = vjets_reweighting_cfg()
-    cfg.x.jec, cfg.x.jer = jerc_cfg(campaign, year)
     # add the shifts
     add_shifts(cfg)
-
-    # cfg.x.btag_sf = btag_sf_cfg(year)
-    cfg.x.btag_wp_count_config = btag_sf_cfg(cfg, 2024)["btag_wp_count_config"]
-    cfg.x.btag_wp_sf_config = btag_sf_cfg(cfg, 2024)["btag_wp_sf_config"]
-    cfg.x.toptag_sf = toptag_sf_cfg()
-
-    cfg.x.electron_reco_sf_config = lepton_sf_cfg(cfg, "electron")["electron_reco_sf_config"]
-    cfg.x.electron_id_iso_sf_config = lepton_sf_cfg(cfg, "electron")["electron_id_iso_sf_config"]
-
-    cfg.x.muon_iso_sf_config = lepton_sf_cfg(cfg, "muon")["muon_iso_config"]
-    cfg.x.muon_id_sf_config = lepton_sf_cfg(cfg, "muon")["muon_id_config"]
-
-    cfg.x.met_phi_correction = met_phi_cfg(cfg)  # METPhiConfig object
-    cfg.x.jet_id = jet_id_cfg()["Jet"]  # JetIdConfig object
-    cfg.x.fatjet_id = jet_id_cfg()["FatJet"]  # JetIdConfig object
 
     # top pt reweighting parameters
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat?rev=31
