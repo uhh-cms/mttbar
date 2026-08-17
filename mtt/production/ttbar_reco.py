@@ -774,19 +774,10 @@ def add_prod_cats_reqs(self: Producer, task: law.Task, reqs: dict) -> None:
     if "ttbar" in reqs or task.producer != "add_prod_cats":
         return
 
-    producer_inst = task.build_producer_inst("ttbar", params={
-        "dataset": task.dataset,
-        "dataset_inst": task.dataset_inst,
-        "config": task.config,
-        "config_inst": task.config_inst,
-        "analysis": task.analysis,
-        "analysis_inst": task.analysis_inst,
-    })
     from columnflow.tasks.production import ProduceColumns
-    reqs["ttbar"] = ProduceColumns.req(
+    reqs["ttbar"] = ProduceColumns.req_other_producer(
         task,
         producer="ttbar",
-        producer_inst=producer_inst,
     )
 
 
