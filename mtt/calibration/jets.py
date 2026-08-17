@@ -17,22 +17,24 @@ from mtt.production.util import lv_xyzt, lv_mass
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
 
+get_jerc_file_default.map_jet_name_file_key["SubJet"] = "jet_jerc"
+jer_subjets = jer_ak8.derive("jer_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
+jec_subjets = jec_ak8.derive("jec_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
+jec_subjets_nominal = jec_subjets.derive("jec_subjets", cls_dict={"uncertainty_sources": []})
+jer_subjets_nominal = jer_subjets.derive("jer_subjets", cls_dict={"jec_uncertainty_sources": []})
+
 
 # custom jec calibrator that only runs nominal correction
 jec_ak4_nominal = jec_ak4.derive(
     "jec_ak4_nominal",
     cls_dict={
         "uncertainty_sources": [],
-        "met_name": "PuppiMET",
-        "raw_met_name": "RawPuppiMET",
     },
 )
 jer_ak4_nominal = jer_ak4.derive(
     "jer_ak4_nominal",
     cls_dict={
         "jec_uncertainty_sources": [],
-        "met_name": "PuppiMET",
-        "raw_met_name": "RawPuppiMET",
     },
 )
 
@@ -56,11 +58,66 @@ jer_ak8_nominal = jer_ak8.derive(
     },
 )
 
+jec_ak4_Puppi = jec_ak4.derive(
+    "jec_ak4_Puppi",
+    cls_dict={
+        "met_name": "PuppiMET",
+        "raw_met_name": "RawPuppiMET",
+        "propagate_met": True,
+    },
+)
+jer_ak4_Puppi = jer_ak4.derive(
+    "jer_ak4_Puppi",
+    cls_dict={
+        "met_name": "PuppiMET",
+        "raw_met_name": "RawPuppiMET",
+        "propagate_met": True,
+    },
+)
+jec_ak4_Puppi_nominal = jec_ak4_Puppi.derive("jec_ak4_Puppi_nominal", cls_dict={"uncertainty_sources": []})
+jer_ak4_Puppi_nominal = jer_ak4_Puppi.derive("jer_ak4_Puppi_nominal", cls_dict={"jec_uncertainty_sources": []})
 
-get_jerc_file_default.map_jet_name_file_key["SubJet"] = "jet_jerc"
-jer_subjets = jer_ak8_nominal.derive("jer_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
-jec_subjets = jec_ak8_nominal.derive("jec_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
-jec_subjets_nominal = jec_subjets.derive("jec_subjets", cls_dict={"uncertainty_sources": []})
+jec_ak8_Puppi = jec_ak8.derive(
+    "jec_ak8_Puppi",
+    cls_dict={
+        "propagate_met": False,
+        "met_name": "DO_NOT_USE",
+        "raw_met_name": "DO_NOT_USE",
+    },
+)
+jer_ak8_Puppi = jer_ak8.derive(
+    "jer_ak8_Puppi",
+    cls_dict={
+        "propagate_met": False,
+        "met_name": "DO_NOT_USE",
+        "raw_met_name": "DO_NOT_USE",
+    },
+)
+jec_ak8_Puppi_nominal = jec_ak8_Puppi.derive("jec_ak8_Puppi_nominal", cls_dict={"uncertainty_sources": []})
+jer_ak8_Puppi_nominal = jer_ak8_Puppi.derive("jer_ak8_Puppi_nominal", cls_dict={"jec_uncertainty_sources": []})
+
+jec_subjets_Puppi = jec_subjets.derive(
+    "jec_subjets_Puppi",
+    cls_dict={
+        "propagate_met": False,
+        "met_name": "DO_NOT_USE",
+        "raw_met_name": "DO_NOT_USE",
+    },
+)
+jer_subjets_Puppi = jer_subjets.derive(
+    "jer_subjets_Puppi",
+    cls_dict={
+        "propagate_met": False,
+        "met_name": "DO_NOT_USE",
+        "raw_met_name": "DO_NOT_USE",
+    },
+)
+jec_subjets_Puppi_nominal = jec_subjets_Puppi.derive(
+    "jec_subjets_Puppi_nominal", cls_dict={"uncertainty_sources": []},
+)
+jer_subjets_Puppi_nominal = jer_subjets_Puppi.derive(
+    "jer_subjets_Puppi_nominal", cls_dict={"jec_uncertainty_sources": []},
+)
 
 
 @calibrator
@@ -70,29 +127,98 @@ def jet_energy(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     uncertainties plus JER for MC. Information about used and produced columns and dependent
     calibrators is added in a custom init function below.
     """
-    if self.dataset_inst.is_mc:
-        # TODO: for testing purposes, only run jec_nominal for now
-        events = self[jec_ak4_nominal](events, **kwargs)
-        events = self[jer_ak4_nominal](events, **kwargs)
-        events = self[jec_ak8_nominal](events, **kwargs)
-        events = self[jer_ak8_nominal](events, **kwargs)
+    if self.config_inst.year in [2024, 2025, 2026]:
+        events = self[jec_ak4_Puppi](events, **kwargs)
+        events = self[jec_ak8_Puppi](events, **kwargs)
+        events = self[jec_subjets_Puppi](events, **kwargs)
+        if self.dataset_inst.is_mc:
+            events = self[jer_ak4_Puppi](events, **kwargs)
+            events = self[jer_ak8_Puppi](events, **kwargs)
+            events = self[jer_subjets_Puppi](events, **kwargs)
     else:
-        events = self[jec_ak4_nominal](events, **kwargs)
-        events = self[jec_ak8_nominal](events, **kwargs)
+        events = self[jec_ak4](events, **kwargs)
+        events = self[jec_ak8](events, **kwargs)
+        events = self[jec_subjets](events, **kwargs)
+        if self.dataset_inst.is_mc:
+            events = self[jer_ak4](events, **kwargs)
+            events = self[jer_ak8](events, **kwargs)
+            events = self[jer_subjets](events, **kwargs)
 
     return events
 
 
 @jet_energy.init
 def jet_energy_init(self: Calibrator) -> None:
-    # add standard jec and jer for mc, and only jec nominal for dta
-    if getattr(self, "dataset_inst", None) and self.dataset_inst.is_mc:
-        # TODO: for testing purposes, only run jec_nominal for now
-        self.uses |= {jec_ak4_nominal, jer_ak4_nominal, jec_ak8_nominal, jer_ak8_nominal}
-        self.produces |= {jec_ak4_nominal, jer_ak4_nominal, jec_ak8_nominal, jer_ak8_nominal}
+    # add standard jec and jer for mc, and only jec nominal for data
+    if self.config_inst.year in [2024, 2025]:
+        self.uses |= {
+            jec_ak4_Puppi, jec_ak8_Puppi, jec_subjets_Puppi,
+            jer_ak4_Puppi, jer_ak8_Puppi, jer_subjets_Puppi,
+        }
+        self.produces |= {
+            jec_ak4_Puppi, jec_ak8_Puppi, jec_subjets_Puppi,
+            jer_ak4_Puppi, jer_ak8_Puppi, jer_subjets_Puppi,
+        }
     else:
-        self.uses |= {jec_ak4_nominal, jec_ak8_nominal}
-        self.produces |= {jec_ak4_nominal, jec_ak8_nominal}
+        self.uses |= {
+            jec_ak4, jec_ak8, jec_subjets,
+            jer_ak4, jer_ak8, jer_subjets,
+        }
+        self.produces |= {
+            jec_ak4, jec_ak8, jec_subjets,
+            jer_ak4, jer_ak8, jer_subjets,
+        }
+
+
+@calibrator
+def jet_energy_nominal(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Common calibrator for Jet energy corrections, applying nominal JEC for data, and JEC with
+    uncertainties plus JER for MC. Information about used and produced columns and dependent
+    calibrators is added in a custom init function below.
+    """
+    # TODO: for testing purposes, only run jec_nominal for now
+    if self.config_inst.x.year in [2024, 2025, 2026]:
+        events = self[jec_ak4_Puppi_nominal](events, **kwargs)
+        events = self[jec_ak8_Puppi_nominal](events, **kwargs)
+        events = self[jec_subjets_Puppi_nominal](events, **kwargs)
+        if self.dataset_inst.is_mc:
+            events = self[jer_ak4_Puppi_nominal](events, **kwargs)
+            events = self[jer_ak8_Puppi_nominal](events, **kwargs)
+            events = self[jer_subjets_Puppi_nominal](events, **kwargs)
+    else:
+        events = self[jec_ak4_nominal](events, **kwargs)
+        events = self[jec_ak8_nominal](events, **kwargs)
+        events = self[jec_subjets_nominal](events, **kwargs)
+        if self.dataset_inst.is_mc:
+            events = self[jer_ak4_nominal](events, **kwargs)
+            events = self[jer_ak8_nominal](events, **kwargs)
+            events = self[jer_subjets_nominal](events, **kwargs)
+
+    return events
+
+
+@jet_energy_nominal.init
+def jet_energy_nominal_init(self: Calibrator) -> None:
+    # add standard jec and jer for mc, and only jec nominal for data
+    if self.config_inst.x.year in [2024, 2025, 2026]:
+        self.uses |= {
+            jec_ak4_Puppi_nominal, jec_ak8_Puppi_nominal, jec_subjets_Puppi_nominal,
+            jer_ak4_Puppi_nominal, jer_ak8_Puppi_nominal, jer_subjets_Puppi_nominal,
+        }
+        self.produces |= {
+            jec_ak4_Puppi_nominal, jec_ak8_Puppi_nominal, jec_subjets_Puppi_nominal,
+            jer_ak4_Puppi_nominal, jer_ak8_Puppi_nominal, jer_subjets_Puppi_nominal,
+        }
+    else:
+        self.uses |= {
+            jec_ak4_nominal, jec_ak8_nominal, jec_subjets_nominal,
+            jer_ak4_nominal, jer_ak8_nominal, jer_subjets_nominal,
+        }
+        self.produces |= {
+            jec_ak4_nominal, jec_ak8_nominal, jec_subjets_nominal,
+            jer_ak4_nominal, jer_ak8_nominal, jer_subjets_nominal,
+        }
 
 
 @calibrator(
