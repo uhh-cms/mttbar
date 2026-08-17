@@ -14,7 +14,7 @@ from mtt.config.variables import add_variables_ml
 from mtt.config.categories import add_categories_production
 from mtt.production.weights import weights
 from mtt.production.lepton import choose_lepton
-from mtt.production.ttbar_reco import ttbar
+# from mtt.production.ttbar_reco import ttbar
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -119,7 +119,7 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # build deltaR between MET and jets/fatjets for later use in ML input selection
     # for MET, we can treat it as a particle at phi = met.phi and eta = 0
     met_vector = ak.zip(
-        {"pt": met.pt, "phi": met.phi, "eta": ak.zeros_like(met.pt)}, with_name="PtEtaPhiMLorentzVector"
+        {"pt": met.pt, "phi": met.phi, "eta": ak.zeros_like(met.pt)}, with_name="PtEtaPhiMLorentzVector",
     )
     met_jet_deltar = ak.firsts(jet.metric_table(met_vector), axis=-1)
     jet = ak.with_field(jet, met_jet_deltar, "met_deltar")
@@ -135,17 +135,17 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     leading_jets_deltar = ak.where(
         ak.num(jet) >= 2,  # Only use real result if we have 2+ jets
         jet_safe[:, 0].deltaR(jet_safe[:, 1]),
-        -1.0
+        -1.0,
     )
     leading_fatjets_deltar = ak.where(
         ak.num(fatjet) >= 2,
         fatjet_safe[:, 0].deltaR(fatjet_safe[:, 1]),
-        -1.0
+        -1.0,
     )
     leading_jetfatjet_deltar = ak.where(
         (ak.num(jet) >= 1) & (ak.num(fatjet) >= 1),
         ak.pad_none(jet, 1)[:, 0].deltaR(ak.pad_none(fatjet, 1)[:, 0]),
-        -1.0
+        -1.0,
     )
 
     # # add reco vars from ttbar reconstruction
@@ -189,7 +189,10 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # AK8 jets
     events = set_vars(
         events, "fatjet", fatjet, n_max=3,
-        attrs=("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32", "tau1", "tau2", "tau3", "lepton_deltar", "met_deltar"),
+        attrs=(
+            "energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32",
+            "tau1", "tau2", "tau3", "lepton_deltar", "met_deltar",
+        ),
     )
 
     # Lepton
@@ -234,7 +237,9 @@ def ml_inputs_init(self: Producer) -> None:
         "n_bjet",
     } | {
         f"jet_{i + 1}_{var}"
-        for var in ("energy", "pt", "eta", "phi", "mass", btag_col, f"{btag_col}_buckets", "lepton_deltar", "met_deltar")
+        for var in (
+            "energy", "pt", "eta", "phi", "mass", btag_col, f"{btag_col}_buckets", "lepton_deltar", "met_deltar",
+        )
         for i in range(5)
     } | {
         f"jet_{i + 1}_{btag_col}_pass_{wp}"
@@ -242,7 +247,10 @@ def ml_inputs_init(self: Producer) -> None:
         for i in range(5)
     } | {
         f"fatjet_{i + 1}_{var}"
-        for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32", "tau1", "tau2", "tau3", "lepton_deltar", "met_deltar")
+        for var in (
+            "energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32",
+            "tau1", "tau2", "tau3", "lepton_deltar", "met_deltar",
+        )
         for i in range(3)
     } | {
         f"lepton_{var}"

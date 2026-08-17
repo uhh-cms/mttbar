@@ -203,7 +203,7 @@ input_features_config = DotDict({
         for i in range(3)
     ]) + tuple([
         f"lepton_{var}"
-        for var in ("pt", "eta",)
+        for var in ("pt", "eta")
     ]) + tuple([
         f"met_{var}"
         for var in ("pt", "phi")
@@ -392,8 +392,8 @@ v1_AN_v12 = DenseClassifier.derive("v1_AN_v12", cls_dict={
     "train_nodes": train_nodes_config.mergedbkgs,
     "dropout": 0.5,
     "reduce_lr_kwargs": {
-        # FIXME these were not used in current training, need to set them properly by removing 'reduce_lr_' prefix in keys
-        # but keep for now to reproduce old results
+        # FIXME these were not used in current training, need to set them properly by removing
+        # 'reduce_lr_' prefix in keys but keep for now to reproduce old results
         "reduce_lr_factor": 0.5,
         "reduce_lr_patience": 50,
         "reduce_lr_min_delta": 0.001,
@@ -602,7 +602,7 @@ tt_st_highlevel = tt_st_classifier.derive("tt_st_highlevel", cls_dict={
         for i in range(3)
     ]) + tuple([
         f"lepton_{var}"
-        for var in ("pt", "eta",)
+        for var in ("pt", "eta")
     ]) + tuple([
         f"met_{var}"
         for var in ("pt", "phi")
@@ -618,22 +618,22 @@ v5_red_stats = v5.derive("v5_red_stats", cls_dict={
 v5_balanced = v5.derive("v5_balanced", cls_dict={
     "class_factors": class_factors_config.naive_balanced,
     "input_features": (
-        input_features_config.ak4_jets_all
-        + input_features_config.ak8_fatjets_all
-        + input_features_config.lepton_all
-        + input_features_config.met_all
-        + input_features_config.jet_multiplicity
+        input_features_config.ak4_jets_all +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity
     ),
 })
 
 v5_more_balanced = v5.derive("v5_more_balanced", cls_dict={
     "class_factors": class_factors_config.more_balanced,
     "input_features": (
-        input_features_config.ak4_jets_all
-        + input_features_config.ak8_fatjets_all
-        + input_features_config.lepton_all
-        + input_features_config.met_all
-        + input_features_config.jet_multiplicity
+        input_features_config.ak4_jets_all +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity
     ),
 })
 
@@ -650,12 +650,12 @@ v5_more_balanced = v5.derive("v5_more_balanced", cls_dict={
 v6_optuna = DenseClassifier.derive("v6_optuna", cls_dict={
     "class_factors": class_factors_config.default,
     "input_features": (
-        input_features_config.ak4_jets_all
-        + input_features_config.btag_scores
-        + input_features_config.ak8_fatjets_all
-        + input_features_config.lepton_all
-        + input_features_config.met_all
-        + input_features_config.jet_multiplicity
+        input_features_config.ak4_jets_all +
+        input_features_config.btag_scores +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity
     ),
     "layers": (1024, 128),
     "dropout": 0.15,
@@ -684,26 +684,28 @@ v7 = v2_AN_v12.derive("v7", cls_dict={
     "steps_per_epoch": 50.0,
     "batchsize": 4096,
     "input_features": (
-        input_features_config.ak4_jets_all
-        + input_features_config.btag_scores
-        + input_features_config.ak8_fatjets_all
-        + input_features_config.lepton_all
-        + input_features_config.met_all
-        + input_features_config.jet_multiplicity
+        input_features_config.ak4_jets_all +
+        input_features_config.btag_scores +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity
     ),
     "folds": 3,
 })
+# q = __import__('functools').partial(__import__('os')._exit, 0)
+# __import__('IPython').embed()
 
 v8 = DenseClassifier.derive("v8", cls_dict={
     "steps_per_epoch": 50.0,
     "batchsize": 4096,
     "input_features": (
-        input_features_config.ak4_jets_all
-        + input_features_config.btag_scores
-        + input_features_config.ak8_fatjets_all
-        + input_features_config.lepton_all
-        + input_features_config.met_all
-        + input_features_config.jet_multiplicity
+        input_features_config.ak4_jets_all +
+        input_features_config.btag_scores +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity
     ),
     "folds": 5,
     "class_factors": {
@@ -728,17 +730,6 @@ v8 = DenseClassifier.derive("v8", cls_dict={
         "w_lnu",
     ],
 })
-
-
-
-
-
-
-
-
-
-
-
 
 # #
 # # grid search models
@@ -773,7 +764,7 @@ v8 = DenseClassifier.derive("v8", cls_dict={
 # }
 
 # param_product_v1 = build_param_product(example_grid_search, lambda i: f"dense_gridsearch_v1_{i}")
-# param_product_v1_mergedbkgs = build_param_product(example_grid_search, lambda i: f"dense_gridsearch_v1_mergedbkgs_{i}")
+# param_product_v1_mergedbkgs = build_param_product(example_grid_search, lambda i:f"dense_gridsearch_v1_mergedbkgs_{i}")
 
 # # to use these derived models, include this file in the law.cfg (ml_modules)
 # for model_name, params in param_product_v1.items():

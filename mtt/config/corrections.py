@@ -187,7 +187,7 @@ def jerc_cfg(
                 # "CorrelationGroupFlavor",
                 # "CorrelationGroupUncorrelated",
             ],
-            "data_per_era": False if year in [2023, 2024] else True,  # 2022 JEC has the era in the correction set name
+            "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
         "SubJet": {
             "campaign": jec_campaign,
@@ -253,7 +253,7 @@ def jerc_cfg(
                 # "CorrelationGroupFlavor",
                 # "CorrelationGroupUncorrelated",
             ],
-            "data_per_era": False if year in [2023, 2024] else True,  # 2022 JEC has the era in the correction set name
+            "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
     }
 

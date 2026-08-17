@@ -686,6 +686,7 @@ def add_new_config(
                     "btag_weight": "btag_weight_light_" + "{direction}",
                 },
             )
+
         # jet energy scale (JEC) uncertainty variations
         for jec_source in cfg.x.jec.Jet.uncertainty_sources:
             idx = all_jec_sources.index(jec_source)

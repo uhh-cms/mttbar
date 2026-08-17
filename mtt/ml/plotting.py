@@ -89,7 +89,11 @@ def plot_introspection(
     input_features: list | None = None,
     stats: dict | None = None,
 ):
-    from mtt.ml.introspection import sensitivity_analysis, gradient_times_input, shap_ranking
+    from mtt.ml.introspection import (
+        # sensitivity_analysis,
+        # gradient_times_input,
+        shap_ranking,
+    )
 
     # get only signal events for now
     inputs = inputs.features[inputs.labels == 0]

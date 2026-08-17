@@ -808,21 +808,21 @@ def add_variables_ml(config: od.Config) -> None:
         name="AN_v12_mli_leading_jets_deltar",
         expression=f"{ns}.leading_jets_deltar",
         binning=(40, 0, 5),
-        x_title=rf"ML input $\Delta R$ between leading and subleading AK4 jets - ANv12",
+        x_title=r"ML input $\Delta R$ between leading and subleading AK4 jets - ANv12",
     )
 
     config.add_variable(
         name="AN_v12_mli_leading_fatjets_deltar",
         expression=f"{ns}.leading_fatjets_deltar",
         binning=(40, 0, 5),
-        x_title=rf"ML input $\Delta R$ between leading and subleading AK8 jets - ANv12",
+        x_title=r"ML input $\Delta R$ between leading and subleading AK8 jets - ANv12",
     )
 
     config.add_variable(
         name="AN_v12_mli_leading_jetfatjet_deltar",
         expression=f"{ns}.leading_jetfatjet_deltar",
         binning=(40, 0, 5),
-        x_title=rf"ML input $\Delta R$ between leading AK4 jet and leading AK8 jet - ANv12",
+        x_title=r"ML input $\Delta R$ between leading AK4 jet and leading AK8 jet - ANv12",
     )
 
     for i in range(1, 6):
