@@ -548,10 +548,12 @@ def add_new_config(
             "all": {
                 "triggers": {
                     "muon": {
-                        "IsoMu27",
+                        # "IsoMu27",
+                        "IsoMu24",  # updated Run 3 recommendation
                     },
                     "electron": {
-                        "Ele35_WPTight_Gsf",
+                        # "Ele35_WPTight_Gsf",
+                        "Ele30_WPTight_Gsf",  # updated Run 3 recommendation
                     },
                 },
             },
@@ -562,6 +564,7 @@ def add_new_config(
                     "muon": {
                         "Mu50",
                         "HighPtTkMu100",
+                        "CascadeMu100",  # updated Run 3 recommendation
                     },
                     "electron": {
                         "Ele115_CaloIdVT_GsfTrkIdT",
