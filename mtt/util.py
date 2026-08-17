@@ -11,6 +11,7 @@ from typing import Hashable, Callable
 from functools import wraps
 import tracemalloc
 import math
+from contextlib import contextmanager
 
 import law
 
@@ -311,3 +312,34 @@ def get_subclasses_deep(*classes):
             all_classes[key] = classes.pop(key)
 
     return all_classes
+
+
+@contextmanager
+def record_calls(inst, run_list):
+    cls = type(inst)
+    orig_getitem = cls.__getitem__
+
+    def wrapped_getitem(self, key):
+        prod = orig_getitem(self, key)
+        name = getattr(key, "__name__", None) or str(key)
+
+        @wraps(prod)
+        def wrapped(*args, **kwargs):
+            start = time.perf_counter()
+
+            result = prod(*args, **kwargs)
+
+            duration = time.perf_counter() - start
+            run_list.append(f"    {name:<40} {duration:7.3f}s")
+
+            return result
+
+        wrapped.__dict__.update(getattr(prod, "__dict__", {}))
+        return wrapped
+
+    cls.__getitem__ = wrapped_getitem
+
+    try:
+        yield
+    finally:
+        cls.__getitem__ = orig_getitem
