@@ -43,7 +43,6 @@ from mtt.config.corrections import (
     btag_sf_cfg,
     toptag_sf_cfg,
     met_phi_cfg,
-    # jet_id_cfg,
 )
 from columnflow.production.cms.jet import JetIdConfig
 from columnflow.util import maybe_import

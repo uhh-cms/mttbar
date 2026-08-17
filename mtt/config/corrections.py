@@ -8,8 +8,9 @@ import order as od
 import law
 
 from columnflow.util import DotDict
-from columnflow.production.cms.electron import ElectronSFConfig
-from columnflow.production.cms.muon import MuonSFConfig
+from columnflow.selection.cms.btag import BTagWPCountConfig
+from columnflow.production.cms.btag import BTagSFConfig, BTagWPSFConfig
+
 logger = law.logger.get_logger(__name__)
 
 
@@ -18,11 +19,13 @@ def vjets_reweighting_cfg(
 
     kfactors = {
         "w": {
-            "value": "wjets_kfactor_value",
+            # "value": "wjets_kfactor_value",
+            "value": "NOT_YET_AVAILABLE",
             "error": "wjets_kfactor_error",
         },
         "z": {
-            "value": "zjets_kfactor_value",
+            # "value": "zjets_kfactor_value",
+            "value": "NOT_YET_AVAILABLE",
             "error": "zjets_kfactor_error",
         },
     }
@@ -426,176 +429,6 @@ def toptag_sf_cfg(
     # return DotDict.wrap(name)
 
 
-def lepton_sf_cfg(
-        config: od.Config,
-        lepton: str = None,
-) -> list:
-    # TODO: we need to use different SFs for control regions
-    run = config.campaign.x.run
-    tag = config.x.cpn_tag
-
-    lepton_sf_dict = {
-        3: {
-            "2022preEE": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2022Re-recoBCD",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022preEE",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2022preEE",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022preEE",
-                    ),
-                },
-            },
-            "2022postEE": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2022Re-recoE+PromptFG",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022postEE",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2022postEE",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022postEE",
-                    ),
-                },
-            },
-            "2023preBPix": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2023PromptC",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023preBPix",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2023preBPix",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023preBPix",
-                    ),
-                },
-            },
-            "2023postBPix": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2023PromptD",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023postBPix",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2023postBPix",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023postBPix",
-                    ),
-                },
-            },
-            "2024": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2024Prompt",
-                        "Tight",
-                    ),
-                    "reco_sf_names": (
-                        "Electron-ID-SF",
-                        "2024Prompt",
-                        ["RecoBelow20", "Reco20to75", "RecoAbove75"],
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2024Prompt24",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2024Prompt24",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2024Prompt24",
-                    ),
-                },
-            },
-        },
-    }
-
-    if lepton == "electron":
-        electron_id_iso_sf_config = ElectronSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][0],
-            campaign=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][1],
-            working_point={
-                "wp80iso": (lambda variables: variables["pt"] > 10),
-            },
-        )
-        electron_reco_sf_config = ElectronSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][0],
-            campaign=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][1],
-            working_point={
-                "RecoBelow20": (lambda variables: variables["pt"] < 20),
-                "Reco20to75": (lambda variables: (variables["pt"] >= 20) & (variables["pt"] < 75.0)),
-                "RecoAbove75": (lambda variables: variables["pt"] >= 75.0),
-            },
-        )
-        configs = {
-            "electron_id_iso_sf_config": electron_id_iso_sf_config,
-            "electron_reco_sf_config": electron_reco_sf_config,
-        }
-        return configs
-
-    elif lepton == "muon":
-        muon_id_config = MuonSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["id_sf_names"][0],
-        )
-        muon_iso_config = MuonSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["iso_sf_names"][0],
-        )
-        configs = {
-            "muon_id_config": muon_id_config,
-            "muon_iso_config": muon_iso_config,
-        }
-        return configs
-
-
 def met_phi_cfg(
     config: od.Config,
 ):
@@ -606,7 +439,8 @@ def met_phi_cfg(
     met_config = METPhiConfig(
         met_name=met_column,
         met_type=met_column,
-        correction_set="met_xy_corrections",
+        # correction_set="met_xy_corrections",
+        correction_set="NOT_YET_AVAILABLE",
         keep_uncorrected=True,  # TODO do we need this?
         pt_phi_variations={
             "stat_xdn": "metphi_statx_down",
