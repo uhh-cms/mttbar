@@ -23,21 +23,7 @@ from columnflow.config_util import (
 )
 from mtt.config.categories import add_categories_selection
 from mtt.config.variables import add_variables
-
-from mtt.config.datasets import (
-    data_datasets,
-    dy_datasets,
-    w_lnu_datasets,
-    qcd_datasets,
-    tt_datasets,
-    st_datasets,
-    vv_datasets,
-    # Run 3 signal samples
-    zprime_datasets,
-    # hscalar_datasets,
-    # hpseudo_datasets,
-    # rsgluon_datasets,
-)
+from mtt.config.datasets import add_datasets_from_yaml
 from mtt.config.taggers import btag_params, toptag_params
 from mtt.config.defaults_and_groups import (
     set_defaults,
@@ -111,58 +97,46 @@ def add_new_config(
 
     # add processes and datasets we are interested in
     cfg.add_process(procs.n.data)
-    data_datasets(cfg, limit_dataset_files, log=False)
 
     cfg.add_process(procs.n.tt)
-    tt_datasets(cfg, limit_dataset_files, log=False)
 
     cfg.add_process(procs.n.st)
-    st_datasets(cfg, limit_dataset_files, log=False)
 
     cfg.add_process(procs.n.vv)
-    vv_datasets(cfg, limit_dataset_files, log=False)
 
-    # # ttbar signal processes
-    if year in [2023, 2024]:
-        cfg.add_process(procs.n.zprime_tt)
-        zprime_datasets(cfg, limit_dataset_files, log=False)
-        process_insts = [
-            process_inst
-            for process_inst, _, _ in cfg.walk_processes()
-            if process_inst.name.startswith("zprime_tt")
-        ]
-        for process_inst in process_insts:
-            if not process_inst.xsecs.get(13.6, None):
-                # print(f"Warning: cross section for process {process_inst.name} at 13.6 TeV is not set.")
-                # print("Setting it to 0.1 pb.")
-                process_inst.xsecs[13.6] = Number(0.1)
+    # ttbar signal processes
+    cfg.add_process(procs.n.zprime_tt)
 
-    if year == 2024:
-        cfg.add_process(procs.n.dy)
-        dy_datasets(cfg, limit_dataset_files, log=False)
+    process_insts = [
+        process_inst
+        for process_inst, _, _ in cfg.walk_processes()
+        if process_inst.name.startswith("zprime_tt")
+    ]
+    for process_inst in process_insts:
+        if not process_inst.xsecs.get(13.6, None):
+            # print(f"Warning: cross section for process {process_inst.name} at 13.6 TeV is not set.")
+            # print("Setting it to 0.1 pb.")
+            process_inst.xsecs[13.6] = Number(0.1)
 
-        cfg.add_process(procs.n.qcd)
-        qcd_datasets(cfg, limit_dataset_files, log=False)
+    cfg.add_process(procs.n.dy)
 
-        cfg.add_process(procs.n.w_lnu)
-        w_lnu_datasets(cfg, limit_dataset_files, log=False)
+    cfg.add_process(procs.n.qcd)
 
-        cfg.add_process(procs.n.w_lnu_1j)
+    cfg.add_process(procs.n.w_lnu)
 
-        cfg.add_process(procs.n.w_lnu_2j)
+    # cfg.add_process(procs.n.w_lnu_1j)
 
-        cfg.add_process(procs.n.w_lnu_3j)
+    # cfg.add_process(procs.n.w_lnu_2j)
 
-        cfg.add_process(procs.n.w_lnu_4j)
+    # cfg.add_process(procs.n.w_lnu_3j)
+
+    # cfg.add_process(procs.n.w_lnu_4j)
 
     # cfg.add_process(procs.n.hscalar_tt)
-    # hscalar_datasets(cfg, log=True)
 
     # cfg.add_process(procs.n.hpseudo_tt)
-    # hpseudo_datasets(cfg, log=True)
 
     # cfg.add_process(procs.n.rsgluon_tt)
-    # rsgluon_datasets(cfg, log=True)
 
     # set flags for signal processes (used when plotting)
     for process, _, _ in cfg.walk_processes():
@@ -182,6 +156,42 @@ def add_new_config(
             process.hide_errors = True
         else:
             process.x.is_mtt_signal = False
+
+    dataset_names = add_datasets_from_yaml(
+        cfg,
+        limit_dataset_files=limit_dataset_files,
+        dataset_types=[
+            "data_mu",
+            "data_egamma",
+            "tt",
+            "st",
+            "dy",
+            "w_lnu",
+            "vv",
+            "qcd",
+        ],
+        log=False,
+    )
+
+    if year == 2024:
+        dataset_names += add_datasets_from_yaml(
+            cfg,
+            limit_dataset_files=limit_dataset_files,
+            dataset_types=[
+                "zprime_full",
+            ],
+            log=False,
+        )
+    elif year == 2025:
+        dataset_names += add_datasets_from_yaml(
+            cfg,
+            limit_dataset_files=limit_dataset_files,
+            dataset_types=[
+                "zprime_full",
+            ],
+            log=False,
+        )
+    logger.info_once(f"Added {len(dataset_names)} datasets to config {cfg.name} (config id: {cfg.id})")
 
     # set color of main processes
     colors = {
