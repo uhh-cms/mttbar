@@ -11,12 +11,14 @@ from typing import Hashable, Callable
 from functools import wraps
 import tracemalloc
 import math
+import re
 from contextlib import contextmanager
 
 import law
 
 from columnflow.types import Any
 from columnflow.util import maybe_import
+from columnflow.columnar_util import ArrayFunction, deferred_column
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -314,6 +316,36 @@ def get_subclasses_deep(*classes):
     return all_classes
 
 
+def zprime_label(process_name):
+    """
+    Generate a Z' label from a process name like 'zprime_tt_m500_w5'.
+
+    Parses mass (in GeV) and width (in GeV) from the name, converts mass
+    to TeV, and computes the width/mass ratio as a percentage.
+    """
+    match = re.match(r"zprime_tt_m(\d+)_w(\d+(?:p\d+)?)", process_name)
+    if not match:
+        # If the process name doesn't match the expected pattern, return it unchanged
+        return process_name
+
+    mass_gev = float(match.group(1))
+    width_str = match.group(2).replace("p", ".")  # handle decimal widths like '5p5'
+    width_gev = float(width_str)
+
+    mass_tev = mass_gev / 1000.0
+    ratio_percent = width_gev / mass_gev * 100.0
+
+    # Format mass nicely (no trailing .0 if integer)
+    mass_str = f"{mass_tev:g}"
+    ratio_str = f"{ratio_percent:g}"
+
+    return rf"Z' ($m$ = {mass_str} TeV, {ratio_str}%)"
+
+
+def build_zprime_labels(process_names):
+    return {name: zprime_label(name) for name in process_names}
+
+
 @contextmanager
 def record_calls(inst, run_list):
     cls = type(inst)
@@ -357,3 +389,40 @@ def has_tag(tag, *container, operator: callable = any) -> bool:
     """
     values = [inst.has_tag(tag) for inst in container]
     return operator(values)
+
+
+@deferred_column
+def IF_MC(self: ArrayFunction.DeferredColumn, func: ArrayFunction) -> Any | set[Any]:
+    if getattr(func, "dataset_inst", None) is None:
+        return self.get()
+
+    return self.get() if func.dataset_inst.is_mc else None
+
+
+def call_once_on_config(func=None, *, include_hash=False):
+    """
+    Parametrized decorator to ensure that function *func* is only called once for the config *config*.
+    Can be used with or without parentheses.
+    """
+    if func is None:
+        # If func is None, it means the decorator was called with arguments.
+        def wrapper(f):
+            return call_once_on_config(f, include_hash=include_hash)
+        return wrapper
+
+
+def remove_weight_columns(weight_dict: dict[str, list], columns_to_remove: list[str]) -> dict[str, list]:
+    """
+    Remove specified weight columns from the weight dictionary.
+
+    :param weight_dict: Dictionary containing weight columns.
+    :param columns_to_remove: List of column names to remove from the dictionary.
+    :return: Updated weight dictionary with specified columns removed.
+    """
+    for column in columns_to_remove:
+        if column in weight_dict:
+            weight_dict.pop(column)
+            _logger.warning(f"Removed weight column '{column}' from the default correction weights.")
+        else:
+            _logger.warning(f"Weight column '{column}' not found in the default correction weights.")
+    return weight_dict

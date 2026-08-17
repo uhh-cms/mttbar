@@ -43,6 +43,10 @@ from mtt.config.corrections import (
     met_phi_cfg,
     jet_id_cfg,
 )
+from columnflow.util import maybe_import
+
+np = maybe_import("numpy")
+ak = maybe_import("awkward")
 
 import order as od
 
@@ -87,10 +91,107 @@ def add_new_config(
     # (if id and name are not set they will be taken from the campaign)
     cfg = analysis.add_config(campaign, name=config_name, id=config_id)
 
+    # groups for custom plot styling
+    cfg.x.custom_style_config_groups = {
+        "more_legend": {
+            "gridspec_cfg": {
+                # "left": 0.08,
+                # "right": 0.98,
+                "top": 0.75,
+                # "bottom": 0.05,
+                # "bottom": 0.1,
+            },
+        },
+        "large_ratio": {
+            "rax_cfg": {
+                "ylim": (0.4, 1.6),
+            },
+        },
+        "DEFAULT": {
+            "legend_cfg": {
+                "ncols": 2,
+                "fontsize": 14,
+                "bbox_to_anchor": (0., 0., 1., 1.),
+            },
+            "annotate_cfg": {
+                "xy": (0.60, 0.60),
+                "xycoords": "axes fraction",
+                "fontsize": 14,
+            },
+            "rax_cfg": {
+                "ylim": (0.4, 1.6),
+            },
+        },
+        "for_an": {
+            "legend_cfg": {
+                "ncols": 3,
+                "fontsize": 12,
+                "bbox_to_anchor": (0., 0., 1., 1.),
+            },
+            "annotate_cfg": {
+                "xy": (0.60, 0.60),
+                "xycoords": "axes fraction",
+                "fontsize": 12,
+            },
+            "rax_cfg": {
+                "ylim": (0.4, 1.6),
+            },
+        },
+        "no_cat_label": {
+            "legend_cfg": {"ncols": 2, "fontsize": 20},
+            "annotate_cfg": {"text": ""},
+        },
+        "cutflow": {
+            "annotate_cfg": {
+                "xy": (0.05, 0.95),
+                "xycoords": "axes fraction",
+                "fontsize": 14,
+            },
+            "legend_cfg": {
+                "ncols": 2,
+                "fontsize": 14,
+                "bbox_to_anchor": (0., 0., 1., 1.),
+            },
+            "ax_cfg": {
+                "ylim": (0.000001, 5.0),
+            },
+        },
+        "example": {
+            "legend_cfg": {"title": "my custom legend title", "ncols": 2},
+            "ax_cfg": {"ylabel": "my ylabel", "xlim": (0, 100)},
+            "rax_cfg": {"ylabel": "some other ylabel"},
+            "annotate_cfg": {"text": "category label usually here"},
+        },
+    }
+
     # add tags to config
     cfg.x.run = 3
     cfg.x.cpn_tag = f"{year}{corr_postfix}"
     cfg.x.year = year
+    if limit_dataset_files is not None:
+        cfg.add_tag("is_limited")
+
+    # add tags for skipping lepton weights if not available (as of 16.07.26)
+    if year == 2024:
+        cfg.add_tag("skip_electron_trigger_weights")  # high pt trigger SF not available yet TODO: derive them
+        cfg.add_tag("skip_muon_trigger_weights")  # TODO compute high pt custom trigger SF for muons
+        cfg.add_tag("skip_btag_weights")
+        cfg.add_tag("skip_btag_wp_weights")
+    elif year == 2025:
+        cfg.add_tag("skip_electron_trigger_weights")  # no trigger SF available yet TODO: derive them
+        cfg.add_tag("skip_muon_trigger_weights")  # TODO compute high pt custom trigger SF for muons
+        cfg.add_tag("skip_btag_weights")
+        cfg.add_tag("skip_btag_wp_weights")
+    elif year == 2026:
+        cfg.add_tag("skip_electron_weights")  # TODO no SFs at all available yet
+        cfg.add_tag("skip_muon_weights")  # TODO no SFs at all available yet
+        cfg.add_tag("skip_btag_weights")
+        cfg.add_tag("skip_btag_wp_weights")
+    else:
+        raise NotImplementedError(f"Skipping weights for year {year} is not implemented.")
+
+    cfg.add_tag("skip_kfactor_weights")
+    logger.warning_once("Skipping (some) electron, muon, and k-factor weights for now.")
 
     # get all root processes
     procs = get_root_processes_from_campaign(campaign)
@@ -154,6 +255,8 @@ def add_new_config(
             process.x.is_mtt_signal = True
             process.unstack = True
             process.hide_errors = True
+            for subproc in process.get_leaf_processes():
+                subproc.scale = "stack"
         else:
             process.x.is_mtt_signal = False
 
@@ -210,45 +313,69 @@ def add_new_config(
         "other": "#999999",  # grey
     }
     zprime_colors = {
-        "zprime_tt_m500_w5": "#006400",  # black
-        "zprime_tt_m4000_w40": "#98FB98",  # light gray
-        "zprime_tt_m7000_w70": "#aaaaaa",  # very dark gray
+        # 1% width signals
+        "zprime_tt_m500_w5": "#abcded",  # light blue
+        "zprime_tt_m1000_w10": "#a2f6c2",  # light green
+        "zprime_tt_m3000_w30": "#dbbdc6",  # light mauve
+        "zprime_tt_m7000_w70": "#ffcc99",  # light orange
+        # 10 % width signals
+        "zprime_tt_m500_w50": "#11304d",  # blue
+        "zprime_tt_m1000_w100": "#11ae4d",  # green
+        "zprime_tt_m3000_w300": "#8a4b5d",  # mauve
+        "zprime_tt_m7000_w700": "#ff7f00",  # orange
+        # 30 % width signals
+        "zprime_tt_m500_w150": "#091a2a",  # dark blue
+        "zprime_tt_m1000_w300": "#052e15",  # dark green
+        "zprime_tt_m3000_w900": "#4a2530",  # dark mauve
+        "zprime_tt_m7000_w2100": "#331900",  # dark orange
     }
 
     # process settings groups to quickly define settings for ProcessPlots
-    if year == 2024:
-        cfg.x.process_settings_groups = {
-            "default": [
-                ["zprime_tt_m400_w40", "scale=2000", "unstack"],
-            ],
-            "unstack_all": [
-                [proc, "unstack"] for proc in cfg.processes
-            ],
-        }
+    cfg.x.process_settings_groups = {
+        "default": [
+            ["zprime_tt_m500_w50", "scale=2000", "unstack"],
+        ],
+        "unstack_all": [
+            [proc, "unstack"] for proc in cfg.processes
+        ],
+        "unstack_signal": [
+            [proc, "unstack"] for proc in cfg.processes
+            if proc.name.startswith("zprime_tt")
+        ],
+        "scale_signal": [
+            [proc, "scale=stack"] for proc in cfg.processes
+            if proc.name.startswith("zprime_tt")
+        ],
+    }
+    from mtt.util import build_zprime_labels
+    zprime_procs_list = []
+    for proc in cfg.processes:
+        if proc.name.startswith("zprime_tt"):
+            zprime_proc = cfg.processes.get("zprime_tt")
+            for sig_proc in zprime_proc.get_leaf_processes():
+                zprime_procs_list.append(sig_proc.name)
 
-        zprime_base_label = r"Z'"
-        zprime_mass_labels = {
-            "zprime_tt_m500_w5": "$m$ = 0.5 TeV, $\Gamma$/$m$ = 1%",
-            "zprime_tt_m4000_w40": "$m$ = 4 TeV, $\Gamma$/$m$ = 1%",
-            "zprime_tt_m7000_w70": "$m$ = 7 TeV, $\Gamma$/$m$ = 1%",
-        }
+    zprime_mass_labels = build_zprime_labels(
+        zprime_procs_list,
+    )
 
-        for proc, zprime_mass_label in zprime_mass_labels.items():
-            proc_inst = cfg.get_process(proc)
-            proc_inst.label = f"{zprime_base_label} ({zprime_mass_label})"
-            if proc in zprime_colors:
-                proc_inst.color1 = zprime_colors[proc]
-                proc_inst.color2 = zprime_colors[proc]
+    for proc, zprime_mass_label in zprime_mass_labels.items():
+        proc_inst = cfg.get_process(proc)
+        proc_inst.label = zprime_mass_label
+        if proc in zprime_colors:
+            proc_inst.color1 = zprime_colors[proc]
+            proc_inst.color2 = zprime_colors[proc]
 
-        for proc in cfg.processes:
-            proc_inst = cfg.get_process(proc)
-            if proc.name not in zprime_colors.keys():
-                proc_inst.color1 = colors.get(proc.name, "#aaaaaa")
-                proc_inst.color2 = colors.get(proc.name, "#000000")
+    for proc in cfg.processes:
+        proc_inst = cfg.get_process(proc)
+        if proc.name not in zprime_colors.keys():
+            proc_inst.color1 = colors.get(proc.name, "#aaaaaa")
+            proc_inst.color2 = colors.get(proc.name, "#000000")
 
     # verify that the root processes of each dataset (or one of their
     # ancestor processes) are registered in the config
     verify_config_processes(cfg, warn=True)
+    logger.debug(f"Added {len(cfg.processes)} processes and {len(cfg.datasets)} datasets to config '{cfg.name}'")
 
     # add tagger working points
     cfg.x.btag_wp = btag_params(cfg)
@@ -1119,5 +1246,7 @@ def add_new_config(
 
     # add variables
     add_variables(cfg)
+
+    logger.info_once(f"Config {cfg.name} finalized with {len(cfg.tags)} tags:\n{cfg.tags}.")
 
     return cfg

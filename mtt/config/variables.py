@@ -91,6 +91,20 @@ def add_variables(config: od.Config) -> None:
             #     unit="GeV",
             #     x_title=rf"{obj} {i+1} number of b tagging wp passed",
             # )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_btagUParTAK4B",
+                expression=f"{obj}.btagUParTAK4B[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=(50, 0, 1),
+                x_title=rf"{obj} {i+1} btagUParTAK4B score",
+            )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_btagUParTAK4B_buckets",
+                expression=f"{obj}.btagUParTAK4B[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=[0, 0.0246, 0.1272, 0.4648, 0.6298, 0.9739, 1.0],
+                x_title=rf"{obj} {i+1} btagUParTAK4B score",
+            )
 
     config.add_variable(
         name="fatjet_tau32",
@@ -132,6 +146,13 @@ def add_variables(config: od.Config) -> None:
         binning=(24 // 2, 0, 1.2),
         x_title=r"FatJet $\tau_{3}$",
     )
+    config.add_variable(
+        name="fatjet_mSD",
+        expression="FatJet.msoftdrop",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"FatJet $m_{SD}$",
+    )
 
     # Leptons
     for obj in ["Electron", "Muon"]:
@@ -140,6 +161,22 @@ def add_variables(config: od.Config) -> None:
             expression=f"{obj}.pt[:,0]",
             null_value=EMPTY_FLOAT,
             binning=(40, 0., 400.),
+            unit="GeV",
+            x_title=obj + r" $p_{T}$",
+        )
+        config.add_variable(
+            name=f"{obj.lower()}_pt_mid_extended",
+            expression=f"{obj}.pt[:,0]",
+            null_value=EMPTY_FLOAT,
+            binning=(60, 0., 1000.),
+            unit="GeV",
+            x_title=obj + r" $p_{T}$",
+        )
+        config.add_variable(
+            name=f"{obj.lower()}_pt_extended",
+            expression=f"{obj}.pt[:,0]",
+            null_value=EMPTY_FLOAT,
+            binning=(80, 0., 2000.),
             unit="GeV",
             x_title=obj + r" $p_{T}$",
         )
@@ -296,6 +333,15 @@ def add_variables(config: od.Config) -> None:
         y_title="Events",
     )
     config.add_variable(
+        name="ttbar_mass_narrow_ext",
+        expression="TTbar.mass",
+        # binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 0, 9000),
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
+    )
+    config.add_variable(
         name="cos_theta_star",
         expression="TTbar.cos_theta_star",
         binning=(100, -1, 1),
@@ -353,10 +399,27 @@ def add_variables(config: od.Config) -> None:
         y_title="Events",
     )
     config.add_variable(
+        name="gen_ttbar_mass_narrow",
+        expression="TTbar.gen_mass",
+        binning=(100, 400, 4400),
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+        y_title="Events",
+    )
+    config.add_variable(
         name="gen_ttbar_mass_narrow_ext",
         expression="TTbar.gen_mass",
         # binning=config.get_variable("ttbar_mass_narrow").binning,
         binning=(100, 0, 9000),
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+        y_title="Events",
+    )
+    config.add_variable(
+        name="gen_ttbar_mass_narrow_ext_ext",
+        expression="TTbar.gen_mass",
+        # binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 0, 10000),
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
         y_title="Events",
@@ -471,6 +534,30 @@ def add_variables(config: od.Config) -> None:
         expression="cutflow.n_muon",
         binning=(5, -0.5, 4.5),
         x_title=r"Number of muons",
+    )
+    config.add_variable(
+        name="cf_n_bjet",
+        expression="cutflow.n_bjet",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of b-tagged AK4 jets",
+    )
+    config.add_variable(
+        name="cf_n_lightjet",
+        expression="cutflow.n_lightjet",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of light AK4 jets",
+    )
+    config.add_variable(
+        name="cf_n_veto_electron",
+        expression="cutflow.n_veto_electron",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of veto electrons",
+    )
+    config.add_variable(
+        name="cf_n_veto_muon",
+        expression="cutflow.n_veto_muon",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of veto muons",
     )
     config.add_variable(
         name="cf_n_toptag",
