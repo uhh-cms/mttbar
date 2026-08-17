@@ -14,6 +14,7 @@ import yaml
 from scinum import Number
 
 from columnflow.util import DotDict
+from columnflow.types import Callable
 from columnflow.cms_util import CATInfo, CATSnapshot
 from columnflow.config_util import (
     add_shift_aliases,
@@ -21,6 +22,8 @@ from columnflow.config_util import (
     get_shifts_from_sources,
     verify_config_processes,
 )
+from columnflow.production.cms.muon import MuonSFConfig
+from columnflow.production.cms.electron import ElectronSFConfig
 from mtt.config.categories import add_categories_selection
 from mtt.config.variables import add_variables
 from mtt.config.datasets import add_datasets_from_yaml
@@ -39,16 +42,18 @@ from mtt.config.corrections import (
     jerc_cfg,
     btag_sf_cfg,
     toptag_sf_cfg,
-    lepton_sf_cfg,
     met_phi_cfg,
-    jet_id_cfg,
+    # jet_id_cfg,
 )
+from columnflow.production.cms.jet import JetIdConfig
 from columnflow.util import maybe_import
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
 
 import order as od
+
+logger = law.logger.get_logger(__name__)
 
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
@@ -60,6 +65,7 @@ def add_new_config(
     config_name: str | None = None,
     config_id: int | None = None,
     limit_dataset_files: int | None = None,
+    split_mc: bool | None = None,
 ) -> od.Config:
     """
     Configurable function for creating a config for a run3 analysis given
@@ -67,11 +73,15 @@ def add_new_config(
     """
 
     # validation (TODO: why?)
-    assert campaign.x.year in [2022, 2023, 2024]
+    implemented_years = [2024, 2025]
+    assert campaign.x.year in implemented_years
     if campaign.x.year == 2022:
         assert campaign.x.EE in ["pre", "post"]
     elif campaign.x.year == 2023:
         assert campaign.x.BPix in ["pre", "post"]
+
+    if split_mc is None:
+        raise ValueError("The flag 'split_mc' must be specified (True/False) for the config.")
 
     # campaign data
     year = campaign.x.year
@@ -83,7 +93,6 @@ def add_new_config(
     elif year == 2023:
         corr_postfix = f"{campaign.x.BPix}BPix"
 
-    implemented_years = [2022, 2023, 2024]
     if year not in implemented_years:
         raise NotImplementedError(f"Only {', '.join(map(str, implemented_years))} campaigns are implemented.")
 
@@ -296,6 +305,40 @@ def add_new_config(
         )
     logger.info_once(f"Added {len(dataset_names)} datasets to config {cfg.name} (config id: {cfg.id})")
 
+    # whether to validate the number of obtained LFNs in GetDatasetLFNs
+    cfg.x.validate_dataset_lfns = limit_dataset_files is None
+
+    # MC splitting settings
+    # taken from https://github.com/uhh-cms/hh2bbtautau/blob/2b227967d8cc86351908ac834144a63e2d3733f1/hbt/config/configs_hbt.py#L2458-L2475  # noqa
+
+    if split_mc:
+        # for details see https://gist.github.com/riga/5aad795980919d23ea6b7df0502a999b
+        if year not in {2024, 2025, 2026}:
+            raise ValueError(f"MC splitting is not supported in {year}")
+
+        _splitter = None
+
+        def get_nano_filter_config(task, target) -> tuple[Callable[[ak.Array], np.ndarray], set[str]] | None:
+            # skip for data
+            if task.dataset_inst.is_data:
+                return None
+
+            # define splitting function and required column names for mc
+            def nano_filter_func(events: ak.Array) -> ak.Array | np.ndarray:
+                nonlocal _splitter
+                if _splitter is None:
+                    from columnflow.util import load_correction_set
+                    splitter_path = "/data/dust/user/matthiej/mttbar/mtt/config/run3/data/mc_event_splitter.json.gz"
+                    _splitter = load_correction_set(splitter_path)["mc_event_splitter"]
+                return _splitter.evaluate(events.event) == year
+
+            columns = {"event"}
+
+            return nano_filter_func, columns
+
+        # register on config to be picked up by ChunkedIOMixin's
+        cfg.x.get_nano_filter_config = get_nano_filter_config
+
     # set color of main processes
     colors = {
         "data": "#000000",  # black
@@ -378,7 +421,12 @@ def add_new_config(
     logger.debug(f"Added {len(cfg.processes)} processes and {len(cfg.datasets)} datasets to config '{cfg.name}'")
 
     # add tagger working points
-    cfg.x.btag_wp = btag_params(cfg)
+    # cfg.x.btag_wp = btag_params(cfg)
+
+    # full b-tag working points dict
+    cfg.x.btag_wp = btag_params(cfg, full=True)
+    # store only upart wps for fixed wp sf producer
+    cfg.x.btag_wp.btagUParTAK4B.fixed_wp = btag_params(cfg, full=False)
     cfg.x.toptag_wp = toptag_params(cfg)
 
     #
@@ -386,6 +434,10 @@ def add_new_config(
     #
 
     # lepton selection parameters
+    logger.warning(
+        "Update cfg.x.lepton_selection['e']['id_addveto']['min_value'] to 4"
+        "when rerunning selection to match Run 2 analysis.",
+    )
     cfg.x.lepton_selection = DotDict.wrap({
         "mu": {
             "column": "Muon",
@@ -449,10 +501,8 @@ def add_new_config(
                 "mu": [50, 50],
             },
             "btagger": {
-                "column": "btagDeepFlavB" if year != 2024 else "btagUParTAK4B",
-                # "column": "btagDeepFlavB" if year != 2024 else "btagPNetB",
-                "wp": cfg.x.btag_wp.deepjet.medium if year != 2024 else cfg.x.btag_wp.btagUParTAK4B.medium,
-                # "wp": cfg.x.btag_wp.deepjet.medium if year != 2024 else cfg.x.btag_wp.particle_net.medium,
+                "column": "btagDeepFlavB" if year not in [2024, 2025] else "btagUParTAK4B",
+                "wp": cfg.x.btag_wp.btagUParTAK4B.fixed_wp.medium if year in [2024, 2025] else cfg.x.btag_wp.deepjet.medium,
             },
         },
         "ak8": {
@@ -464,12 +514,12 @@ def add_new_config(
             },
             "msoftdrop": [105, 210],
             "toptagger": {
-                "column": ["particleNetWithMass_TvsQCD"] if year != 2024 else [
+                "column": ["particleNetWithMass_TvsQCD"] if year not in [2024, 2025] else [
                     "globalParT3_TopbWqq",
                     "globalParT3_TopbWq",
                     "globalParT3_QCD",
                 ],
-                "wp": cfg.x.toptag_wp.particle_net.tight if year != 2024 else cfg.x.toptag_wp.GloParTv3.tight,
+                "wp": cfg.x.toptag_wp.GloParTv3.tight if year in [2024, 2025] else cfg.x.toptag_wp.particle_net.tight,
             },
             "delta_r_lep": 0.8,
         },
@@ -564,16 +614,17 @@ def add_new_config(
             "lumi_13p6TeV_2023": 0.013j,
         })
     elif year == 2024:
-        cfg.x.luminosity = Number(109_080.0, {
-            "lumi_13p6TeV_2024": 0.013j,
+        cfg.x.luminosity = Number(109_950.0 - 130.0, {
+            "lumi_13p6TeV_2024": 0.016j,  # CERN-CMS-DP-2026-003
         })
-        # cfg.x.luminosity = Number(109_095.0, {  # FIXME: SWITCH WHEN RERUNNING
-        #     "lumi_13p6TeV_2024": 0.013j,  # check error
-        # })
         # processed lumi for limited configs
         # cfg.x.luminosity = Number(995.223558512, {
         #     "lumi_13p6TeV_2024": 0.013j,
         # })
+    elif year == 2025:
+        cfg.x.luminosity = Number(110_840, {
+            "lumi_13p6TeV_2025": 0.016j,  # FIXME placeholder atm, fill in when available
+        })
     else:
         raise NotImplementedError(f"Luminosity for year {year} is not defined.")
 
@@ -664,6 +715,124 @@ def add_new_config(
 
     for ds in diboson_xsecs_14:
         procs.n(ds).set_xsec(13.6, diboson_xsecs_13_6[ds])
+
+    #
+    # corrections
+    #
+
+    cfg.x.vjets_reweighting = vjets_reweighting_cfg()
+    cfg.x.jec, cfg.x.jer = jerc_cfg(campaign, year)
+
+    if year in [2024, 2025, 2026]:
+        cfg.x.jet_id = JetIdConfig(
+            corrections={"AK4PUPPI_Tight": 2, "AK4PUPPI_TightLeptonVeto": 3},
+        )
+        cfg.x.fatjet_id = JetIdConfig(
+            corrections={"AK8PUPPI_Tight": 2, "AK8PUPPI_TightLeptonVeto": 3},
+        )
+    else:
+        logger.debug(f"(Fat)Jet ID recalculation not configured for {cfg.x.cpn_tag} campaign. Will be skipped.")
+        cfg.add_tag("skip_jet_ids")
+
+    # cfg.x.btag_sf = btag_sf_cfg(year)
+    cfg.x.btag_sf_jec_sources = btag_sf_cfg(cfg, year)
+    cfg.x.toptag_sf = toptag_sf_cfg()
+
+    # electron SF configs for low and high pt regions
+    # reco
+    cfg.x.electron_reco_weight_low_pt_sf_config = ElectronSFConfig(
+        correction="Electron-ID-SF",
+        campaign=f"{year}Prompt",
+        working_point={
+            "RecoBelow20": (lambda variables: variables["pt"] < 20),
+            "Reco20to75": (lambda variables: (variables["pt"] >= 20) & (variables["pt"] < 75.0)),
+            "RecoAbove75": (lambda variables: variables["pt"] >= 75.0),
+        },
+    )
+    cfg.x.electron_reco_weight_high_pt_sf_config = ElectronSFConfig(
+        correction="Electron-ID-SF",
+        campaign=f"{year}Prompt",
+        working_point={
+            "RecoBelow20": (lambda variables: variables["pt"] < 20),
+            "Reco20to75": (lambda variables: (variables["pt"] >= 20) & (variables["pt"] < 75.0)),
+            "RecoAbove75": (lambda variables: variables["pt"] >= 75.0),
+        },
+    )
+    # id and iso
+    cfg.x.electron_id_iso_weight_low_pt_sf_config = ElectronSFConfig(
+        correction="Electron-ID-SF",
+        campaign=f"{year}Prompt",
+        working_point={
+            "wp80iso": (lambda variables: variables["pt"] > 10),
+        },
+    )
+    cfg.x.electron_id_weight_high_pt_sf_config = ElectronSFConfig(
+        correction="Electron-ID-SF",
+        campaign=f"{year}Prompt",
+        working_point={
+            "wp80noiso": (lambda variables: variables["pt"] > 10),
+        },
+    )
+    cfg.x.electron_iso_weight_high_pt_sf_config = ElectronSFConfig(
+        correction="NOT_YET_AVAILABLE",  # TODO derive high pt iso SF for custom iso definition
+        campaign=f"{year}Prompt",
+        working_point={
+            "wp80iso": (lambda variables: variables["pt"] > 10),
+        },
+    )
+    # trigger
+    cfg.x.electron_trigger_weight_low_pt_sf_config = ElectronSFConfig(
+        correction="Electron-HLT-SF",
+        campaign=f"{year}Prompt",
+        hlt_path="HLT_SF_Ele30_MVAiso80ID",
+    )
+    cfg.x.electron_trigger_weight_high_pt_sf_config = ElectronSFConfig(
+        correction="NOT_YET_AVAILABLE",  # TODO derive high pt trigger SF
+        campaign=f"{year}Prompt",
+        hlt_path="HLT_SF_Ele30_MVAiso80ID",
+    )
+
+    # muon SF configs for low and high pt regions
+    # reco
+    cfg.x.muon_reco_low_pt_sf_config = MuonSFConfig(
+        correction="NOT_NEEDED",
+    )
+    cfg.x.muon_reco_high_pt_sf_config = MuonSFConfig(
+        correction="NUM_GlobalMuons_DEN_TrackerMuonProbes",
+    )
+
+    # id
+    cfg.x.muon_id_weight_low_pt_sf_config = MuonSFConfig(
+        correction="NUM_TightID_DEN_TrackerMuons",
+    )
+    cfg.x.muon_id_weight_high_pt_sf_config = MuonSFConfig(
+        correction="NUM_HighPtID_DEN_GlobalMuonProbes",
+    )
+
+    # iso
+    cfg.x.muon_iso_weight_low_pt_sf_config = MuonSFConfig(
+        correction="NUM_TightPFIso_DEN_TightID",
+    )
+    cfg.x.muon_iso_weight_high_pt_sf_config = MuonSFConfig(
+        correction="TO_BE_DERIVED",  # TODO derive high pt iso SF for custom iso definition
+    )
+
+    # trigger
+    cfg.x.muon_trigger_weight_low_pt_sf_config = MuonSFConfig(
+        correction="NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
+    )
+    cfg.x.muon_trigger_weight_high_pt_sf_config = MuonSFConfig(
+        correction="TO_BE_DERIVED",  # TODO derive high pt trigger SF
+    )
+
+    cfg.x.met_phi_correction = met_phi_cfg(cfg)  # METPhiConfig object
+
+    # top pt reweighting parameters
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat?rev=31
+    cfg.x.top_pt_reweighting_params = {
+        "a": 0.0615,
+        "b": -0.0005,
+    }
 
     #
     # systematic shifts
@@ -919,7 +1088,7 @@ def add_new_config(
         dataset.x.event_weights = DotDict()
 
         # group datasets together for btag WP efficiency calculation in 2024
-        if year == 2024:
+        if year in [2024, 2025]:
             # TODO figure out which datasets should be grouped together;
             # for now, don't group any datasets together and treat each type of dataset separately
             cfg.x.btag_wp_eff_groups = [
@@ -1005,7 +1174,21 @@ def add_new_config(
             vnano=15,
             era="24CDEReprocessingFGHIPrompt-Summer24",
             pog_directories={"dc": "Collisions24"},
-            snapshot=CATSnapshot(btv="2026-01-30", dc="2025-07-25", egm="2025-12-15", jme="2025-12-02", muo="2025-11-27", lum="2025-12-02"),  # noqa: E501
+            snapshot=CATSnapshot(btv="2026-03-10", dc="2025-07-25", egm="2025-12-15", jme="2026-07-16", muo="2025-11-27", lum="2025-12-02"),  # noqa: E501
+        ),
+        (2025, "", 15): CATInfo(
+            run=3,
+            vnano=15,
+            era="25Prompt-Summer24",
+            pog_directories={"dc": "Collisions25"},
+            snapshot=CATSnapshot(btv="2026-06-26", dc="2025-07-25", egm="2026-06-26", jme="2026-07-14", muo="2026-04-28", lum="2026-06-05"),  # noqa: E501
+        ),
+        (2026, "", 15): CATInfo(
+            run=3,
+            vnano=15,
+            era="26Prompt-Summer24",
+            pog_directories={"dc": "Collisions26"},
+            snapshot=CATSnapshot(jme="2026-07-15"),  # noqa: E501
         ),
     }[(year, campaign.x.postfix, vnano)]
     cfg.x.cat_info = cat_info
@@ -1022,6 +1205,7 @@ def add_new_config(
             # not yet available at CAT space
             # 2024: (cat_info.get_file("dc", "Cert_Collisions2024_378981_386951_Golden.json"), "v1"),
             2024: ("https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions24/Cert_Collisions2024_378981_386951_Golden.json", "v1"),  # noqa: E501
+            2025: ("https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions25/Cert_Collisions2025_391658_398903_Golden.json", "v1"),  # noqa: E501
         }[year],
         "normtag": {
             # https://twiki.cern.ch/twiki/bin/view/CMS/PdmVRun3Analysis?rev=161#Year_2022
@@ -1030,26 +1214,30 @@ def add_new_config(
             2023: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_BRIL.json", "v1"),
             # https://twiki.cern.ch/twiki/bin/view/CMS/PdmVRun3Analysis?rev=180#Year_2024
             2024: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_BRIL.json", "v1"),  # TODO: correct?
+            2025: ("/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_BRIL.json", "v1"),  # TODO: correct?
         }[year],
     })
 
     # pileup weight corrections
-    if year != 2024:  # TODO: not yet available, see https://cms-analysis-corrections.docs.cern.ch
-        add_external("pu_sf", (cat_info.get_file("lum", "puWeights.json.gz"), "v1"))
+    if year == 2025:
+        add_external("pu_sf", (cat_info.get_file("lum", "puWeights_2025pp_Golden_Summer24_25ns_69200ub.json.gz"), "v1"))
     elif year == 2024:
         add_external("pu_sf", (cat_info.get_file("lum", "puWeights_BCDEFGHI.json.gz"), "v1"))
+    else:
+        add_external("pu_sf", (cat_info.get_file("lum", "puWeights.json.gz"), "v1"))
 
     # jet energy correction
     add_external("jet_jerc", (cat_info.get_file("jme", "jet_jerc.json.gz"), "v1"))
 
     # fat jet energy correction
-    add_external("fat_jet_jerc", (cat_info.get_file("jme", "fat_jet_jerc.json.gz" if year != 2024 else "fatJet_jerc.json.gz"), "v1"))  # noqa: E501
+    add_external("fat_jet_jerc", (cat_info.get_file("jme", "fat_jet_jerc.json.gz" if year not in [2024, 2025, 2026] else "fatJet_jerc.json.gz"), "v1"))  # noqa: E501
 
     # jet veto map
     add_external("jet_veto_map", (cat_info.get_file("jme", "jetvetomaps.json.gz"), "v1"))
 
     # btag scale factor
-    if year != 2024:
+    # add_external("btag_wp_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
+    if year not in [2024, 2025]:
         add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
     else:
         # SF stored in preliminary file for 2024 for now
@@ -1061,14 +1249,17 @@ def add_new_config(
     add_external("jet_id", (cat_info.get_file("jme", "jetid.json.gz"), "v1"))
 
     # muon scale factors
-    add_external("muon_sf", (cat_info.get_file("muo", "muon_Z.json.gz"), "v1"))
+    add_external("muon_low_pt_sf", (cat_info.get_file("muo", "muon_Z.json.gz"), "v1"))
+    add_external("muon_high_pt_sf", (cat_info.get_file("muo", "muon_HighPt.json.gz"), "v1"))
 
     # met phi correction
-    if year != 2024:  # TODO: not yet available for 2024
+    if year not in [2024, 2025]:  # TODO: not yet available for 2024
         add_external("met_phi_corr", (cat_info.get_file("jme", f"met_xyCorrections_{year}_{year}{campaign.x.postfix}.json.gz"), "v1"))  # noqa: E501
 
     # electron scale factors
     add_external("electron_sf", (cat_info.get_file("egm", "electron.json.gz"), "v1"))
+    if year in {2024}:
+        add_external("electron_trigger_low_pt_sf", (cat_info.get_file("egm", "electronHlt.json.gz"), "v1"))
     # electron energy correction and smearing
     add_external("electron_ss", (cat_info.get_file("egm", "electronSS_EtDependent.json.gz"), "v1"))  # FIXME correct for us? # noqa: E501
 
@@ -1077,56 +1268,6 @@ def add_new_config(
 
     # # V+jets reweighting
     # "vjets_reweighting": f"{sources['local_repo']}/data/json/vjets_reweighting.json",
-
-    # if year == 2022 and campaign.x.EE == "pre":
-    #     cfg.x.external_files.update(DotDict.wrap({
-    #         # lumi files from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideGoodLumiSectionsJSONFile
-    #         "lumi": {
-    #             "golden": (f"{sources['cert']}/Cert_Collisions2022_355100_362760_Golden.json", "v1"),  # noqa
-    #             "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-    #         },
-
-    #         # pileup files (for PU reweighting)
-    #         "pu": {
-    #             # "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCD/pileup_JSON.txt", "v1"),  # noqa
-    #             "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCDEFG/pileup_JSON.txt", "v1"),  # noqa
-    #             "mc_profile": ("https://raw.githubusercontent.com/cms-sw/cmssw/bb525104a7ddb93685f8ced6fed1ab793b2d2103/SimGeneral/MixingModule/python/Run3_2022_LHC_Simulation_10h_2h_cfi.py", "v1"),  # noqa
-    #             "data_profile": {
-    #                 # "nominal": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCD/pileupHistogram-Cert_Collisions2022_355100_357900_eraBCD_GoldenJson-13p6TeV-69200ub-99bins.root", "v1"),  # noqa
-    #                 # "minbias_xs_up": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCD/pileupHistogram-Cert_Collisions2022_355100_357900_eraBCD_GoldenJson-13p6TeV-72400ub-99bins.root", "v1"),  # noqa
-    #                 # "minbias_xs_down": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCD/pileupHistogram-Cert_Collisions2022_355100_357900_eraBCD_GoldenJson-13p6TeV-66000ub-99bins.root", "v1"),  # noqa
-    #                 "nominal": (f"/afs/cern.ch/user/a/anhaddad/public/Collisions22/pileupHistogram-Cert_Collisions2022_355100_362760_GoldenJson-13p6TeV-69200ub-100bins.root", "v1"),  # noqa
-    #                 "minbias_xs_up": (f"/afs/cern.ch/user/a/anhaddad/public/Collisions22/pileupHistogram-Cert_Collisions2022_355100_362760_GoldenJson-13p6TeV-72400ub-100bins.root", "v1"),  # noqa
-    #                 "minbias_xs_down": (f"/afs/cern.ch/user/a/anhaddad/public/Collisions22/pileupHistogram-Cert_Collisions2022_355100_362760_GoldenJson-13p6TeV-66000ub-100bins.root", "v1"),  # noqa
-    #             },
-    #         },
-    #     }))
-    # elif year == 2022 and campaign.x.EE == "post":
-    #     cfg.x.external_files.update(DotDict.wrap({
-    #         # files from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideGoodLumiSectionsJSONFile
-    #         "lumi": {
-    #             "golden": ("https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/Cert_Collisions2022_355100_362760_Golden.json", "v1"),  # noqa
-    #             "normtag": ("/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json", "v1"),
-    #         },
-
-    #         # pileup files (for PU reweighting)
-    #         "pu": {
-    #             # "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/EFG/pileup_JSON.txt", "v1"),  # noqa
-    #             "json": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/BCDEFG/pileup_JSON.txt", "v1"),  # noqa
-    #             "mc_profile": ("https://raw.githubusercontent.com/cms-sw/cmssw/bb525104a7ddb93685f8ced6fed1ab793b2d2103/SimGeneral/MixingModule/python/Run3_2022_LHC_Simulation_10h_2h_cfi.py", "v1"),  # noqa
-    #             "data_profile": {
-    #                 # data profiles were produced with 99 bins instead of 100 --> use custom produced data profiles instead  # noqa
-    #                 # "nominal": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/EFG/pileupHistogram-Cert_Collisions2022_359022_362760_eraEFG_GoldenJson-13p6TeV-69200ub-99bins.root", "v1"),  # noqa
-    #                 # "minbias_xs_up": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/EFG/pileupHistogram-Cert_Collisions2022_359022_362760_eraEFG_GoldenJson-13p6TeV-72400ub-99bins.root", "v1"),  # noqa
-    #                 # "minbias_xs_down": (f"https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/PileUp/EFG/pileupHistogram-Cert_Collisions2022_359022_362760_eraEFG_GoldenJson-13p6TeV-66000ub-99bins.root", "v1"),  # noqa
-    #                 "nominal": (f"/afs/cern.ch/user/a/anhaddad/public/Collisions22/pileupHistogram-Cert_Collisions2022_355100_362760_GoldenJson-13p6TeV-69200ub-100bins.root", "v1"),  # noqa
-    #                 "minbias_xs_up": (f"/afs/cern.ch/user/a/anhaddad/public/Collisions22/pileupHistogram-Cert_Collisions2022_355100_362760_GoldenJson-13p6TeV-72400ub-100bins.root", "v1"),  # noqa
-    #                 "minbias_xs_down": (f"/afs/cern.ch/user/a/anhaddad/public/Collisions22/pileupHistogram-Cert_Collisions2022_355100_362760_GoldenJson-13p6TeV-66000ub-100bins.root", "v1"),  # noqa
-    #             },
-    #         },
-    #     }))
-    # else:
-    #     raise NotImplementedError(f"No lumi and pu files provided for year {year}")
 
     #
     # set defaults for
@@ -1226,6 +1367,8 @@ def add_new_config(
             "mc_weight",
             "pt_regime",
             "pu_weight*",
+            "pdf_weight*", "fsr_weight*", "isr_weight*",
+            "muf_weight*", "mur_weight*", "murmuf_weight*", "murmuf_envelope*",
         },
     })
 

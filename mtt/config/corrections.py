@@ -5,11 +5,12 @@ Configuration of corrections for the m(ttbar) analysis.
 """
 
 import order as od
+import law
 
 from columnflow.util import DotDict
-from columnflow.production.cms.btag import BTagSFConfig
 from columnflow.production.cms.electron import ElectronSFConfig
 from columnflow.production.cms.muon import MuonSFConfig
+logger = law.logger.get_logger(__name__)
 
 
 def vjets_reweighting_cfg(
@@ -46,14 +47,19 @@ def jerc_cfg(
         jec_campaign = f"Summer23{jerc_postfix}Prompt23"
     elif year == 2024:
         jec_campaign = "Summer24Prompt24"
-        jer_campaign = "Summer23BPixPrompt23_RunD"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1 # noqa
+        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1 # noqa
+    elif year == 2025:
+        jec_campaign = "Summer24Prompt25"
+        jer_campaign = "Summer24Prompt25"
 
     jet_type = "AK4PFPuppi"
     fatjet_type = "AK8PFPuppi"
     jec_ak4_version = jec_ak8_version = {
         2022: "V3",
         2023: "V3",
-        2024: "V2",
+        2024: "V5",
+        2025: "V2",
+        2026: "V1",
     }[year]
 
     jec_params = {
@@ -121,7 +127,7 @@ def jerc_cfg(
                 # "CorrelationGroupFlavor",
                 # "CorrelationGroupUncorrelated",
             ],
-            "data_per_era": False if year in [2023, 2024] else True,  # 2022 JEC has the era in the correction set name
+            "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
         "FatJet": {
             "campaign": jec_campaign,
@@ -262,17 +268,17 @@ def jerc_cfg(
     jer_params = {
         "Jet": {
             "campaign": jer_campaign,
-            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV1"}[year],
+            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV2", 2025: "JRV2"}[year],
             "jet_type": jet_type,
         },
         "FatJet": {
             "campaign": jer_campaign,
-            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV1"}[year],
+            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV2", 2025: "JRV2"}[year],
             "jet_type": fatjet_type,
         },
         "SubJet": {
             "campaign": jer_campaign,
-            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV1"}[year],
+            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV2", 2025: "JRV2"}[year],
             "jet_type": jet_type,
         },
     }
@@ -410,13 +416,14 @@ def btag_sf_cfg(
 
 def toptag_sf_cfg(
 ) -> DotDict:
+    logger.warning_once("Top-tagging SFs are not yet implemented.")
     # TODO: use PNet!
-    name = {
-        "name": "DeepAK8_Top_MassDecorr",
-        "wp": "1p0",
-    }
+    # name = {
+    #     "name": "DeepAK8_Top_MassDecorr",
+    #     "wp": "1p0",
+    # }
 
-    return DotDict.wrap(name)
+    # return DotDict.wrap(name)
 
 
 def lepton_sf_cfg(

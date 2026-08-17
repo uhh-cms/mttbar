@@ -74,6 +74,7 @@ from mtt.config.run3.new_mtt_config import add_new_config
 # from cmsdb.campaigns.run3_2023_preBPix_nano_v12 import campaign_run3_2023_preBPix_nano_v12 as campaign_run3_2023_preBPix_nano_v12  # noqa
 # from cmsdb.campaigns.run3_2023_postBPix_nano_v12 import campaign_run3_2023_postBPix_nano_v12 as campaign_run3_2023_postBPix_nano_v12  # noqa
 from cmsdb.campaigns.run3_2024_nano_v15 import campaign_run3_2024_nano_v15 as campaign_run3_2024_nano_v15  # noqa
+from cmsdb.campaigns.run3_2025_nano_v15 import campaign_run3_2025_nano_v15 as campaign_run3_2025_nano_v15  # noqa
 
 # campaign_run3_2022_preEE_nano_v12.x.EE = "pre"
 # campaign_run3_2022_postEE_nano_v12.x.EE = "post"
@@ -289,6 +290,7 @@ config_2024_new = add_new_config(
     campaign_run3_2024_nano_v15.copy(),
     config_name="run3_mtt_2024_nano_v15_new",
     config_id=3_24_11,  # 3: Run3 24: year 1: full stat 1: 24
+    split_mc=True,
 )
 
 # configs with limited number of files
@@ -298,6 +300,7 @@ config_2024_limited_new = add_new_config(
     config_name="run3_mtt_2024_nano_v15_limited_new",
     config_id=3_24_21,  # 3: Run3 24
     limit_dataset_files=2,
+    split_mc=True,
 )
 
 # configs with medium limited number of files
@@ -307,4 +310,34 @@ config_2024_medium_limited_new = add_new_config(
     config_name="run3_mtt_2024_nano_v15_medium_limited_new",
     config_id=3_24_31,  # 3: Run3 24
     limit_dataset_files=10,
+    split_mc=True,
+)
+
+
+config_2025_new = add_new_config(
+    ana_new,
+    campaign_run3_2025_nano_v15.copy(),
+    config_name="run3_mtt_2025_nano_v15_new",
+    config_id=3_25_11,  # 3: Run3 25: year 1: full stat 1: 25
+    split_mc=True,
+)
+
+# configs with limited number of files
+config_2025_limited_new = add_new_config(
+    ana_new,
+    campaign_run3_2025_nano_v15.copy(),
+    config_name="run3_mtt_2025_nano_v15_limited_new",
+    config_id=3_25_21,  # 3: Run3 25
+    limit_dataset_files=2,
+    split_mc=True,
+)
+
+# configs with medium limited number of files
+config_2025_medium_limited_new = add_new_config(
+    ana_new,
+    campaign_run3_2025_nano_v15.copy(),
+    config_name="run3_mtt_2025_nano_v15_medium_limited_new",
+    config_id=3_25_31,  # 3: Run3 25
+    limit_dataset_files=10,
+    split_mc=True,
 )
