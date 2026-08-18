@@ -160,6 +160,24 @@ def base_init(self: HistProducer) -> None:
             f"Config {self.config_inst.name} has tag 'skip_btag_weights', "
             "removing normalized_ht_njet_nhf_btag_weight columns and use btag weight instead",
         )
+        def _is_known_btag_unc(column: str) -> bool:
+            for flavor, known_uncs in (
+                ("bc", self.config_inst.x.btag_uncs_bc), ("light", self.config_inst.x.btag_uncs_light)
+            ):
+                suffix = f"_{flavor}"
+                if column == f"btag_{flavor}":
+                    # bare nominal-per-flavor column, always keep
+                    return True
+                if column.endswith(suffix) and column[len("btag_"):-len(suffix)] in known_uncs:
+                    return True
+            return False
+        dropped = [c for c in self.local_weight_columns["btag_weight"] if not _is_known_btag_unc(c)]
+        if dropped:
+            logger.debug(f"dropping unknown btag weight columns: {dropped}")
+
+        self.local_weight_columns["btag_weight"] = list(dict.fromkeys(
+            col for col in self.local_weight_columns["btag_weight"] if _is_known_btag_unc(col)
+        ))
         self.local_weight_columns.pop("normalized_ht_njet_nhf_btag_weight", None)
     else:
         # throw error if no tag is set
@@ -277,39 +295,30 @@ def base_post_init(self: HistProducer, task: law.Task):
 # setup of different sets of weights to be used in different HistProducers #
 # ------------------------------------------------------------------------ #
 
+# load all possible btag uncs from the yaml file, which is used to set up the btag SFs in the config
+import yaml
+btag_uncs_bc = []
+btag_uncs_light = []
+with open("mtt/config/run3/data/btag_fixed_wp_uncs.yaml", "r") as f:
+    btag_uncs = yaml.safe_load(f)
+
+for key in ["2024full", "2025full"]:
+    btag_uncs_bc += btag_uncs["bc"][key]
+    btag_uncs_light += btag_uncs["light"][key]
+
+
+btag_uncs_bc_full = [f"{unc}_bc" for unc in btag_uncs_bc] + ["bc"]
+btag_uncs_light_full = [f"{unc}_light" for unc in btag_uncs_light] + ["light"]
+
+all_btag_uncs = btag_uncs_bc_full + btag_uncs_light_full
+
+# btag uncs from shape based SFs
 btag_uncs = [
     "hf", "lf",
     "cferr1", "cferr2",
     "hfstats1", "lfstats1",
     "hfstats2", "lfstats2",
 ]
-
-
-btag_uncs_bc = [
-    "correlated",
-    "uncorrelated",
-    "bfragmentation",
-    "fsrdef",
-    "hdamp",
-    "isrdef",
-    "jer",
-    "jes",
-    "muf",
-    "mur",
-    "pdfas",
-    "pileup",
-    "statistic",
-    "topmass",
-    "type3p",
-]
-btag_uncs_bc_full = [f"{unc}_bc" for unc in btag_uncs_bc] + ["bc"]
-btag_uncs_light = [
-    "",
-    "correlated", "uncorrelated",
-]
-btag_uncs_light_full = [f"{unc}_light" for unc in btag_uncs_light] + ["light"]
-
-all_btag_uncs = btag_uncs_bc_full + btag_uncs_light_full
 
 all_correction_weights = {
     "normalization_weight": [],
@@ -349,9 +358,9 @@ all_correction_weights = {
 # remove temporarily further lepton weights that are not available yet
 temp_lepton_columns_to_remove = [
     "muon_iso_weight_high_pt",  # NOTE: custom 2D isolation
-    "muon_trigger_weight_high_pt",
+    "muon_trigger_weight_high_pt",  # TODO: derive high pT trigger SFs
     "electron_iso_weight_high_pt",  # NOTE: custom 2D isolation
-    "electron_trigger_weight_high_pt",
+    "electron_trigger_weight_high_pt",  # TODO: derive high pT trigger SFs
 ]
 remove_weight_columns(all_correction_weights, temp_lepton_columns_to_remove)
 

@@ -1,0 +1,52 @@
+bc:
+  2024full:
+    - correlated
+    - uncorrelated
+    - bfragmentation
+    - fsrdef
+    - hdamp
+    - isrdef
+    - jer
+    - jes
+    - muf
+    - mur
+    - pdfas
+    - pileup
+    - statistic
+    - topmass
+    - type3p
+  2025full:
+    - correlated
+    - uncorrelated
+    - fsrdef
+    - hdamp
+    - isrdef
+    - jer
+    - jesRegrouped_Absolute
+    - jesRegrouped_Absolute_2024
+    - jesRegrouped_BBEC1
+    - jesRegrouped_BBEC1_2024
+    - jesRegrouped_EC2
+    - jesRegrouped_EC2_2024
+    - jesRegrouped_FlavorQCD
+    - jesRegrouped_HF
+    - jesRegrouped_HF_2024
+    - jesRegrouped_RelativeBal
+    - jesRegrouped_RelativeSample_2024
+    - mass
+    - muf
+    - mur
+    - pdf
+    - as
+    - pileup
+    - statistic
+    - ttbar
+    - type3
+
+light:
+  2024full:
+    - correlated
+    - uncorrelated
+  2025full:
+    - correlated
+    - uncorrelated

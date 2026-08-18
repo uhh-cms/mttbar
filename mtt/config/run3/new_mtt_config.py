@@ -40,7 +40,7 @@ from mtt.config.defaults_and_groups import (
 from mtt.config.corrections import (
     vjets_reweighting_cfg,
     jerc_cfg,
-    btag_sf_cfg,
+    btag_sf_setup,
     toptag_sf_cfg,
     met_phi_cfg,
 )
@@ -184,12 +184,12 @@ def add_new_config(
         cfg.add_tag("skip_electron_trigger_weights")  # high pt trigger SF not available yet TODO: derive them
         cfg.add_tag("skip_muon_trigger_weights")  # TODO compute high pt custom trigger SF for muons
         cfg.add_tag("skip_btag_weights")
-        cfg.add_tag("skip_btag_wp_weights")
+        # cfg.add_tag("skip_btag_wp_weights")
     elif year == 2025:
         cfg.add_tag("skip_electron_trigger_weights")  # no trigger SF available yet TODO: derive them
         cfg.add_tag("skip_muon_trigger_weights")  # TODO compute high pt custom trigger SF for muons
         cfg.add_tag("skip_btag_weights")
-        cfg.add_tag("skip_btag_wp_weights")
+        # cfg.add_tag("skip_btag_wp_weights")
     elif year == 2026:
         cfg.add_tag("skip_electron_weights")  # TODO no SFs at all available yet
         cfg.add_tag("skip_muon_weights")  # TODO no SFs at all available yet
@@ -736,8 +736,21 @@ def add_new_config(
         logger.debug(f"(Fat)Jet ID recalculation not configured for {cfg.x.cpn_tag} campaign. Will be skipped.")
         cfg.add_tag("skip_jet_ids")
 
-    # cfg.x.btag_sf = btag_sf_cfg(year)
-    cfg.x.btag_sf_jec_sources = btag_sf_cfg(cfg, year)
+    # btag uncs from clib file
+    # for b and c jets, and for light jets
+    with open("mtt/config/run3/data/btag_fixed_wp_uncs.yaml", "r") as f:
+        btag_uncs_from_yaml = yaml.safe_load(f)
+    if year == 2024:
+        cfg.x.btag_uncs_bc = btag_uncs_from_yaml["bc"]["2024full"]
+        cfg.x.btag_uncs_light = btag_uncs_from_yaml["light"]["2024full"]
+    elif year == 2025:
+        cfg.x.btag_uncs_bc = btag_uncs_from_yaml["bc"]["2025full"]
+        cfg.x.btag_uncs_light = btag_uncs_from_yaml["light"]["2025full"]
+    elif year == 2026:
+        raise NotImplementedError(f"Btag uncs for {year} are not yet implemented.")
+
+    # store btag sources for JEC variations and set up btag SFs
+    cfg.x.btag_sf_jec_sources = btag_sf_setup(cfg, year)
     cfg.x.toptag_sf = toptag_sf_cfg()
 
     # electron SF configs for low and high pt regions
@@ -836,25 +849,43 @@ def add_new_config(
         "b": -0.0005,
     }
 
+    # b tagging working point efficiency groups
+    # TODO: figure out which datasets should be grouped together;
+    # for now, group all bkg datasets and all signal datasets together
+    cfg.x.btag_wp_eff_groups = [
+        ["tt_*", "st_*", "qcd_*", "ww_*", "dy_*", "w_lnu_*", "wz_*", "zz_*"],
+        # ["dy_*"],
+        # ["w_lnu_*"],
+        # ["ww_*", "wz_*", "zz_*"],
+        # ["qcd_*"],
+        ["zprime_tt_*"],
+        # ["dy_*", "w_lnu_*", "wz_*", "zz_*"],
+    ]
+    for dataset in cfg.datasets:
+        # group datasets together for btag WP efficiency calculation in 2024
+        if year in [2024, 2025, 2026] and dataset.is_mc:
+            group_matched = False
+            for i, dataset_pattern in enumerate(cfg.x.btag_wp_eff_groups):
+                if law.util.multi_match(dataset.name, dataset_pattern):
+                    if group_matched:
+                        raise ValueError(
+                            f"dataset '{dataset.name}' already has a btag WP group assigned! Cannot assign it to more "
+                            "than one group",
+                        )
+                    group_matched = True
+                    dataset.add_tag(f"btag_wp_eff_group_{i}")
+            if not group_matched and dataset.is_mc:
+                raise ValueError(f"no btag_wp_eff_group_* assigned to dataset '{dataset.name}'")
+            if group_matched and dataset.is_data:
+                raise ValueError(f"must not assign btag_wp_eff_group_* to dataset '{dataset.name}'")
+
     #
     # systematic shifts
     #
 
     # read in JEC sources from file
-    with open(os.path.join(thisdir, "jec_sources.yaml"), "r") as f:
+    with open(os.path.join(thisdir, "data/jec_sources.yaml"), "r") as f:
         all_jec_sources = yaml.load(f, yaml.Loader)["names"]
-    btag_uncs_bc = [
-        "fsrdef", "isrdef",
-        "hdamp", "jer", "jes",
-        "mass", "statistic",
-        "tune",
-    ]
-    btag_uncs_bc_full = [f"{unc}_bc" for unc in btag_uncs_bc] + ["bc"]
-    btag_uncs_light = [
-        "",
-        "correlated", "uncorrelated",
-    ]
-    btag_uncs_light_full = [f"{unc}_light" for unc in btag_uncs_light] + ["light"]
 
     # declare the shifts
     def add_shifts(cfg):
@@ -930,7 +961,10 @@ def add_new_config(
         add_shift_aliases(cfg, "vjets", {"vjets_weight": "vjets_weight_{direction}"})
 
         # b-tagging shifts
-        if year != 2024:
+        if year not in [2024, 2025, 2026]:
+            logger.debug("adding shape based btag SF shifts for 2022/2023")
+            logger.warning("shape based btag SF are not maintained in the current iteration"
+            " and may need adaptions for the Run 3 clib files.")
             btag_uncs = [
                 "hf", "lf",
                 "hfstats1", "hfstats2",
@@ -938,48 +972,52 @@ def add_new_config(
                 "cferr1", "cferr2",
             ]
             for i, unc in enumerate(btag_uncs):
-                cfg.add_shift(name=f"btag_{unc}_up", id=501 + 2 * i, type="shape")
-                cfg.add_shift(name=f"btag_{unc}_down", id=502 + 2 * i, type="shape")
+                logger.debug(
+                    f"adding btag SF shift for unc. source '{unc}' with id {500 + 2 * i} (up) and {501 + 2 * i} (down)",
+                )
+                cfg.add_shift(name=f"btag_{unc}_up", id=500 + 2 * i, type="shape")
+                cfg.add_shift(name=f"btag_{unc}_down", id=501 + 2 * i, type="shape")
                 add_shift_aliases(
                     cfg,
                     f"btag_{unc}",
                     {
-                        # PREVIOUS IMPLEMENTATION (still used in some configs?)
-                        # taken from
-                        # https://github.com/uhh-cms/hh2bbww/blob/c6d4ee87a5c970660497e52aed6b7ebe71125d20/hbw/config/config_run2.py#L421
-                        "normalized_btag_weight": f"normalized_btag_weight_{unc}_" + "{direction}",
-                        "normalized_njet_btag_weight": f"normalized_njet_btag_weight_{unc}_" + "{direction}",
-                        "btag_weight": f"btag_weight_{unc}_" + "{direction}",
-                        "njet_btag_weight": f"njet_btag_weight_{unc}_" + "{direction}",
+                        btag_weight_name: f"{btag_weight_name}_{unc}_" + "{direction}"
+                        for btag_weight_name in (
+                            "btag_weight",
+                            # "normalized_btag_weight",
+                            # "normalized_njet_btag_weight",
+                            # "normalized_ht_njet_btag_weight",
+                            "normalized_ht_njet_nhf_btag_weight",
+                            # "normalized_ht_btag_weight",
+                        )
                     },
                 )
         else:
-            # https://cms-analysis-corrections.docs.cern.ch/corrections_era/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/BTV/2025-08-19/#btagging_preliminaryjsongz  # noqa
-            for i, unc in enumerate(btag_uncs_bc):
+            logger.debug("adding wp based btag SF shifts for 2024, 2025, 2026")
+            for i, unc in enumerate(cfg.x.btag_uncs_bc):
                 cfg.add_shift(name=f"btag_{unc}_bc_up", id=501 + 4 * i, type="shape")
                 cfg.add_shift(name=f"btag_{unc}_bc_down", id=502 + 4 * i, type="shape")
                 add_shift_aliases(
                     cfg,
                     f"btag_{unc}_bc",
                     {
-                        f"btag_weight": f"btag_weight_{unc}_bc_" + "{direction}",
+                        "btag_weight": f"btag_weight_{unc}_bc_" + "{direction}",
                     },
                 )
-            for i, unc in enumerate(btag_uncs_light):
+            for i, unc in enumerate(cfg.x.btag_uncs_light):
                 cfg.add_shift(name=f"btag_{unc}_light_up", id=503 + 4 * i, type="shape")
                 cfg.add_shift(name=f"btag_{unc}_light_down", id=504 + 4 * i, type="shape")
                 add_shift_aliases(
                     cfg,
                     f"btag_{unc}_light",
                     {
-                        f"btag_weight": f"btag_weight_{unc}_light_" + "{direction}",
+                        "btag_weight": f"btag_weight_{unc}_light_" + "{direction}",
                     },
                 )
-
-            cfg.add_shift(name="btag_bc_up", id=501 + 4 * len(btag_uncs_bc), type="shape")
-            cfg.add_shift(name="btag_bc_down", id=502 + 4 * len(btag_uncs_bc), type="shape")
-            cfg.add_shift(name="btag_light_up", id=503 + 4 * len(btag_uncs_light), type="shape")
-            cfg.add_shift(name="btag_light_down", id=504 + 4 * len(btag_uncs_light), type="shape")
+            cfg.add_shift(name="btag_bc_up", id=501 + 4 * len(cfg.x.btag_uncs_bc), type="shape")
+            cfg.add_shift(name="btag_bc_down", id=502 + 4 * len(cfg.x.btag_uncs_bc), type="shape")
+            cfg.add_shift(name="btag_light_up", id=503 + 4 * len(cfg.x.btag_uncs_light), type="shape")
+            cfg.add_shift(name="btag_light_down", id=504 + 4 * len(cfg.x.btag_uncs_light), type="shape")
             add_shift_aliases(
                 cfg,
                 "btag_bc",
@@ -1006,9 +1044,23 @@ def add_new_config(
                 {
                     "Jet.pt": "Jet.pt_{name}",
                     "Jet.mass": "Jet.mass_{name}",
-                    "MET.pt": "MET.pt_{name}",
-                },
-            )
+            if jec_source in ["Total", *cfg.x.btag_sf_jec_sources]:
+                # when jec_source is a known btag SF source, add aliases for btag weight column
+                add_shift_aliases(
+                    cfg,
+                    f"jec_{jec_source}",
+                    {
+                        btag_weight: f"{btag_weight}_jec_{jec_source}_" + "{direction}"
+                        for btag_weight in (
+                            "btag_weight",
+                            # "normalized_btag_weight",
+                            # "normalized_njet_btag_weight",
+                            # "normalized_ht_njet_btag_weight",
+                            "normalized_ht_njet_nhf_btag_weight",
+                            # "normalized_ht_btag_weight",
+                        )
+                    },
+                )
 
         # jet energy resolution (JER) scale factor variations
         cfg.add_shift(name="jer_up", id=6000, type="shape")
@@ -1031,65 +1083,33 @@ def add_new_config(
 
     #
     # event weights
+    # NOTE: use the flexible hist_producer setup in mtt/weights/default.py to have full control over
+    # which event weights should be applied. This setup is no longer maintained, and the columnflow native
+    # `--hist-producer all_weights` option will only apply the normalization weights as that is the only weight present
+    # in the `cfg.x.event_weights` aux entry. Kept here for reference, but will be removed in the future.
     #
 
     # event weight columns as keys in an OrderedDict, mapped to shift instances they depend on
-    get_shifts = functools.partial(get_shifts_from_sources, cfg)
-    full_btag_uncs = btag_uncs_bc_full + btag_uncs_light_full
+    # get_shifts = functools.partial(get_shifts_from_sources, cfg)
+    # btag_uncs_bc_full = [f"{unc}_bc" for unc in cfg.x.btag_uncs_bc] + ["bc"]
+    # btag_uncs_light_full = [f"{unc}_light" for unc in cfg.x.btag_uncs_light] + ["light"]
+    # full_btag_uncs = btag_uncs_bc_full + btag_uncs_light_full
     cfg.x.event_weights = DotDict({
         "normalization_weight": [],
-        "pu_weight": get_shifts("minbias_xs"),
-        "muon_id_weight": get_shifts("muon_id"),
-        "muon_iso_weight": get_shifts("muon_iso"),
-        "electron_reco_weight": get_shifts("electron_reco"),
-        "electron_id_iso_weight": get_shifts("electron_id_iso"),
-        "btag_weight": get_shifts(*(f"btag_{unc}" for unc in full_btag_uncs)),
-        # "ISR": get_shifts("ISR"),
-        # "FSR": get_shifts("FSR"),
-        # TODO: add scale and PDF weights, where available
-        # "scale_weight": ???,
-        # "pdf_weight": ???,
+        # "pu_weight": get_shifts("minbias_xs"),
     })
 
-    for dataset in cfg.datasets:
-        # event weights only present in certain datasets
-        dataset.x.event_weights = DotDict()
+    # for dataset in cfg.datasets:
+    #     # event weights only present in certain datasets
+    #     dataset.x.event_weights = DotDict()
 
-        # group datasets together for btag WP efficiency calculation in 2024
-        if year in [2024, 2025]:
-            # TODO figure out which datasets should be grouped together;
-            # for now, don't group any datasets together and treat each type of dataset separately
-            cfg.x.btag_wp_eff_groups = [
-                ["tt_*", "st_*", "zprime_tt_*", "qcd_*", "ww_*", "dy_*", "w_lnu_*", "wz_*", "zz_*"],
-                # ["dy_*"],
-                # ["w_lnu_*"],
-                # ["ww_*", "wz_*", "zz_*"],
-                # ["qcd_*"],
-                # ["zprime_tt_*"],
-                # ["dy_*", "w_lnu_*", "wz_*", "zz_*"],
-            ]
-            group_matched = False
-            for i, dataset_pattern in enumerate(cfg.x.btag_wp_eff_groups):
-                if law.util.multi_match(dataset.name, dataset_pattern):
-                    if group_matched:
-                        raise ValueError(
-                            f"dataset '{dataset.name}' already has a btag WP group assigned! Cannot assign it to more "
-                            "than one group",
-                        )
-                    group_matched = True
-                    dataset.add_tag(f"btag_wp_eff_group_{i}")
-            if not group_matched and dataset.is_mc:
-                raise ValueError(f"no btag_wp_eff_group_* assigned to dataset '{dataset.name}'")
-            if group_matched and dataset.is_data:
-                raise ValueError(f"must not assign btag_wp_eff_group_* to dataset '{dataset.name}'")
+    #     # TTbar: top pt reweighting
+    #     if dataset.has_tag("is_ttbar"):
+    #         dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
 
-        # TTbar: top pt reweighting
-        if dataset.has_tag("is_ttbar"):
-            dataset.x.event_weights["top_pt_weight"] = get_shifts("top_pt")
-
-        # V+jets: QCD NLO reweighting (disable for now)
-        # if dataset.has_tag("is_v_jets"):
-        #     dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
+    #     # V+jets: QCD NLO reweighting (disable for now)
+    #     # if dataset.has_tag("is_v_jets"):
+    #     #     dataset.x.event_weights["vjets_weight"] = get_shifts("vjets")
 
     #
     # external files
@@ -1205,13 +1225,17 @@ def add_new_config(
 
     # btag scale factor
     # add_external("btag_wp_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
-    if year not in [2024, 2025]:
+    if year not in [2024, 2025, 2026]:
         add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
-    else:
-        # SF stored in preliminary file for 2024 for now
-        # add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging_preliminary.json.gz"), "v1"))  # noqa: E501
+    elif year == 2024:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", ("/data/dust/user/matthiej/mttbar/mtt/config/run3/btagging_preliminary_merged.json.gz", "v1"))  # noqa: E501
+        add_external("btag_wp_sf_corr", ("/data/dust/user/matthiej/mttbar/mtt/config/run3/data/btagging_merged__2024__2026-03-10.json.gz", "v1"))  # noqa: E501
+    elif year == 2025:
+        # use custom file with merged SF for both b/c and light jets
+        add_external("btag_wp_sf_corr", ("/data/dust/user/matthiej/mttbar/mtt/config/run3/data/btagging_merged__2025__2026-06-26.json.gz", "v1"))  # noqa: E501
+    elif year == 2026:
+        # use custom file with merged SF for both b/c and light jets
+        raise NotImplementedError("btag SF for 2026 not yet available")
 
     # updated jet id
     add_external("jet_id", (cat_info.get_file("jme", "jetid.json.gz"), "v1"))
