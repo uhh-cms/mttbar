@@ -903,7 +903,14 @@ def add_new_config(
         # pileup / minimum bias cross section variations
         cfg.add_shift(name="minbias_xs_up", id=7, type="shape")
         cfg.add_shift(name="minbias_xs_down", id=8, type="shape")
-        add_shift_aliases(cfg, "minbias_xs", {"pu_weight": "pu_weight_{name}"})
+        add_shift_aliases(
+            cfg,
+            "minbias_xs",
+            {
+                "normalized_pu_weight": "normalized_pu_weight_{name}",
+                "pu_weight": "pu_weight_{name}",
+            },
+        )
 
         # top pt reweighting
         cfg.add_shift(name="top_pt_up", id=9, type="shape")
@@ -918,9 +925,15 @@ def add_new_config(
         cfg.add_shift(name="muf_up", id=903, type="shape")
         cfg.add_shift(name="muf_down", id=904, type="shape")
 
-        # scale variation (?)
-        cfg.add_shift(name="scale_up", id=905, type="shape")
-        cfg.add_shift(name="scale_down", id=906, type="shape")
+        # combined renormalization and factorization scale variation
+        cfg.add_shift(name="murmuf_up", id=905, type="shape")
+        cfg.add_shift(name="murmuf_down", id=906, type="shape")
+        cfg.add_shift(name="murmuf_envelope_up", id=907, type="shape")
+        cfg.add_shift(name="murmuf_envelope_down", id=908, type="shape")
+
+        # scale variation (?) -> isn't that the same as mur/muf/murmuf? tbc.
+        cfg.add_shift(name="scale_up", id=909, type="shape")
+        cfg.add_shift(name="scale_down", id=910, type="shape")
 
         # pdf variations
         cfg.add_shift(name="pdf_up", id=951, type="shape")
@@ -930,30 +943,124 @@ def add_new_config(
         cfg.add_shift(name="alpha_up", id=961, type="shape")
         cfg.add_shift(name="alpha_down", id=962, type="shape")
 
-        # TODO: murf_envelope?
-        for unc in ["mur", "muf", "scale", "pdf", "alpha"]:
-            add_shift_aliases(cfg, unc, {
-                # TODO: normalized?
-                f"{unc}_weight": f"{unc}_weight_{{direction}}",
-            })
+        # PSWeight variations
+        cfg.add_shift(name="isr_up", id=7001, type="shape")  # PS weight [0] ISR=2 FSR=1
+        cfg.add_shift(name="isr_down", id=7002, type="shape")  # PS weight [2] ISR=0.5 FSR=1
+        cfg.add_shift(name="fsr_up", id=7003, type="shape")  # PS weight [1] ISR=1 FSR=2
+        cfg.add_shift(name="fsr_down", id=7004, type="shape")  # PS weight [3] ISR=1 FSR=0.5
+        add_shift_aliases(cfg, "isr", {"isr": "isr_{direction}"})
+        add_shift_aliases(cfg, "fsr", {"fsr": "fsr_{direction}"})
+
+        for unc in ["mur", "muf", "murmuf", "murmuf_envelope", "pdf", "isr", "fsr"]:
+            col = unc
+            add_shift_aliases(
+                cfg,
+                unc,
+                {
+                    f"normalized_{col}_weight": f"normalized_{col}_weight_" + "{direction}",
+                    f"{col}_weight": f"{col}_weight_" + "{direction}",
+                },
+            )
 
         # event weights due to muon scale factors
         if not cfg.has_tag("skip_muon_weights"):
-            cfg.add_shift(name="muon_id_up", id=111, type="shape")
-            cfg.add_shift(name="muon_id_down", id=112, type="shape")
-            add_shift_aliases(cfg, "muon_id", {"muon_id_weight": "muon_id_weight_{direction}"})
-            cfg.add_shift(name="muon_iso_up", id=113, type="shape")
-            cfg.add_shift(name="muon_iso_down", id=114, type="shape")
-            add_shift_aliases(cfg, "muon_iso", {"muon_iso_weight": "muon_iso_weight_{direction}"})
+            # cfg.add_shift(name="muon_up", id=111, type="shape")
+            # cfg.add_shift(name="muon_down", id=112, type="shape")
+            # add_shift_aliases(cfg, "muon", {"muon_weight": "muon_weight_{direction}"})
+            cfg.add_shift(name="muon_reco_low_up", id=113, type="shape")
+            cfg.add_shift(name="muon_reco_low_down", id=114, type="shape")
+            add_shift_aliases(cfg, "muon_reco_low", {
+                "muon_reco_weight_low_pt": "muon_reco_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_reco_high_up", id=115, type="shape")
+            cfg.add_shift(name="muon_reco_high_down", id=116, type="shape")
+            add_shift_aliases(cfg, "muon_reco_high", {
+                "muon_reco_weight_high_pt": "muon_reco_weight_high_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_id_low_up", id=117, type="shape")
+            cfg.add_shift(name="muon_id_low_down", id=118, type="shape")
+            add_shift_aliases(cfg, "muon_id_low", {
+                "muon_id_weight_low_pt": "muon_id_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_id_high_up", id=119, type="shape")
+            cfg.add_shift(name="muon_id_high_down", id=120, type="shape")
+            add_shift_aliases(cfg, "muon_id_high", {
+                "muon_id_weight_high_pt": "muon_id_weight_high_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_iso_low_up", id=121, type="shape")
+            cfg.add_shift(name="muon_iso_low_down", id=122, type="shape")
+            add_shift_aliases(cfg, "muon_iso_low", {
+                "muon_iso_weight_low_pt": "muon_iso_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_iso_high_up", id=123, type="shape")
+            cfg.add_shift(name="muon_iso_high_down", id=124, type="shape")
+            add_shift_aliases(cfg, "muon_iso_high", {
+                "muon_iso_weight_high_pt": "muon_iso_weight_high_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_trigger_low_up", id=125, type="shape")
+            cfg.add_shift(name="muon_trigger_low_down", id=126, type="shape")
+            add_shift_aliases(cfg, "muon_trigger_low", {
+                "muon_trigger_weight_low_pt": "muon_trigger_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="muon_trigger_high_up", id=127, type="shape")
+            cfg.add_shift(name="muon_trigger_high_down", id=128, type="shape")
+            add_shift_aliases(cfg, "muon_trigger_high", {
+                "muon_trigger_weight_high_pt": "muon_trigger_weight_high_pt_{direction}",
+            })
 
         # event weights due to electron scale factors
         if not cfg.has_tag("skip_electron_weights"):
-            cfg.add_shift(name="electron_reco_up", id=121, type="shape")
-            cfg.add_shift(name="electron_reco_down", id=122, type="shape")
-            add_shift_aliases(cfg, "electron_reco", {"electron_reco_weight": "electron_reco_weight_{direction}"})
-            cfg.add_shift(name="electron_id_iso_up", id=123, type="shape")
-            cfg.add_shift(name="electron_id_iso_down", id=124, type="shape")
-            add_shift_aliases(cfg, "electron_id_iso", {"electron_id_iso_weight": "electron_id_iso_weight_{direction}"})
+            # cfg.add_shift(name="electron_up", id=131, type="shape")
+            # cfg.add_shift(name="electron_down", id=132, type="shape")
+            # add_shift_aliases(cfg, "electron", {"electron_weight": "electron_weight_{direction}"})
+            cfg.add_shift(name="electron_reco_low_up", id=133, type="shape")
+            cfg.add_shift(name="electron_reco_low_down", id=134, type="shape")
+            add_shift_aliases(cfg, "electron_reco_low", {
+                "electron_reco_weight_low_pt": "electron_reco_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="electron_reco_high_up", id=135, type="shape")
+            cfg.add_shift(name="electron_reco_high_down", id=136, type="shape")
+            add_shift_aliases(cfg, "electron_reco_high", {
+                "electron_reco_weight_high_pt": "electron_reco_weight_high_pt_{direction}",
+            })
+
+            cfg.add_shift(name="electron_id_iso_low_up", id=137, type="shape")
+            cfg.add_shift(name="electron_id_iso_low_down", id=138, type="shape")
+            add_shift_aliases(cfg, "electron_id_iso_low", {
+                "electron_id_iso_weight_low_pt": "electron_id_iso_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="electron_id_high_up", id=139, type="shape")
+            cfg.add_shift(name="electron_id_high_down", id=140, type="shape")
+            add_shift_aliases(cfg, "electron_id_high", {
+                "electron_id_weight_high_pt": "electron_id_weight_high_pt_{direction}",
+            })
+
+            cfg.add_shift(name="electron_iso_high_up", id=141, type="shape")
+            cfg.add_shift(name="electron_iso_high_down", id=142, type="shape")
+            add_shift_aliases(cfg, "electron_iso_high", {
+                "electron_iso_weight_high_pt": "electron_iso_weight_high_pt_{direction}",
+            })
+
+            cfg.add_shift(name="electron_trigger_low_up", id=143, type="shape")
+            cfg.add_shift(name="electron_trigger_low_down", id=144, type="shape")
+            add_shift_aliases(cfg, "electron_trigger_low", {
+                "electron_trigger_weight_low_pt": "electron_trigger_weight_low_pt_{direction}",
+            })
+
+            cfg.add_shift(name="electron_trigger_high_up", id=145, type="shape")
+            cfg.add_shift(name="electron_trigger_high_down", id=146, type="shape")
+            add_shift_aliases(cfg, "electron_trigger_high", {
+                "electron_trigger_weight_high_pt": "electron_trigger_weight_high_pt_{direction}",
+            })
 
         # V+jets reweighting
         cfg.add_shift(name="vjets_up", id=201, type="shape")
@@ -1036,14 +1143,39 @@ def add_new_config(
         # jet energy scale (JEC) uncertainty variations
         for jec_source in cfg.x.jec.Jet.uncertainty_sources:
             idx = all_jec_sources.index(jec_source)
-            cfg.add_shift(name=f"jec_{jec_source}_up", id=5000 + 2 * idx, type="shape", tags={"jec"})
-            cfg.add_shift(name=f"jec_{jec_source}_down", id=5001 + 2 * idx, type="shape", tags={"jec"})
+            cfg.add_shift(
+                name=f"jec_{jec_source}_up",
+                id=5000 + 2 * idx,
+                type="shape",
+                tags={"jec"},
+                aux={
+                    "jec_source": jec_source,
+                    "version": 1,
+                },
+            )
+            cfg.add_shift(
+                name=f"jec_{jec_source}_down",
+                id=5001 + 2 * idx,
+                type="shape",
+                tags={"jec"},
+                aux={
+                    "jec_source": jec_source,
+                    "version": 1,
+                },
+            )
             add_shift_aliases(
                 cfg,
                 f"jec_{jec_source}",
                 {
                     "Jet.pt": "Jet.pt_{name}",
                     "Jet.mass": "Jet.mass_{name}",
+                    "PuppiMET.pt": "PuppiMET.pt_{name}",
+                    "PuppiMET.phi": "PuppiMET.phi_{name}",
+                    "FatJet.pt": "FatJet.pt_{name}",
+                    "FatJet.mass": "FatJet.mass_{name}",
+                },
+            )
+
             if jec_source in ["Total", *cfg.x.btag_sf_jec_sources]:
                 # when jec_source is a known btag SF source, add aliases for btag weight column
                 add_shift_aliases(
@@ -1071,6 +1203,13 @@ def add_new_config(
             {
                 "Jet.pt": "Jet.pt_{name}",
                 "Jet.mass": "Jet.mass_{name}",
+                "PuppiMET.pt": "PuppiMET.pt_{name}",
+                "PuppiMET.phi": "PuppiMET.phi_{name}",
+                "FatJet.pt": "FatJet.pt_{name}",
+                "FatJet.mass": "FatJet.mass_{name}",
+            },
+        )
+
     # add the shifts
     add_shifts(cfg)
 
