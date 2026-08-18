@@ -79,6 +79,8 @@ def add_datasets_from_yaml(
         tag = "2024full"
     elif tag == "2025":
         tag = "2025full"
+    elif tag == "2026":
+        tag = "2026full"
 
     # normalize requested types to a set for fast membership tests
     if dataset_types is None:

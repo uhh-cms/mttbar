@@ -6,7 +6,7 @@ Configuration for the Run 3 m(ttbar) analysis.
 
 from __future__ import annotations
 
-import functools
+# import functools
 import os
 import law
 
@@ -19,7 +19,7 @@ from columnflow.cms_util import CATInfo, CATSnapshot
 from columnflow.config_util import (
     add_shift_aliases,
     get_root_processes_from_campaign,
-    get_shifts_from_sources,
+    # get_shifts_from_sources,
     verify_config_processes,
 )
 from columnflow.production.cms.muon import MuonSFConfig
@@ -98,79 +98,6 @@ def add_new_config(
     # create a config by passing the campaign
     # (if id and name are not set they will be taken from the campaign)
     cfg = analysis.add_config(campaign, name=config_name, id=config_id)
-
-    # groups for custom plot styling
-    cfg.x.custom_style_config_groups = {
-        "more_legend": {
-            "gridspec_cfg": {
-                # "left": 0.08,
-                # "right": 0.98,
-                "top": 0.75,
-                # "bottom": 0.05,
-                # "bottom": 0.1,
-            },
-        },
-        "large_ratio": {
-            "rax_cfg": {
-                "ylim": (0.4, 1.6),
-            },
-        },
-        "DEFAULT": {
-            "legend_cfg": {
-                "ncols": 2,
-                "fontsize": 14,
-                "bbox_to_anchor": (0., 0., 1., 1.),
-            },
-            "annotate_cfg": {
-                "xy": (0.60, 0.60),
-                "xycoords": "axes fraction",
-                "fontsize": 14,
-            },
-            "rax_cfg": {
-                "ylim": (0.4, 1.6),
-            },
-        },
-        "for_an": {
-            "legend_cfg": {
-                "ncols": 3,
-                "fontsize": 12,
-                "bbox_to_anchor": (0., 0., 1., 1.),
-            },
-            "annotate_cfg": {
-                "xy": (0.60, 0.60),
-                "xycoords": "axes fraction",
-                "fontsize": 12,
-            },
-            "rax_cfg": {
-                "ylim": (0.4, 1.6),
-            },
-        },
-        "no_cat_label": {
-            "legend_cfg": {"ncols": 2, "fontsize": 20},
-            "annotate_cfg": {"text": ""},
-        },
-        "cutflow": {
-            "annotate_cfg": {
-                "xy": (0.05, 0.95),
-                "xycoords": "axes fraction",
-                "fontsize": 14,
-            },
-            "legend_cfg": {
-                "ncols": 2,
-                "fontsize": 14,
-                "bbox_to_anchor": (0., 0., 1., 1.),
-            },
-            "ax_cfg": {
-                "ylim": (0.000001, 5.0),
-            },
-        },
-        "example": {
-            "legend_cfg": {"title": "my custom legend title", "ncols": 2},
-            "ax_cfg": {"ylabel": "my ylabel", "xlim": (0, 100)},
-            "rax_cfg": {"ylabel": "some other ylabel"},
-            "annotate_cfg": {"text": "category label usually here"},
-        },
-    }
 
     # add tags to config
     cfg.x.run = 3
@@ -268,6 +195,7 @@ def add_new_config(
         else:
             process.x.is_mtt_signal = False
 
+    # register data and bkg MC datasets
     dataset_names = add_datasets_from_yaml(
         cfg,
         limit_dataset_files=limit_dataset_files,
@@ -284,12 +212,16 @@ def add_new_config(
         log=False,
     )
 
+    # register signal MC datasets
     if year == 2024:
         dataset_names += add_datasets_from_yaml(
             cfg,
             limit_dataset_files=limit_dataset_files,
             dataset_types=[
-                "zprime_full",
+                "zprime_full",  # all 22 mass points in three widths
+                # "hscalar_tt_full",
+                # "hpseudo_tt_full",
+                # "rsgluon_tt_full",
             ],
             log=False,
         )
@@ -298,7 +230,22 @@ def add_new_config(
             cfg,
             limit_dataset_files=limit_dataset_files,
             dataset_types=[
-                "zprime_full",
+                "zprime_full",  # all 22 mass points in three widths
+                # "hscalar_tt_full",
+                # "hpseudo_tt_full",
+                # "rsgluon_tt_full",
+            ],
+            log=False,
+        )
+    elif year == 2026:
+        dataset_names += add_datasets_from_yaml(
+            cfg,
+            limit_dataset_files=limit_dataset_files,
+            dataset_types=[
+                "zprime_full",  # all 22 mass points in three widths
+                # "hscalar_tt_full",
+                # "hpseudo_tt_full",
+                # "rsgluon_tt_full",
             ],
             log=False,
         )
@@ -306,6 +253,11 @@ def add_new_config(
 
     # whether to validate the number of obtained LFNs in GetDatasetLFNs
     cfg.x.validate_dataset_lfns = limit_dataset_files is None
+
+    # verify that the root processes of each dataset (or one of their
+    # ancestor processes) are registered in the config
+    verify_config_processes(cfg, warn=True)
+    logger.debug(f"Added {len(cfg.processes)} processes and {len(cfg.datasets)} datasets to config '{cfg.name}'")
 
     # MC splitting settings
     # taken from https://github.com/uhh-cms/hh2bbtautau/blob/2b227967d8cc86351908ac834144a63e2d3733f1/hbt/config/configs_hbt.py#L2458-L2475  # noqa
@@ -337,6 +289,83 @@ def add_new_config(
 
         # register on config to be picked up by ChunkedIOMixin's
         cfg.x.get_nano_filter_config = get_nano_filter_config
+
+    #
+    # stylings & customizations
+    #
+
+    # groups for custom plot styling
+    cfg.x.custom_style_config_groups = {
+        "more_legend": {
+            "gridspec_cfg": {
+                # "left": 0.08,
+                # "right": 0.98,
+                "top": 0.75,
+                # "bottom": 0.05,
+                # "bottom": 0.1,
+            },
+        },
+        "large_ratio": {
+            "rax_cfg": {
+                "ylim": (0.4, 1.6),
+            },
+        },
+        "DEFAULT": {
+            "legend_cfg": {
+                "ncols": 2,
+                "fontsize": 14,
+                "bbox_to_anchor": (0., 0., 1., 1.),
+            },
+            "annotate_cfg": {
+                "xy": (0.60, 0.60),
+                "xycoords": "axes fraction",
+                "fontsize": 14,
+            },
+            "rax_cfg": {
+                "ylim": (0.4, 1.6),
+            },
+        },
+        "for_an": {
+            "legend_cfg": {
+                "ncols": 3,
+                "fontsize": 12,
+                "bbox_to_anchor": (0., 0., 1., 1.),
+            },
+            "annotate_cfg": {
+                "xy": (0.60, 0.60),
+                "xycoords": "axes fraction",
+                "fontsize": 12,
+            },
+            "rax_cfg": {
+                "ylim": (0.4, 1.6),
+            },
+        },
+        "no_cat_label": {
+            "legend_cfg": {"ncols": 2, "fontsize": 20},
+            "annotate_cfg": {"text": ""},
+        },
+        "cutflow": {
+            "annotate_cfg": {
+                "xy": (0.05, 0.95),
+                "xycoords": "axes fraction",
+                "fontsize": 14,
+            },
+            "legend_cfg": {
+                "ncols": 2,
+                "fontsize": 14,
+                "bbox_to_anchor": (0., 0., 1., 1.),
+            },
+            "ax_cfg": {
+                "ylim": (0.000001, 5.0),
+            },
+        },
+        "example": {
+            "legend_cfg": {"title": "my custom legend title", "ncols": 2},
+            "ax_cfg": {"ylabel": "my ylabel", "xlim": (0, 100)},
+            "rax_cfg": {"ylabel": "some other ylabel"},
+            "annotate_cfg": {"text": "category label usually here"},
+        },
+    }
 
     # set color of main processes
     colors = {
@@ -414,23 +443,17 @@ def add_new_config(
             proc_inst.color1 = colors.get(proc.name, "#aaaaaa")
             proc_inst.color2 = colors.get(proc.name, "#000000")
 
-    # verify that the root processes of each dataset (or one of their
-    # ancestor processes) are registered in the config
-    verify_config_processes(cfg, warn=True)
-    logger.debug(f"Added {len(cfg.processes)} processes and {len(cfg.datasets)} datasets to config '{cfg.name}'")
+    #
+    # selector configuration
+    #
 
     # add tagger working points
-    # cfg.x.btag_wp = btag_params(cfg)
-
     # full b-tag working points dict
     cfg.x.btag_wp = btag_params(cfg, full=True)
     # store only upart wps for fixed wp sf producer
     cfg.x.btag_wp.btagUParTAK4B.fixed_wp = btag_params(cfg, full=False)
+    # top tagger working points dict
     cfg.x.toptag_wp = toptag_params(cfg)
-
-    #
-    # selector configuration
-    #
 
     # lepton selection parameters
     logger.warning(
@@ -500,8 +523,8 @@ def add_new_config(
                 "mu": [50, 50],
             },
             "btagger": {
-                "column": "btagDeepFlavB" if year not in [2024, 2025] else "btagUParTAK4B",
-                "wp": cfg.x.btag_wp.btagUParTAK4B.fixed_wp.medium if year in [2024, 2025] else cfg.x.btag_wp.deepjet.medium,
+                "column": "btagDeepFlavB" if year not in [2024, 2025, 2026] else "btagUParTAK4B",
+                "wp": cfg.x.btag_wp.btagUParTAK4B.fixed_wp.medium if year in [2024, 2025, 2026] else cfg.x.btag_wp.deepjet.medium,
             },
         },
         "ak8": {
@@ -513,12 +536,12 @@ def add_new_config(
             },
             "msoftdrop": [105, 210],
             "toptagger": {
-                "column": ["particleNetWithMass_TvsQCD"] if year not in [2024, 2025] else [
+                "column": ["particleNetWithMass_TvsQCD"] if year not in [2024, 2025, 2026] else [
                     "globalParT3_TopbWqq",
                     "globalParT3_TopbWq",
                     "globalParT3_QCD",
                 ],
-                "wp": cfg.x.toptag_wp.GloParTv3.tight if year in [2024, 2025] else cfg.x.toptag_wp.particle_net.tight,
+                "wp": cfg.x.toptag_wp.GloParTv3.tight if year in [2024, 2025, 2026] else cfg.x.toptag_wp.particle_net.tight,
             },
             "delta_r_lep": 0.8,
         },
@@ -1350,6 +1373,8 @@ def add_new_config(
         add_external("pu_sf", (cat_info.get_file("lum", "puWeights_2025pp_Golden_Summer24_25ns_69200ub.json.gz"), "v1"))
     elif year == 2024:
         add_external("pu_sf", (cat_info.get_file("lum", "puWeights_BCDEFGHI.json.gz"), "v1"))
+    elif year == 2026:
+        raise NotImplementedError("pileup SF for 2026 not yet available")
     else:
         add_external("pu_sf", (cat_info.get_file("lum", "puWeights.json.gz"), "v1"))
 
@@ -1384,7 +1409,7 @@ def add_new_config(
     add_external("muon_high_pt_sf", (cat_info.get_file("muo", "muon_HighPt.json.gz"), "v1"))
 
     # met phi correction
-    if year not in [2024, 2025]:  # TODO: not yet available for 2024
+    if year not in [2024, 2025, 2026]:  # NOTE: metphi correction for 2024-2026 not available and currently not needed
         add_external("met_phi_corr", (cat_info.get_file("jme", f"met_xyCorrections_{year}_{year}{campaign.x.postfix}.json.gz"), "v1"))  # noqa: E501
 
     # electron scale factors
