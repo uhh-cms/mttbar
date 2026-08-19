@@ -127,7 +127,7 @@ def jet_energy(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
     uncertainties plus JER for MC. Information about used and produced columns and dependent
     calibrators is added in a custom init function below.
     """
-    if self.config_inst.year in [2024, 2025, 2026]:
+    if self.config_inst.x.year in [2024, 2025, 2026]:
         events = self[jec_ak4_Puppi](events, **kwargs)
         events = self[jec_ak8_Puppi](events, **kwargs)
         events = self[jec_subjets_Puppi](events, **kwargs)
@@ -150,7 +150,7 @@ def jet_energy(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
 @jet_energy.init
 def jet_energy_init(self: Calibrator) -> None:
     # add standard jec and jer for mc, and only jec nominal for data
-    if self.config_inst.year in [2024, 2025]:
+    if self.config_inst.x.year in [2024, 2025, 2026]:
         self.uses |= {
             jec_ak4_Puppi, jec_ak8_Puppi, jec_subjets_Puppi,
             jer_ak4_Puppi, jer_ak8_Puppi, jer_subjets_Puppi,

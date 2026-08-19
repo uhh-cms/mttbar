@@ -3,7 +3,7 @@
 """
 Event weight producer.
 """
-
+import os
 import law
 
 from columnflow.util import maybe_import
@@ -15,6 +15,8 @@ from mtt.util import has_tag, remove_weight_columns
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
+
+thisdir = os.path.dirname(os.path.abspath(__file__))
 
 logger = law.logger.get_logger(__name__)
 
@@ -299,7 +301,7 @@ def base_post_init(self: HistProducer, task: law.Task):
 import yaml
 btag_uncs_bc = []
 btag_uncs_light = []
-with open("mtt/config/run3/data/btag_fixed_wp_uncs.yaml", "r") as f:
+with open(os.path.join(thisdir, "data/btag_fixed_wp_uncs.yaml"), "r") as f:
     btag_uncs = yaml.safe_load(f)
 
 for key in ["2024full", "2025full"]:

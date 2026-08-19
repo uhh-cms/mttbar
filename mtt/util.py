@@ -399,18 +399,6 @@ def IF_MC(self: ArrayFunction.DeferredColumn, func: ArrayFunction) -> Any | set[
     return self.get() if func.dataset_inst.is_mc else None
 
 
-def call_once_on_config(func=None, *, include_hash=False):
-    """
-    Parametrized decorator to ensure that function *func* is only called once for the config *config*.
-    Can be used with or without parentheses.
-    """
-    if func is None:
-        # If func is None, it means the decorator was called with arguments.
-        def wrapper(f):
-            return call_once_on_config(f, include_hash=include_hash)
-        return wrapper
-
-
 def remove_weight_columns(weight_dict: dict[str, list], columns_to_remove: list[str]) -> dict[str, list]:
     """
     Remove specified weight columns from the weight dictionary.

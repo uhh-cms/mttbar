@@ -279,7 +279,7 @@ def add_new_config(
                 nonlocal _splitter
                 if _splitter is None:
                     from columnflow.util import load_correction_set
-                    splitter_path = "/data/dust/user/matthiej/mttbar/mtt/config/run3/data/mc_event_splitter.json.gz"
+                    splitter_path = os.path.join(thisdir, "data/mc_event_splitter.json.gz")
                     _splitter = load_correction_set(splitter_path)["mc_event_splitter"]
                 return _splitter.evaluate(events.event) == year
 
@@ -761,7 +761,7 @@ def add_new_config(
 
     # btag uncs from clib file
     # for b and c jets, and for light jets
-    with open("mtt/config/run3/data/btag_fixed_wp_uncs.yaml", "r") as f:
+    with open(os.path.join(thisdir, "data/btag_fixed_wp_uncs.yaml"), "r") as f:
         btag_uncs_from_yaml = yaml.safe_load(f)
     if year == 2024:
         cfg.x.btag_uncs_bc = btag_uncs_from_yaml["bc"]["2024full"]
@@ -863,7 +863,7 @@ def add_new_config(
         correction="TO_BE_DERIVED",  # TODO derive high pt trigger SF
     )
 
-    cfg.x.met_phi_correction = met_phi_cfg(cfg)  # METPhiConfig object
+    cfg.x.met_phi_correction = met_phi_cfg(cfg, year)  # METPhiConfig object
 
     # top pt reweighting parameters
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat?rev=31
@@ -1393,10 +1393,10 @@ def add_new_config(
         add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
     elif year == 2024:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", ("/data/dust/user/matthiej/mttbar/mtt/config/run3/data/btagging_merged__2024__2026-03-10.json.gz", "v1"))  # noqa: E501
+        add_external("btag_wp_sf_corr", (open(os.path.join(thisdir, "data/btagging_merged__2024__2026-03-10.json.gz"), "v1")))  # noqa: E501
     elif year == 2025:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", ("/data/dust/user/matthiej/mttbar/mtt/config/run3/data/btagging_merged__2025__2026-06-26.json.gz", "v1"))  # noqa: E501
+        add_external("btag_wp_sf_corr", (open(os.path.join(thisdir, "data/btagging_merged__2025__2026-06-26.json.gz"), "v1")))  # noqa: E501
     elif year == 2026:
         # use custom file with merged SF for both b/c and light jets
         raise NotImplementedError("btag SF for 2026 not yet available")

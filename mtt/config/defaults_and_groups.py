@@ -24,7 +24,7 @@ def set_defaults(
         "selector": "ttbar_res_sel",
         "reducer": "default",
         "producer": None,
-        "hist_producer": "default",
+        "hist_producer": "full_weights",
         "ml_model": None,
         "inference_model": "an_v12_simplified__m7000_w70",
         "categories": [

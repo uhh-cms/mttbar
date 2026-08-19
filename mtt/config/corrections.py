@@ -445,16 +445,20 @@ def toptag_sf_cfg(
 
 def met_phi_cfg(
     config: od.Config,
+    year: int = None,
 ):
     met_column = config.x.met_selection.column
     # raw_met_column = config.x.met_selection.raw_column
 
     from columnflow.calibration.cms.met import METPhiConfig
+    if year in [2024, 2025, 2026]:
+        correction_set = "NOT_YET_AVAILABLE"
+    else:
+        correction_set = "met_xy_corrections"
     met_config = METPhiConfig(
         met_name=met_column,
         met_type=met_column,
-        # correction_set="met_xy_corrections",
-        correction_set="NOT_YET_AVAILABLE",
+        correction_set=correction_set,
         keep_uncorrected=True,  # TODO do we need this?
         pt_phi_variations={
             "stat_xdn": "metphi_statx_down",

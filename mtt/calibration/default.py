@@ -94,7 +94,7 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
 
 @default.init
 def default_init(self: Calibrator) -> None:
-    if self.config_inst.x.year not in [2024, 2025]:
+    if self.config_inst.x.year not in [2024, 2025, 2026]:
         self.uses |= {met_phi}
         self.produces |= {met_phi}
     if not has_tag("skip_jet_ids", self.config_inst, self.dataset_inst, operator=any):
@@ -110,7 +110,7 @@ default_all = default.derive("default_all", cls_dict={"jerc_mode": "all_jercunc"
 def default_nominal_init(self: Calibrator) -> None:
     self.uses |= {jet_energy_nominal}
     self.produces |= {jet_energy_nominal}
-    if self.config_inst.x.year not in [2024, 2025]:
+    if self.config_inst.x.year not in [2024, 2025, 2026]:
         self.uses |= {met_phi}
         self.produces |= {met_phi}
     if not has_tag("skip_jet_ids", self.config_inst, self.dataset_inst, operator=any):
@@ -122,7 +122,7 @@ def default_nominal_init(self: Calibrator) -> None:
 def default_all_init(self: Calibrator) -> None:
     self.uses |= {jet_energy}
     self.produces |= {jet_energy}
-    if self.config_inst.x.year not in [2024, 2025]:
+    if self.config_inst.x.year not in [2024, 2025, 2026]:
         self.uses |= {met_phi}
         self.produces |= {met_phi}
     if not has_tag("skip_jet_ids", self.config_inst, self.dataset_inst, operator=any):

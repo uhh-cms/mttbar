@@ -161,7 +161,7 @@ def top_tagged_jets(
     # top-tagger working point
     wp_top_md = sel_params.toptagger.wp
 
-    if self.config_inst.x.year in [2024, 2025]:
+    if self.config_inst.x.year in [2024, 2025, 2026]:
         # for 2024, the toptagger column is a list of columns (one per GloPar category)
         TopbWqq, TopbWq, QCD = sel_params.toptagger.column
         # score defined in https://twiki.cern.ch/twiki/bin/viewauth/CMS/GlobalParT
