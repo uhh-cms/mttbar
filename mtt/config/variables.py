@@ -804,6 +804,19 @@ def add_variables_ml(config: od.Config) -> None:
         x_title=r"ML input (# of b tagged AK4 jets) - ANv12",
     )
 
+    config.add_variable(
+        name="AN_v12_mli_lepton_channel",
+        expression=f"{ns}.lepton_channel",
+        binning=(3, -0.5, 1.5),
+        x_title=r"ML input (Lepton channel) - ANv12",
+    )
+    config.add_variable(
+        name="AN_v12_mli_is_boosted",
+        expression=f"{ns}.is_boosted",
+        binning=(3, -0.5, 1.5),
+        x_title=r"ML input (Boosted event) - ANv12",
+    )
+
     # binning adjusted variables to better compare with AN
 
     config.add_variable(

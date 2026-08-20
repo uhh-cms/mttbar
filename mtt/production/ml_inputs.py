@@ -3,6 +3,7 @@
 """
 Producers for ML inputs
 """
+import law
 import functools
 import itertools
 
@@ -23,6 +24,7 @@ maybe_import("coffea.nanoevents.methods.nanoaod")
 
 # use float32 type for ML input columns
 set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
+logger = law.logger.get_logger(__name__)
 
 
 @producer(
@@ -36,6 +38,7 @@ set_ak_column_f32 = functools.partial(set_ak_column, value_type=np.float32)
         "FatJet.msoftdrop",
         "FatJet.tau1", "FatJet.tau2", "FatJet.tau3",
         "BJet.pt",
+        "channel_id", "category_ids",
     },
     produces={
         weights,
@@ -63,9 +66,24 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     lepton = ak.with_name(events.Lepton, "PtEtaPhiMLorentzVector")
     met = events[met_col]
 
+    # extract the lepton channel (0 = electron, 1 = muon) and boosted flag (0 = resolved, 1 = boosted)
+    # from the last (most specific) entry of each event's category_ids list; within that id, the
+    # last digit encodes the channel (1 = electron, 2 = muon) and the second-to-last digit encodes
+    # boosted-ness (1 = resolved, 2 = boosted)
+    leaf_category_id = ak.firsts(events.category_ids[:, ::-1])
+
+    channel_digit = leaf_category_id % 10          # 1 = electron, 2 = muon
+    boosted_digit = (leaf_category_id // 10) % 10  # 1 = resolved, 2 = boosted
+
+    lepton_channel = ak.where(channel_digit == 2, 1, 0)
+    is_boosted = ak.where(boosted_digit == 2, 1, 0)
+
+    events = set_ak_column(events, f"{ns}.lepton_channel", lepton_channel)
+    events = set_ak_column(events, f"{ns}.is_boosted", is_boosted)
+
     # btag score for AK4 jets
     # get btagging working points for the given column from config
-    wp_dict = self.config_inst.x.btag_wp[btag_col]
+    wp_dict = self.config_inst.x.btag_wp.btagUParTAK4B.fixed_wp
     edges = sorted(wp_dict.values())
 
     scores = jet[btag_col]
@@ -161,6 +179,7 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             value = ak.nan_to_none(getattr(arr[:, i - 1], attr))
             value = ak.fill_none(value, default)
             events = set_ak_column_f32(events, f"{self.ml_namespace}.{name}_{i}_{attr}", value)
+        logger.debug(f"Set {n_max} {name} variables: {', '.join(attrs)}")
         return events
 
     def set_vars_single(events, name, arr, attrs, default=-10.0):
@@ -183,7 +202,13 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     )
     events = set_vars(
         events, "jet", jet, n_max=5,
-        attrs=(f"{btag_col}_pass_{wp}" for wp in wp_dict.keys()),
+        attrs=(
+            f"{btag_col}_pass_loose",
+            f"{btag_col}_pass_medium",
+            f"{btag_col}_pass_tight",
+            f"{btag_col}_pass_xtight",
+            f"{btag_col}_pass_xxtight"
+        ),
     )
 
     # AK8 jets
@@ -235,6 +260,8 @@ def ml_inputs_init(self: Producer) -> None:
         "n_jet",
         "n_fatjet",
         "n_bjet",
+        "lepton_channel",
+        "is_boosted",
     } | {
         f"jet_{i + 1}_{var}"
         for var in (
@@ -243,7 +270,7 @@ def ml_inputs_init(self: Producer) -> None:
         for i in range(5)
     } | {
         f"jet_{i + 1}_{btag_col}_pass_{wp}"
-        for wp in self.config_inst.x.btag_wp[btag_col].keys()
+        for wp in self.config_inst.x.btag_wp[btag_col].fixed_wp.keys()
         for i in range(5)
     } | {
         f"fatjet_{i + 1}_{var}"
