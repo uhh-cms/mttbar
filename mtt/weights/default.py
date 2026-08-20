@@ -298,15 +298,12 @@ def base_post_init(self: HistProducer, task: law.Task):
 # ------------------------------------------------------------------------ #
 
 # load all possible btag uncs from the yaml file, which is used to set up the btag SFs in the config
-import yaml
+from mtt.config.run3.analysis_mtt import config_2024_new, config_2025_new
 btag_uncs_bc = []
 btag_uncs_light = []
-with open(os.path.join(thisdir, "data/btag_fixed_wp_uncs.yaml"), "r") as f:
-    btag_uncs = yaml.safe_load(f)
-
-for key in ["2024full", "2025full"]:
-    btag_uncs_bc += btag_uncs["bc"][key]
-    btag_uncs_light += btag_uncs["light"][key]
+for config in [config_2024_new, config_2025_new]:
+    btag_uncs_bc += config.x.btag_uncs_bc
+    btag_uncs_light += config.x.btag_uncs_light
 
 
 btag_uncs_bc_full = [f"{unc}_bc" for unc in btag_uncs_bc] + ["bc"]

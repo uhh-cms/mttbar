@@ -56,6 +56,8 @@ logger = law.logger.get_logger(__name__)
 
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
+# NOTE: this path is hardcoded and should be adapted by the user
+run3_data_path = "/data/dust/user/matthiej/mttbar/mtt/config/run3/data/"
 
 
 def add_new_config(
@@ -279,7 +281,7 @@ def add_new_config(
                 nonlocal _splitter
                 if _splitter is None:
                     from columnflow.util import load_correction_set
-                    splitter_path = os.path.join(thisdir, "data/mc_event_splitter.json.gz")
+                    splitter_path = os.path.join(f"{run3_data_path}/mc_event_splitter.json.gz")
                     _splitter = load_correction_set(splitter_path)["mc_event_splitter"]
                 return _splitter.evaluate(events.event) == year
 
@@ -1393,10 +1395,10 @@ def add_new_config(
         add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
     elif year == 2024:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", (open(os.path.join(thisdir, "data/btagging_merged__2024__2026-03-10.json.gz"), "v1")))  # noqa: E501
+        add_external("btag_wp_sf_corr", (f"{run3_data_path}/btagging_merged__2024__2026-03-10.json.gz", "v1"))  # noqa: E501
     elif year == 2025:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", (open(os.path.join(thisdir, "data/btagging_merged__2025__2026-06-26.json.gz"), "v1")))  # noqa: E501
+        add_external("btag_wp_sf_corr", (f"{run3_data_path}/btagging_merged__2025__2026-06-26.json.gz", "v1"))  # noqa: E501
     elif year == 2026:
         # use custom file with merged SF for both b/c and light jets
         raise NotImplementedError("btag SF for 2026 not yet available")

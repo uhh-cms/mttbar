@@ -14,7 +14,7 @@ bc:
     - pileup
     - statistic
     - topmass
-    - type3p
+    - type3
   2025full:
     - correlated
     - uncorrelated
