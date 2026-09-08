@@ -166,7 +166,7 @@ def add_ml_cats_init(self: Producer) -> None:
 # # FIXME to be tested again, currently disabled
 from mtt.ml.base import MLClassifierBase
 ml_model_names = get_subclasses_deep(MLClassifierBase)
-logger.info(f"deriving {len(ml_model_names)} ML categorizer...")
+logger.info(f"deriving {len(ml_model_names)} ML categorizers...")
 
 for ml_model_name in ml_model_names:
     add_ml_cats.derive(f"add_ml_cats_{ml_model_name}", cls_dict={"ml_model_name": ml_model_name})

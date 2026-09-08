@@ -89,7 +89,11 @@ def plot_introspection(
     input_features: list | None = None,
     stats: dict | None = None,
 ):
-    from mtt.ml.introspection import sensitivity_analysis, gradient_times_input, shap_ranking
+    from mtt.ml.introspection import (
+        # sensitivity_analysis,
+        # gradient_times_input,
+        shap_ranking,
+    )
 
     # get only signal events for now
     inputs = inputs.features[inputs.labels == 0]
@@ -155,7 +159,6 @@ def gather_confusion_stats(
         stats: dict,
 ) -> None:
     from math import sqrt
-    print(len(confusion))
     for i in range(len(confusion)):
         # labels must be in the same order as the confusion matrix
         proc_name = process_insts[i].name
@@ -201,12 +204,12 @@ def plot_confusion(
     if isinstance(stats, dict):
         gather_confusion_stats(confusion, process_insts, input_type, stats)
 
-    # normalize confusion matrix (axis=1: over columns (predicted), axis=0: over rows (truth))
-    if normalize == "columns":
-        # normalize over columns (predicted)
+    # normalize confusion matrix (axis=1: over rows (predicted), axis=0: over columns (truth))
+    if normalize == "rows":
+        # normalize over rows (predicted)
         confusion = confusion / confusion.sum(axis=1, keepdims=True)
-    elif normalize == "rows":
-        # normalize over rows (truth)
+    elif normalize == "columns":
+        # normalize over columns (truth)
         confusion = confusion / confusion.sum(axis=0, keepdims=True)
     elif normalize == "total":
         # normalize over all entries
@@ -231,11 +234,11 @@ def plot_confusion(
     )
 
     # Add title and CMS label
-    ax.set_title(f"Confusion matrix for {input_type} set, rows normalized", fontsize=24, pad=+24 * 2)
+    ax.set_title(f"Confusion matrix for {input_type} set, {normalize} normalized", fontsize=24, pad=+24 * 2)
     mplhep.cms.label(ax=ax, fontsize=24, loc=0, **cms_label_kwargs, com=model.config_inst.campaign.ecm)
 
     plt.tight_layout()
-    output.child(f"Confusion_{input_type}.pdf", type="f").dump(fig, formatter="mpl")
+    output.child(f"Confusion_{input_type}_{normalize}.pdf", type="f").dump(fig, formatter="mpl")
 
 
 @timeit

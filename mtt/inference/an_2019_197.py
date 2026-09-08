@@ -2,6 +2,7 @@
 
 """
 mttbar inference model
+NOTE: Not maintained at the moment, but kept as reference. Use zprime model instead.
 """
 from __future__ import annotations
 
@@ -60,7 +61,7 @@ def an_2019_197(
                     category=config_cat,
                     variable="ttbar_mass",
                     data_datasets=[],
-                )
+                ),
             },
             mc_stats=True,
             flow_strategy=FlowStrategy.warn,  # FIXME look for options!
@@ -205,7 +206,7 @@ def an_2019_197(
             param_kwargs["config_data"] = {
                 config_inst.name: self.parameter_config_spec(
                     shift_source=unc,
-                )
+                ),
             }
             self.add_parameter(
                 f"{par}_{proc}",
@@ -265,7 +266,7 @@ def an_v12_simplified(
                     category=config_cat,
                     variable="ttbar_mass_ext",
                     data_datasets=["data_*"],  # Should this be empty for now?
-                )
+                ),
             },
             mc_stats=True,
             flow_strategy=FlowStrategy.warn,  # FIXME look for options!
@@ -414,7 +415,7 @@ def an_v12_simplified(
             param_kwargs["config_data"] = {
                 config_inst.name: self.parameter_config_spec(
                     shift_source=unc,
-                )
+                ),
             }
             self.add_parameter(
                 f"{par}",
@@ -433,7 +434,7 @@ an_v12_simplified__m500_w5 = an_v12_simplified.derive(
     cls_dict={
         "signal_mass": 500,
         "signal_width": 5,
-    }
+    },
 )
 
 an_v12_simplified__m4000_w40 = an_v12_simplified.derive(
@@ -441,7 +442,7 @@ an_v12_simplified__m4000_w40 = an_v12_simplified.derive(
     cls_dict={
         "signal_mass": 4000,
         "signal_width": 40,
-    }
+    },
 )
 
 an_v12_simplified__m4500_w45 = an_v12_simplified.derive(
@@ -449,7 +450,7 @@ an_v12_simplified__m4500_w45 = an_v12_simplified.derive(
     cls_dict={
         "signal_mass": 4500,
         "signal_width": 45,
-    }
+    },
 )
 
 an_v12_simplified__m7000_w70 = an_v12_simplified.derive(
@@ -457,7 +458,7 @@ an_v12_simplified__m7000_w70 = an_v12_simplified.derive(
     cls_dict={
         "signal_mass": 7000,
         "signal_width": 70,
-    }
+    },
 )
 
 # 10% width samples
@@ -466,14 +467,14 @@ an_v12_simplified__m2000_w200 = an_v12_simplified.derive(
     cls_dict={
         "signal_mass": 2000,
         "signal_width": 200,
-    }
+    },
 )
 an_v12_simplified__m8000_w800 = an_v12_simplified.derive(
     "an_v12_simplified__m8000_w800",
     cls_dict={
         "signal_mass": 8000,
         "signal_width": 800,
-    }
+    },
 )
 
 # 30% width samples
@@ -482,5 +483,5 @@ an_v12_simplified__m5000_w1500 = an_v12_simplified.derive(
     cls_dict={
         "signal_mass": 5000,
         "signal_width": 1500,
-    }
+    },
 )

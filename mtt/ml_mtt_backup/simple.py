@@ -269,7 +269,7 @@ class TTbarSimpleDNN(MLModel):
                 f"Processing dataset: {dataset} for process {this_proc_name}\n"
                 f"  Process index: {this_proc_idx}\n"
                 f"  #Events: {this_proc_n_events}\n"
-                f"  Sum Eventweights: {this_proc_sum_weights:.2f}"
+                f"  Sum Eventweights: {this_proc_sum_weights:.2f}",
             )
 
             sum_nnweights = 0

@@ -10,6 +10,7 @@ from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
 
 from columnflow.selection import Selector, SelectionResult, selector
+from columnflow.production.cms.electron import electron_sceta
 
 from mtt.selection.util import masked_sorted_indices
 from mtt.selection.early import check_early
@@ -23,6 +24,7 @@ ak = maybe_import("awkward")
     uses={
         "event",
         check_early,
+        electron_sceta,
     },
 )
 def electron_selection(
@@ -43,15 +45,20 @@ def electron_selection(
       the separation from the nearest jet, is applied via a
       separate selector.
     """
+    # calculate super cluster eta for electrons
+    events = self[electron_sceta](events, **kwargs)
 
     sel_params = self.config_inst.x.lepton_selection.e
     lepton = events[sel_params.column]
 
     # general lepton kinematics
     lepton_mask_eta = (
-        (abs(lepton.eta + lepton.deltaEtaSC) < sel_params.max_abseta) &
+        (abs(lepton.eta) < sel_params.max_abseta) &
         # filter out electrons in barrel-endcap transition region
-        ((abs(lepton.eta) < sel_params.barrel_veto[0]) | (abs(lepton.eta) > sel_params.barrel_veto[1]))
+        (
+            (abs(lepton.superclusterEta) < sel_params.barrel_veto[0]) |
+            (abs(lepton.superclusterEta) > sel_params.barrel_veto[1])
+        )
     )
 
     # different criteria for low- and high-pt lepton
@@ -130,6 +137,9 @@ def electron_selection_init(self: Selector) -> None:
             f"{column}.{params.mva_id.low_pt}",
             f"{column}.{params.mva_id.high_pt}",
         }
+    self.produces |= {
+        electron_sceta,
+    }
 
 
 @selector(

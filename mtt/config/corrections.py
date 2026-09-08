@@ -5,11 +5,13 @@ Configuration of corrections for the m(ttbar) analysis.
 """
 
 import order as od
+import law
 
 from columnflow.util import DotDict
-from columnflow.production.cms.btag import BTagSFConfig
-from columnflow.production.cms.electron import ElectronSFConfig
-from columnflow.production.cms.muon import MuonSFConfig
+from columnflow.selection.cms.btag import BTagWPCountConfig
+from columnflow.production.cms.btag import BTagSFConfig, BTagWPSFConfig
+
+logger = law.logger.get_logger(__name__)
 
 
 def vjets_reweighting_cfg(
@@ -17,11 +19,13 @@ def vjets_reweighting_cfg(
 
     kfactors = {
         "w": {
-            "value": "wjets_kfactor_value",
+            # "value": "wjets_kfactor_value",
+            "value": "NOT_YET_AVAILABLE",
             "error": "wjets_kfactor_error",
         },
         "z": {
-            "value": "zjets_kfactor_value",
+            # "value": "zjets_kfactor_value",
+            "value": "NOT_YET_AVAILABLE",
             "error": "zjets_kfactor_error",
         },
     }
@@ -46,14 +50,19 @@ def jerc_cfg(
         jec_campaign = f"Summer23{jerc_postfix}Prompt23"
     elif year == 2024:
         jec_campaign = "Summer24Prompt24"
-        jer_campaign = "Summer23BPixPrompt23_RunD"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1 # noqa
+        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1 # noqa
+    elif year == 2025:
+        jec_campaign = "Summer24Prompt25"
+        jer_campaign = "Summer24Prompt25"
 
     jet_type = "AK4PFPuppi"
     fatjet_type = "AK8PFPuppi"
     jec_ak4_version = jec_ak8_version = {
         2022: "V3",
         2023: "V3",
-        2024: "V2",
+        2024: "V5",
+        2025: "V2",
+        2026: "V1",
     }[year]
 
     jec_params = {
@@ -121,7 +130,7 @@ def jerc_cfg(
                 # "CorrelationGroupFlavor",
                 # "CorrelationGroupUncorrelated",
             ],
-            "data_per_era": False if year in [2023, 2024] else True,  # 2022 JEC has the era in the correction set name
+            "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
         "FatJet": {
             "campaign": jec_campaign,
@@ -187,7 +196,7 @@ def jerc_cfg(
                 # "CorrelationGroupFlavor",
                 # "CorrelationGroupUncorrelated",
             ],
-            "data_per_era": False if year in [2023, 2024] else True,  # 2022 JEC has the era in the correction set name
+            "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
         "SubJet": {
             "campaign": jec_campaign,
@@ -253,7 +262,7 @@ def jerc_cfg(
                 # "CorrelationGroupFlavor",
                 # "CorrelationGroupUncorrelated",
             ],
-            "data_per_era": False if year in [2023, 2024] else True,  # 2022 JEC has the era in the correction set name
+            "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
     }
 
@@ -262,17 +271,17 @@ def jerc_cfg(
     jer_params = {
         "Jet": {
             "campaign": jer_campaign,
-            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV1"}[year],
+            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV2", 2025: "JRV2"}[year],
             "jet_type": jet_type,
         },
         "FatJet": {
             "campaign": jer_campaign,
-            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV1"}[year],
+            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV2", 2025: "JRV2"}[year],
             "jet_type": fatjet_type,
         },
         "SubJet": {
             "campaign": jer_campaign,
-            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV1"}[year],
+            "version": {2022: "JRV1", 2023: "JRV1", 2024: "JRV2", 2025: "JRV2"}[year],
             "jet_type": jet_type,
         },
     }
@@ -280,11 +289,10 @@ def jerc_cfg(
     return [DotDict.wrap(jec_params), DotDict.wrap(jer_params)]
 
 
-def btag_sf_cfg(
-        year: int = None,
+def btag_sf_setup(
+    config: od.Config,
+    year: int = None,
 ) -> list[tuple, list]:
-    name = ("deepJet_shape") if year != 2024 else ("UParTAK4_kinfit")
-    discr = "btagPNetB" if year != 2024 else "btagUParTAK4B"
     jec_sources = [
         "",  # same as "Total"
         "Absolute",
@@ -324,211 +332,133 @@ def btag_sf_cfg(
         "SinglePionHCAL",
         "TimePtEta",
     ]
-    # if year == 2024:
-    #     systematics = [
-    #         "central",
-    #         # "fsrdef", "hdamp", "isrdef", "jer", "jes", "mass",
-    #         # "statistic", "tune",
-    #     ]
-    btag_sf_config = BTagSFConfig(
-        correction_set=name,
-        jec_sources=jec_sources,
-        discriminator=discr,
-        corrector_kwargs={"working_point": "M", "flavor": 5} if year == 2024 else {"working_point": "medium"},
-    )
 
-    return btag_sf_config
+    # b tagging SF configuration
+    discr = config.x.jet_selection.ak4.btagger.column
+
+    # b/c tagging uncertainties from config
+    bc_uncs_list = config.x.btag_uncs_bc
+    light_uncs_list = config.x.btag_uncs_light
+
+    # build dict from these lists:
+    # key: "up/down_<uncertainty_name>" (clib name), value: "<uncertainty_name>_up/_down" (column name)
+
+    btag_uncs = {}
+    for unc in bc_uncs_list:
+        btag_uncs[f"up_{unc}_bc"] = f"{unc}_bc_up"
+        btag_uncs[f"down_{unc}_bc"] = f"{unc}_bc_down"
+    for unc in light_uncs_list:
+        btag_uncs[f"up_{unc}_light"] = f"{unc}_light_up"
+        btag_uncs[f"down_{unc}_light"] = f"{unc}_light_down"
+
+    btag_uncs["up_bc"] = "bc_up"
+    btag_uncs["down_bc"] = "bc_down"
+    btag_uncs["up_light"] = "light_up"
+    btag_uncs["down_light"] = "light_down"
+
+    if year in [2024, 2025, 2026]:
+        config.add_tag("skip_btag_weights")
+        logger.debug("Setting up fixed WP based btag SFs for 2024, as shape based SFs are not yet available."
+        " Please switch to shape based SFs as soon as they are available.")
+        # NOTE: switch to shape based SF also for 2024 as soon as they are available; placeholder for now
+        config.x.btag_sf = BTagSFConfig(
+            correction_set="DO_NOT_USE",
+            jec_sources=jec_sources,
+            discriminator=discr,
+        )
+        # implementation from hbt analysis:
+        # https://github.com/uhh-cms/hh2bbtautau/blob/4b2f1bc57a9c2ada18776e5ac6f0372269e1e26c/hbt/config/configs_hbt.py#L1410 # noqa
+        # set up btag WP histogram to be stored in SelectEvent step
+        config.x.btag_wp_count_config = BTagWPCountConfig(
+            jet_name="Jet",
+            btag_column=discr,
+            # all five wps
+            btag_wps=config.x.btag_wp.btagUParTAK4B.fixed_wp,
+            # fine pt binning, can be merged later for sufficient statistics in each bin
+            pt_edges=(0, 20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000),
+            # abs_eta_edges=(0.0, 1.0, 1.5, 2.0, 5.0),
+            abs_eta_edges=(0.0, 1.5, 5),
+        )
+
+        def dataset_groups(dataset_inst: od.Dataset) -> list[od.Dataset]:
+            # check which efficiency group the dataset belongs to
+            for group_index in range(0, len(config.x.btag_wp_eff_groups)):
+                group_tag = f"btag_wp_eff_group_{group_index}"
+                if dataset_inst.has_tag(group_tag):
+                    return [
+                        _dataset_inst
+                        for _dataset_inst in config.datasets
+                        if _dataset_inst.has_tag(group_tag)
+                    ]
+            raise NotImplementedError(f"btag WP efficiency group not implemented for dataset {dataset_inst.name}")
+
+        # set up btag WP SF binning and systematic variantions to be stored in ProduceColumns step
+        config.x.btag_wp_sf_config = BTagWPSFConfig(
+            jet_name="Jet",
+            btag_column=discr,
+            correction_set="UParTAK4_merged",
+            btag_wps=config.x.btag_wp.btagUParTAK4B.fixed_wp,
+            dataset_groups=dataset_groups,
+            systs=btag_uncs,
+            # further merge eta bins for sufficient statistics in each bin
+            abs_eta_edges=(0.0, 1.5, 5.0),
+            wp_merging={
+                # remove xxtight for better stats
+                "loose": ["loose"],
+                "medium": ["medium"],
+                "tight": ["tight"],
+                "xtight": ["xtight"],
+                "xxtight": ["xxtight"],
+            },
+            pt_edges=(0, 20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000) if not config.has_tag("is_limited") else (0, 10_000),  # no pt binning for testing with limited files # noqa
+        )
+    else:
+        config.add_tag("skip_btag_wp_weights")  # skip fixed WP based btag weights for 2022/2023, apply shape based SF
+        logger.debug("Setting up shape based btag SFs for 2022/2023.")
+        logger.warning_once("Evaluate used processes for normalized btag SFs for 2022/2023, set to 'tt'+'st' for now.")
+        config.x.btag_sf = BTagSFConfig(
+            correction_set="deepJet_shape",
+            jec_sources=jec_sources,
+            discriminator=discr,
+        )
+        config.x.btag_wp_count_config = BTagWPCountConfig(
+            jet_name="Dummy",
+        )
+        config.x.btag_wp_sf_config = BTagWPSFConfig(
+            jet_name="Dummy",
+        )
+
+    return jec_sources
 
 
 def toptag_sf_cfg(
 ) -> DotDict:
+    logger.warning_once("Top-tagging SFs are not yet implemented.")
     # TODO: use PNet!
-    name = {
-        "name": "DeepAK8_Top_MassDecorr",
-        "wp": "1p0",
-    }
+    # name = {
+    #     "name": "DeepAK8_Top_MassDecorr",
+    #     "wp": "1p0",
+    # }
 
-    return DotDict.wrap(name)
-
-
-def lepton_sf_cfg(
-        config: od.Config,
-        lepton: str = None,
-) -> list:
-    # TODO: we need to use different SFs for control regions
-    run = config.campaign.x.run
-    tag = config.x.cpn_tag
-
-    lepton_sf_dict = {
-        3: {
-            "2022preEE": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2022Re-recoBCD",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022preEE",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2022preEE",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022preEE",
-                    ),
-                },
-            },
-            "2022postEE": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2022Re-recoE+PromptFG",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022postEE",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2022postEE",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2022postEE",
-                    ),
-                },
-            },
-            "2023preBPix": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2023PromptC",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023preBPix",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2023preBPix",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023preBPix",
-                    ),
-                },
-            },
-            "2023postBPix": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2023PromptD",
-                        "Tight",
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023postBPix",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2023postBPix",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2023postBPix",
-                    ),
-                },
-            },
-            "2024": {
-                "electron": {
-                    "id_sf_names": (
-                        "Electron-ID-SF",
-                        "2024Prompt",
-                        "Tight",
-                    ),
-                    "reco_sf_names": (
-                        "Electron-ID-SF",
-                        "2024Prompt",
-                        ["RecoBelow20", "Reco20to75", "RecoAbove75"],
-                    ),
-                },
-                "muon": {
-                    "sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2024Prompt24",
-                    ),
-                    "id_sf_names": (
-                        "NUM_TightID_DEN_TrackerMuons",
-                        "2024Prompt24",
-                    ),
-                    "iso_sf_names": (
-                        "NUM_TightPFIso_DEN_TightID",
-                        "2024Prompt24",
-                    ),
-                },
-            },
-        },
-    }
-
-    if lepton == "electron":
-        # electron_id_sf_config = ElectronSFConfig(
-        #     correction=lepton_sf_dict[run][tag][lepton]["id_sf_names"][0],
-        #     campaign=lepton_sf_dict[run][tag][lepton]["id_sf_names"][1],
-        #     working_point="wp80iso",  # taken from hbt config
-        # )
-        electron_reco_id_sf_config = ElectronSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][0],
-            campaign=lepton_sf_dict[run][tag][lepton]["reco_sf_names"][1],
-            working_point={
-                "wp80iso": (lambda variables: variables["pt"] > 10.0),
-                "RecoBelow20": (lambda variables: variables["pt"] < 20.0),
-                "Reco20to75": (lambda variables: (variables["pt"] >= 20.0) & (variables["pt"] < 75.0)),
-                "RecoAbove75": (lambda variables: variables["pt"] >= 75.0),
-            },
-        )
-        return electron_reco_id_sf_config
-
-    elif lepton == "muon":
-        muon_sf_config = MuonSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["sf_names"][0],
-            # campaign=run,
-        )
-        muon_id_config = MuonSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["id_sf_names"][0],
-            # campaign=run,
-        )
-        muon_iso_config = MuonSFConfig(
-            correction=lepton_sf_dict[run][tag][lepton]["iso_sf_names"][0],
-            # campaign=run,
-        )
-        return [muon_sf_config, muon_id_config, muon_iso_config]
+    # return DotDict.wrap(name)
 
 
 def met_phi_cfg(
     config: od.Config,
+    year: int = None,
 ):
     met_column = config.x.met_selection.column
     # raw_met_column = config.x.met_selection.raw_column
 
     from columnflow.calibration.cms.met import METPhiConfig
+    if year in [2024, 2025, 2026]:
+        correction_set = "NOT_YET_AVAILABLE"
+    else:
+        correction_set = "met_xy_corrections"
     met_config = METPhiConfig(
         met_name=met_column,
         met_type=met_column,
-        correction_set="met_xy_corrections",
+        correction_set=correction_set,
         keep_uncorrected=True,  # TODO do we need this?
         pt_phi_variations={
             "stat_xdn": "metphi_statx_down",

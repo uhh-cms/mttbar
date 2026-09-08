@@ -58,7 +58,7 @@ class DenseModelMixin(object):
         self.learningrate = float(self.learningrate)
 
         self.loss = str(self.loss)
-        self.focal_loss_alpha = float(self.focal_loss_alpha)
+        self.focal_loss_alpha = float(self.focal_loss_alpha) if self.focal_loss_alpha is not None else None
         self.focal_loss_gamma = float(self.focal_loss_gamma)
 
     def prepare_ml_model(
@@ -521,6 +521,7 @@ class ModelFitMixin(CallbacksBase):
             logger.debug(f"Using steps per epoch: {steps_per_epoch}")
 
         else:
+            logger.info(f"Using fixed steps_per_epoch: {self.steps_per_epoch}")
             steps_per_epoch = self.steps_per_epoch
 
         logger.info(f"Training will be done with {steps_per_epoch} steps per epoch")

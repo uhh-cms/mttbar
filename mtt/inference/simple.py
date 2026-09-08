@@ -52,7 +52,7 @@ def simple(
                     category=config_cat,
                     variable="ttbar_mass",
                     data_datasets=[],
-                )
+                ),
             },
             mc_stats=True,
             flow_strategy=FlowStrategy.warn,  # FIXME look for options!
@@ -109,7 +109,7 @@ def simple(
                 config_inst.name: self.process_config_spec(
                     process=proc,
                     mc_datasets=datasets,
-                )
+                ),
             },
             is_signal=proc.startswith("zprime_tt"),
         )
@@ -176,7 +176,7 @@ def simple(
             param_kwargs["config_data"] = {
                 config_inst.name: self.parameter_config_spec(
                     shift_source=unc,
-                )
+                ),
             }
             self.add_parameter(
                 f"{par}_{proc}",

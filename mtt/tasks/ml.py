@@ -798,15 +798,17 @@ class PlotMLResultsSingleFold(
             logger.info(f"Creating plots for {data_split} split...")
 
             log_memory("Before plotting confusion matrix")
-            # confusion matrix
-            plot_confusion(
-                self.ml_model_inst,
-                data[data_split],
-                output["plots"],
-                data_split,
-                self.ml_model_inst.train_node_process_insts,
-                stats,
-            )
+            for norm_mode in ["rows", "columns", "total"]:
+                # confusion matrix
+                plot_confusion(
+                    self.ml_model_inst,
+                    data[data_split],
+                    output["plots"],
+                    data_split,
+                    self.ml_model_inst.train_node_process_insts,
+                    stats,
+                    normalize=norm_mode,
+                )
             log_memory("After plotting confusion matrix")
             plt.close("all")
             gc.collect()

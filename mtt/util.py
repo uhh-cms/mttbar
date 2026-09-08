@@ -11,11 +11,14 @@ from typing import Hashable, Callable
 from functools import wraps
 import tracemalloc
 import math
+import re
+from contextlib import contextmanager
 
 import law
 
 from columnflow.types import Any
 from columnflow.util import maybe_import
+from columnflow.columnar_util import ArrayFunction, deferred_column
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -105,7 +108,7 @@ def log_memory(
     }[unit]
 
     current, peak = [x / unit_transform for x in tracemalloc.get_traced_memory()]
-    logger.info(f"Memory after {message}: {current:.3f}{unit} (peak: {peak:.3f}{unit})")
+    logger.info(f"Memory {message}: {current:.3f}{unit} (peak: {peak:.3f}{unit})")
 
 
 def round_sig(
@@ -311,3 +314,103 @@ def get_subclasses_deep(*classes):
             all_classes[key] = classes.pop(key)
 
     return all_classes
+
+
+def zprime_label(process_name):
+    """
+    Generate a Z' label from a process name like 'zprime_tt_m500_w5'.
+
+    Parses mass (in GeV) and width (in GeV) from the name, converts mass
+    to TeV, and computes the width/mass ratio as a percentage.
+    """
+    match = re.match(r"zprime_tt_m(\d+)_w(\d+(?:p\d+)?)", process_name)
+    if not match:
+        # If the process name doesn't match the expected pattern, return it unchanged
+        return process_name
+
+    mass_gev = float(match.group(1))
+    width_str = match.group(2).replace("p", ".")  # handle decimal widths like '5p5'
+    width_gev = float(width_str)
+
+    mass_tev = mass_gev / 1000.0
+    ratio_percent = width_gev / mass_gev * 100.0
+
+    # Format mass nicely (no trailing .0 if integer)
+    mass_str = f"{mass_tev:g}"
+    ratio_str = f"{ratio_percent:g}"
+
+    return rf"Z' ($m$ = {mass_str} TeV, {ratio_str}%)"
+
+
+def build_zprime_labels(process_names):
+    return {name: zprime_label(name) for name in process_names}
+
+
+@contextmanager
+def record_calls(inst, run_list):
+    cls = type(inst)
+    orig_getitem = cls.__getitem__
+
+    def wrapped_getitem(self, key):
+        prod = orig_getitem(self, key)
+        name = getattr(key, "__name__", None) or str(key)
+
+        @wraps(prod)
+        def wrapped(*args, **kwargs):
+            start = time.perf_counter()
+
+            result = prod(*args, **kwargs)
+
+            duration = time.perf_counter() - start
+            run_list.append(f"    {name:<40} {duration:7.3f}s")
+
+            return result
+
+        wrapped.__dict__.update(getattr(prod, "__dict__", {}))
+        return wrapped
+
+    cls.__getitem__ = wrapped_getitem
+
+    try:
+        yield
+    finally:
+        cls.__getitem__ = orig_getitem
+
+
+def has_tag(tag, *container, operator: callable = any) -> bool:
+    """
+    Helper to check multiple container for a certain tag *tag*.
+    Per default, booleans are combined with logical "or"
+
+    :param tag: String of which tag to look for.
+    :param container: Instances to check for tags.
+    :param operator: Callable on how to combine tag existance values.
+    :return: Boolean whether any (all) containter contains the requested tag.
+    """
+    values = [inst.has_tag(tag) for inst in container]
+    return operator(values)
+
+
+@deferred_column
+def IF_MC(self: ArrayFunction.DeferredColumn, func: ArrayFunction) -> Any | set[Any]:
+    if getattr(func, "dataset_inst", None) is None:
+        return self.get()
+
+    return self.get() if func.dataset_inst.is_mc else None
+
+
+def remove_weight_columns(weight_dict: dict[str, list], columns_to_remove: list[str]) -> dict[str, list]:
+    """
+    Remove specified weight columns from the weight dictionary.
+
+    :param weight_dict: Dictionary containing weight columns.
+    :param columns_to_remove: List of column names to remove from the dictionary.
+    :return: Updated weight dictionary with specified columns removed.
+    """
+    for column in columns_to_remove:
+        if column in weight_dict:
+            weight_dict.pop(column)
+            _logger.warning(f"Removed weight column '{column}' from the default correction weights.")
+        else:
+            _logger.warning(f"Weight column '{column}' not found in the default correction weights.")
+    return weight_dict

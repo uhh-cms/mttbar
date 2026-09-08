@@ -107,11 +107,77 @@ def add_categories_selection(config: od.Config) -> None:
         label=r"1t",
     )
 
+    # number of jets
+    config.add_category(
+        name="0j",
+        id=10000,
+        selection="sel_0j",
+        label=r"0j",
+    )
+    config.add_category(
+        name="1j",
+        id=20000,
+        selection="sel_1j",
+        label=r"1j",
+    )
+    config.add_category(
+        name="2j",
+        id=30000,
+        selection="sel_2j",
+        label=r"2j",
+    )
+    config.add_category(
+        name="3j",
+        id=40000,
+        selection="sel_3j",
+        label=r"3j",
+    )
+    config.add_category(
+        name="4j",
+        id=50000,
+        selection="sel_4j",
+        label=r"4j",
+    )
+    config.add_category(
+        name="5j",
+        id=60000,
+        selection="sel_5j",
+        label=r"5j",
+    )
+    config.add_category(
+        name="6jp",
+        id=70000,
+        selection="sel_6jp",
+        label=r"$\geq$6j",
+    )
+
+    # number of b tagged jets
+    config.add_category(
+        name="0bj",
+        id=1000000,
+        selection="sel_0bj",
+        label=r"0b",
+    )
+    config.add_category(
+        name="1bj",
+        id=2000000,
+        selection="sel_1bj",
+        label=r"1b",
+    )
+    config.add_category(
+        name="2bjp",
+        id=3000000,
+        selection="sel_2bjp",
+        label=r"$\geq 2b$",
+    )
+
     # -- combined categories
 
     category_groups = {
         "lepton": CategoryGroup(["1e", "1m"], is_complete=True, has_overlap=False),
-        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
+        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=True, has_overlap=False),
+        # "n_jets": CategoryGroup(["0j", "1j", "2j", "3j", "4j", "5j", "6jp"], is_complete=True, has_overlap=False),
+        # "n_bjets": CategoryGroup(["0bj", "1bj", "2bjp"], is_complete=True, has_overlap=False),
     }
 
     create_category_combinations(config, category_groups, name_fn, kwargs_fn=kwargs_fn, parent_mode="safe")
@@ -176,7 +242,9 @@ def add_categories_production(config: od.Config) -> None:
 
     category_groups = {
         "lepton": CategoryGroup(["1e", "1m"], is_complete=True, has_overlap=False),
-        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
+        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=True, has_overlap=False),
+        # "n_jets": CategoryGroup(["0j", "1j", "2j", "3j", "4j", "5j", "6jp"], is_complete=True, has_overlap=False),
+        # "n_bjets": CategoryGroup(["0bj", "1bj", "2bjp"], is_complete=True, has_overlap=False),
         "chi2": CategoryGroup(["chi2pass", "chi2fail"], is_complete=True, has_overlap=False),
         "cos_theta_star": CategoryGroup(
             ["acts_0_5", "acts_5_7", "acts_7_9", "acts_9_1"],
@@ -185,7 +253,9 @@ def add_categories_production(config: od.Config) -> None:
         ),
     }
 
-    create_category_combinations(config, category_groups, name_fn, kwargs_fn=kwargs_fn, parent_mode="all")
+    create_category_combinations(
+        config, category_groups, name_fn, kwargs_fn=kwargs_fn, skip_existing=True, parent_mode="all",
+    )
 
     # add tag to config to indicate that production categories have been added
     config.x.added_categories_production = True
@@ -279,7 +349,9 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
 
     category_groups = {
         "lepton": CategoryGroup(["1e", "1m"], is_complete=True, has_overlap=False),
-        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=False, has_overlap=False),
+        "n_top_tags": CategoryGroup(["0t", "1t"], is_complete=True, has_overlap=False),
+        # "n_jets": CategoryGroup(["0j", "1j", "2j", "3j", "4j", "5j", "6jp"], is_complete=True, has_overlap=False),
+        # "n_bjets": CategoryGroup(["0bj", "1bj", "2bjp"], is_complete=True, has_overlap=False),
         "chi2": CategoryGroup(["chi2pass", "chi2fail"], is_complete=True, has_overlap=False),
         "cos_theta_star": CategoryGroup(
             ["acts_0_5", "acts_5_7", "acts_7_9", "acts_9_1"],

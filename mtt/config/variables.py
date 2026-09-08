@@ -60,7 +60,7 @@ def add_variables(config: od.Config) -> None:
 
     # Jets (4 pt-leading jets)
     for i in range(4):
-        for obj in ("Jet", "FatJet"):
+        for obj in ("Jet", "FatJet", "BJet", "LightJet"):
             config.add_variable(
                 name=f"{obj.lower()}{i+1}_pt",
                 expression=f"{obj}.pt[:,{i}]",
@@ -82,6 +82,28 @@ def add_variables(config: od.Config) -> None:
                 null_value=EMPTY_FLOAT,
                 binning=(40, -3.2, 3.2),
                 x_title=rf"{obj} {i+1} $\phi$",
+            )
+            # config.add_variable(
+            #     name=f"{obj.lower()}{i+1}_btagUParTAK4B_buckets",
+            #     expression=f"{obj}.btagUParTAK4B_buckets[:,{i}]",
+            #     null_value=EMPTY_FLOAT,
+            #     binning=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            #     unit="GeV",
+            #     x_title=rf"{obj} {i+1} number of b tagging wp passed",
+            # )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_btagUParTAK4B",
+                expression=f"{obj}.btagUParTAK4B[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=(50, 0, 1),
+                x_title=rf"{obj} {i+1} btagUParTAK4B score",
+            )
+            config.add_variable(
+                name=f"{obj.lower()}{i+1}_btagUParTAK4B_buckets",
+                expression=f"{obj}.btagUParTAK4B[:,{i}]",
+                null_value=EMPTY_FLOAT,
+                binning=[0, 0.0246, 0.1272, 0.4648, 0.6298, 0.9739, 1.0],
+                x_title=rf"{obj} {i+1} btagUParTAK4B score",
             )
 
     config.add_variable(
@@ -124,6 +146,13 @@ def add_variables(config: od.Config) -> None:
         binning=(24 // 2, 0, 1.2),
         x_title=r"FatJet $\tau_{3}$",
     )
+    config.add_variable(
+        name="fatjet_mSD",
+        expression="FatJet.msoftdrop",
+        binning=(40, 0, 400),
+        unit="GeV",
+        x_title=r"FatJet $m_{SD}$",
+    )
 
     # Leptons
     for obj in ["Electron", "Muon"]:
@@ -132,6 +161,22 @@ def add_variables(config: od.Config) -> None:
             expression=f"{obj}.pt[:,0]",
             null_value=EMPTY_FLOAT,
             binning=(40, 0., 400.),
+            unit="GeV",
+            x_title=obj + r" $p_{T}$",
+        )
+        config.add_variable(
+            name=f"{obj.lower()}_pt_mid_extended",
+            expression=f"{obj}.pt[:,0]",
+            null_value=EMPTY_FLOAT,
+            binning=(60, 0., 1000.),
+            unit="GeV",
+            x_title=obj + r" $p_{T}$",
+        )
+        config.add_variable(
+            name=f"{obj.lower()}_pt_extended",
+            expression=f"{obj}.pt[:,0]",
+            null_value=EMPTY_FLOAT,
+            binning=(80, 0., 2000.),
             unit="GeV",
             x_title=obj + r" $p_{T}$",
         )
@@ -264,6 +309,23 @@ def add_variables(config: od.Config) -> None:
         y_title="Events",
     )
     config.add_variable(
+        # binning adjusted to AN v12
+        name="ttbar_mass_inf",
+        expression="TTbar.mass",
+        binning=[
+            0., 350., 550., 600., 650., 700., 750., 800., 850.,
+            900., 950., 1000., 1050., 1100., 1150., 1200., 1250.,
+            1300., 1350., 1400., 1450., 1500., 1550., 1600., 1650.,
+            1700., 1750., 1800., 1850., 1900., 1950., 2000., 2050.,
+            2100., 2150., 2200., 2250., 2300., 2350., 2400., 2450.,
+            2500., 2550., 2600., 2700., 2800., 3000., 3500., 4000.,
+            4500., 5000., 5500., 6000., 7000., 10000.,
+        ],
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
+    )
+    config.add_variable(
         name="ttbar_mass_ext",
         expression="TTbar.mass",
         # binning=[
@@ -283,6 +345,15 @@ def add_variables(config: od.Config) -> None:
         name="ttbar_mass_narrow",
         expression="TTbar.mass",
         binning=(100, 400, 4400),
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
+    )
+    config.add_variable(
+        name="ttbar_mass_narrow_ext",
+        expression="TTbar.mass",
+        # binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 0, 9000),
         unit="GeV",
         x_title=r"$m({t}\overline{t})$",
         y_title="Events",
@@ -347,7 +418,25 @@ def add_variables(config: od.Config) -> None:
     config.add_variable(
         name="gen_ttbar_mass_narrow",
         expression="TTbar.gen_mass",
-        binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 400, 4400),
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+        y_title="Events",
+    )
+    config.add_variable(
+        name="gen_ttbar_mass_narrow_ext",
+        expression="TTbar.gen_mass",
+        # binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 0, 9000),
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})^{gen}$",
+        y_title="Events",
+    )
+    config.add_variable(
+        name="gen_ttbar_mass_narrow_ext_ext",
+        expression="TTbar.gen_mass",
+        # binning=config.get_variable("ttbar_mass_narrow").binning,
+        binning=(100, 0, 10000),
         unit="GeV",
         x_title=r"$m({t}\overline{t})^{gen}$",
         y_title="Events",
@@ -464,6 +553,30 @@ def add_variables(config: od.Config) -> None:
         x_title=r"Number of muons",
     )
     config.add_variable(
+        name="cf_n_bjet",
+        expression="cutflow.n_bjet",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of b-tagged AK4 jets",
+    )
+    config.add_variable(
+        name="cf_n_lightjet",
+        expression="cutflow.n_lightjet",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of light AK4 jets",
+    )
+    config.add_variable(
+        name="cf_n_veto_electron",
+        expression="cutflow.n_veto_electron",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of veto electrons",
+    )
+    config.add_variable(
+        name="cf_n_veto_muon",
+        expression="cutflow.n_veto_muon",
+        binning=(5, -0.5, 4.5),
+        x_title=r"Number of veto muons",
+    )
+    config.add_variable(
         name="cf_n_toptag",
         expression="cutflow.n_toptag",
         binning=(5, -0.5, 4.5),
@@ -518,6 +631,7 @@ def add_variables_ml(config: od.Config) -> None:
     v12_tau_binning = (24, 0.0, 1.2)
     v12_njets_binning = (20, 0.0, 20.0)
     v12_nfatjets_binning = (20, 0.0, 20.0)
+    v12_nbjets_binning = (20, 0.0, 20.0)
 
     variables = {
         "pt": [(100, 0, 3000), "$p_{T}$", "GeV"],
@@ -700,6 +814,26 @@ def add_variables_ml(config: od.Config) -> None:
         x_title=r"ML input (# of AK8 jets) - ANv12",
     )
 
+    config.add_variable(
+        name="AN_v12_mli_n_bjet",
+        expression=f"{ns}.n_bjet",
+        binning=v12_nbjets_binning,
+        x_title=r"ML input (# of b tagged AK4 jets) - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_lepton_channel",
+        expression=f"{ns}.lepton_channel",
+        binning=(2, 0, 2),
+        x_title=r"ML input (Lepton channel) - ANv12",
+    )
+    config.add_variable(
+        name="AN_v12_mli_is_boosted",
+        expression=f"{ns}.is_boosted",
+        binning=(2, 0, 2),
+        x_title=r"ML input (Boosted event) - ANv12",
+    )
+
     # binning adjusted variables to better compare with AN
 
     config.add_variable(
@@ -747,110 +881,208 @@ def add_variables_ml(config: od.Config) -> None:
         x_title=r"ML input (MET $\phi$) - ANv12",
     )
 
+    config.add_variable(
+        name="AN_v12_mli_ht_jets",
+        expression=f"{ns}.ht_jets",
+        binning=(100, 0.0, 5000.0),
+        unit="GeV",
+        x_title=r"ML input (HT of AK4 jets) - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_ht_fatjets",
+        expression=f"{ns}.ht_fatjets",
+        binning=(100, 0.0, 5000.0),
+        unit="GeV",
+        x_title=r"ML input (HT of AK8 jets) - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_ht_bjets",
+        expression=f"{ns}.ht_bjets",
+        binning=(100, 0.0, 5000.0),
+        unit="GeV",
+        x_title=r"ML input (HT of b tagged AK4 jets) - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_ht_sum",
+        expression=f"{ns}.ht_sum",
+        binning=(100, 0.0, 5000.0),
+        unit="GeV",
+        x_title=r"ML input (HT of all jets) - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_st",
+        expression=f"{ns}.st",
+        binning=(100, 0.0, 5000.0),
+        unit="GeV",
+        x_title=r"ML input ($S_{T}$) - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_leading_jets_deltar",
+        expression=f"{ns}.leading_jets_deltar",
+        binning=(40, 0, 5),
+        x_title=r"ML input $\Delta R$ between leading and subleading AK4 jets - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_leading_fatjets_deltar",
+        expression=f"{ns}.leading_fatjets_deltar",
+        binning=(40, 0, 5),
+        x_title=r"ML input $\Delta R$ between leading and subleading AK8 jets - ANv12",
+    )
+
+    config.add_variable(
+        name="AN_v12_mli_leading_jetfatjet_deltar",
+        expression=f"{ns}.leading_jetfatjet_deltar",
+        binning=(40, 0, 5),
+        x_title=r"ML input $\Delta R$ between leading AK4 jet and leading AK8 jet - ANv12",
+    )
+
     for i in range(1, 6):
         config.add_variable(
-            name=f"AN_v12_mli_jet_energy_{i}",
-            expression=f"{ns}.jet_energy_{i}",
+            name=f"AN_v12_mli_jet_{i}_energy",
+            expression=f"{ns}.jet_{i}_energy",
             binning=v12_energy_binning_jets,
             unit="GeV",
             x_title=f"ML input (AK4 jet #{i} $E$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_jet_pt_{i}",
-            expression=f"{ns}.jet_pt_{i}",
+            name=f"AN_v12_mli_jet_{i}_pt",
+            expression=f"{ns}.jet_{i}_pt",
             binning=v12_pt_binning_jets,
             unit="GeV",
             x_title=f"ML input (AK4 jet #{i} $p_T$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_jet_eta_{i}",
-            expression=f"{ns}.jet_eta_{i}",
+            name=f"AN_v12_mli_jet_{i}_eta",
+            expression=f"{ns}.jet_{i}_eta",
             binning=v12_eta_binning,
             x_title=rf"ML input (AK4 jet #{i} $\eta$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_jet_phi_{i}",
-            expression=f"{ns}.jet_phi_{i}",
+            name=f"AN_v12_mli_jet_{i}_phi",
+            expression=f"{ns}.jet_{i}_phi",
             binning=v12_phi_binning,
             x_title=rf"ML input (AK4 jet #{i} $\phi$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_jet_mass_{i}",
-            expression=f"{ns}.jet_mass_{i}",
+            name=f"AN_v12_mli_jet_{i}_mass",
+            expression=f"{ns}.jet_{i}_mass",
             binning=v12_mass_binning_jets,
             unit="GeV",
             x_title=f"ML input (AK4 jet #{i} $m$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_jet_btagUParTAK4B_{i}",
-            expression=f"{ns}.jet_btagUParTAK4B_{i}",
+            name=f"AN_v12_mli_jet_{i}_btagUParTAK4B",
+            expression=f"{ns}.jet_{i}_btagUParTAK4B",
             binning=v12_btag_binning,
             x_title=f"ML input (AK4 jet #{i} UParTAK4B b tag score) - ANv12",
+        )
+        config.add_variable(
+            name=f"AN_v12_mli_jet_{i}_btagUParTAK4B_buckets",
+            expression=f"{ns}.jet_{i}_btagUParTAK4B_buckets",
+            binning=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            x_title=f"ML input (AK4 jet #{i} UParTAK4B b tag score buckets) - ANv12",
+        )
+        for wp in config.x.btag_wp["btagUParTAK4B"].keys():
+            config.add_variable(
+                name=f"AN_v12_mli_jet_{i}_btagUParTAK4B_pass_{wp}",
+                expression=f"{ns}.jet_{i}_btagUParTAK4B_pass_{wp}",
+                binning=(2, -0.5, 1.5),
+                x_title=f"ML input (AK4 jet #{i} UParTAK4B b tag score pass {wp}) - ANv12",
+            )
+        config.add_variable(
+            name=f"AN_v12_mli_jet_{i}_lepton_deltar",
+            expression=f"{ns}.jet_{i}_lepton_deltar",
+            binning=(40, 0, 5),
+            x_title=rf"$\Delta R(AK4 jet #{i}, lepton)$",
+        )
+        config.add_variable(
+            name=f"AN_v12_mli_jet_{i}_met_deltar",
+            expression=f"{ns}.jet_{i}_met_deltar",
+            binning=(40, 0, 5),
+            x_title=rf"$\Delta R(AK4 jet #{i}, MET)$",
         )
 
     for i in range(1, 4):
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_energy_{i}",
-            expression=f"{ns}.fatjet_energy_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_energy",
+            expression=f"{ns}.fatjet_{i}_energy",
             binning=v12_energy_binning_jets,
             unit="GeV",
             x_title=f"ML input (AK8 jet #{i} $E$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_pt_{i}",
-            expression=f"{ns}.fatjet_pt_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_pt",
+            expression=f"{ns}.fatjet_{i}_pt",
             binning=v12_pt_binning_jets,
             unit="GeV",
             x_title=f"ML input (AK8 jet #{i} $p_T$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_eta_{i}",
-            expression=f"{ns}.fatjet_eta_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_eta",
+            expression=f"{ns}.fatjet_{i}_eta",
             binning=v12_eta_binning,
             x_title=rf"ML input (AK8 jet #{i} $\eta$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_phi_{i}",
-            expression=f"{ns}.fatjet_phi_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_phi",
+            expression=f"{ns}.fatjet_{i}_phi",
             binning=v12_phi_binning,
             x_title=rf"ML input (AK8 jet #{i} $\phi$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_msoftdrop_{i}",
-            expression=f"{ns}.fatjet_msoftdrop_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_msoftdrop",
+            expression=f"{ns}.fatjet_{i}_msoftdrop",
             binning=v12_msoftdrop_binning,
             unit="GeV",
             x_title=f"ML input (AK8 jet #{i} $m_{{SD}}$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_tau21_{i}",
-            expression=f"{ns}.fatjet_tau21_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_tau21",
+            expression=f"{ns}.fatjet_{i}_tau21",
             binning=v12_tau_binning,
             x_title=rf"ML input (AK8 jet #{i} $\tau_{{21}}$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_tau32_{i}",
-            expression=f"{ns}.fatjet_tau32_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_tau32",
+            expression=f"{ns}.fatjet_{i}_tau32",
             binning=v12_tau_binning,
             x_title=rf"ML input (AK8 jet #{i} $\tau_{{32}}$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_tau1_{i}",
-            expression=f"{ns}.fatjet_tau1_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_tau1",
+            expression=f"{ns}.fatjet_{i}_tau1",
             binning=tau_binning,
             x_title=rf"ML input (AK8 jet #{i} $\tau_{{1}}$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_tau2_{i}",
-            expression=f"{ns}.fatjet_tau2_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_tau2",
+            expression=f"{ns}.fatjet_{i}_tau2",
             binning=tau_binning,
             x_title=rf"ML input (AK8 jet #{i} $\tau_{{2}}$) - ANv12",
         )
         config.add_variable(
-            name=f"AN_v12_mli_fatjet_tau3_{i}",
-            expression=f"{ns}.fatjet_tau3_{i}",
+            name=f"AN_v12_mli_fatjet_{i}_tau3",
+            expression=f"{ns}.fatjet_{i}_tau3",
             binning=tau_binning,
             x_title=rf"ML input (AK8 jet #{i} $\tau_{{3}}$) - ANv12",
+        )
+        config.add_variable(
+            name=f"AN_v12_mli_fatjet_{i}_lepton_deltar",
+            expression=f"{ns}.fatjet_{i}_lepton_deltar",
+            binning=(40, 0, 5),
+            x_title=rf"$\Delta R(AK8 jet #{i}, lepton)$",
+        )
+        config.add_variable(
+            name=f"AN_v12_mli_fatjet_{i}_met_deltar",
+            expression=f"{ns}.fatjet_{i}_met_deltar",
+            binning=(40, 0, 5),
+            x_title=rf"$\Delta R(AK8 jet #{i}, MET)$",
         )
 
     # -- helper functions
@@ -863,8 +1095,8 @@ def add_variables_ml(config: od.Config) -> None:
 
             # add variable to config
             config.add_variable(
-                name=f"mli_{name}_{attr}_{i}",
-                expression=f"{ns}.{name}_{attr}_{i}",
+                name=f"mli_{name}_{i}_{attr}",
+                expression=f"{ns}.{name}_{i}_{attr}",
                 binning=binning,
                 unit=unit,
                 x_title=f"ML input ({obj_label} #{i+1} {var_label})",

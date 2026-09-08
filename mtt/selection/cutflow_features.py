@@ -20,19 +20,27 @@ ak = maybe_import("awkward")
         "cutflow.jet1_eta", "cutflow.jet2_eta", "cutflow.jet3_eta", "cutflow.jet4_eta",
         "cutflow.fatjet1_pt", "cutflow.fatjet2_pt", "cutflow.fatjet3_pt", "cutflow.fatjet4_pt",
         "cutflow.fatjet1_eta", "cutflow.fatjet2_eta", "cutflow.fatjet3_eta", "cutflow.fatjet4_eta",
-        "cutflow.muon_pt", "cutflow.muon_eta",
-        "cutflow.electron_pt", "cutflow.electron_eta",
+        "cutflow.bjet1_pt", "cutflow.bjet2_pt", "cutflow.bjet3_pt", "cutflow.bjet4_pt",
+        "cutflow.bjet1_eta", "cutflow.bjet2_eta", "cutflow.bjet3_eta", "cutflow.bjet4_eta",
+        "cutflow.lightjet1_pt", "cutflow.lightjet2_pt", "cutflow.lightjet3_pt", "cutflow.lightjet4_pt",
+        "cutflow.lightjet1_eta", "cutflow.lightjet2_eta", "cutflow.lightjet3_eta", "cutflow.lightjet4_eta",
+        "cutflow.muon_pt", "cutflow.muon_eta", "cutflow.vetomuon_pt", "cutflow.vetomuon_eta",
+        "cutflow.electron_pt", "cutflow.electron_eta", "cutflow.vetoelectron_pt", "cutflow.vetoelectron_eta",
         "cutflow.n_jet", "cutflow.n_bjet", "cutflow.n_lightjet",
         "cutflow.n_toptag", "cutflow.n_toptag_delta_r_lepton",
-        "cutflow.n_muon", "cutflow.n_electron",
+        "cutflow.n_muon", "cutflow.n_electron", "cutflow.n_veto_muon", "cutflow.n_veto_electron",
     },
 )
 def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult, **kwargs) -> ak.Array:
 
     # jet properties
-    for jet_name in ["Jet", "FatJet"]:
-        jet_indices = ak.argsort(events[jet_name].pt, ascending=False)
-        jets = events[jet_name][jet_indices]
+    for jet_name in ["Jet", "FatJet", "BJet", "LightJet"]:
+        if jet_name == "FatJet":
+            jet_base_name = "FatJet"
+        else:
+            jet_base_name = "Jet"
+        jet_indices = results.objects[jet_base_name][jet_name]
+        jets = events[jet_base_name][jet_indices]
         for i in range(4):
             for var in ("pt", "eta"):
                 events = set_ak_column(
@@ -42,9 +50,10 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
                 )
 
     # pt-leading electron/muon properties
-    for lepton_name in ["Muon", "Electron"]:
-        lepton_indices = results.objects[lepton_name][lepton_name]
-        leptons = events[lepton_name][lepton_indices]
+    for lepton_name in ["Muon", "Electron", "VetoMuon", "VetoElectron"]:
+        lepton_base_name = "Muon" if "Muon" in lepton_name else "Electron"
+        lepton_indices = results.objects[lepton_base_name][lepton_name]
+        leptons = events[lepton_base_name][lepton_indices]
         for var in ("pt", "eta"):
             events = set_ak_column(
                 events,
@@ -65,7 +74,9 @@ def cutflow_features(self: Selector, events: ak.Array, results: SelectionResult,
     )
 
     events = set_ak_column(events, "cutflow.n_muon", ak.num(results.objects.Muon.Muon, axis=-1))
+    events = set_ak_column(events, "cutflow.n_veto_muon", ak.num(results.objects.Muon.VetoMuon, axis=-1))
     events = set_ak_column(events, "cutflow.n_electron", ak.num(results.objects.Electron.Electron, axis=-1))
+    events = set_ak_column(events, "cutflow.n_veto_electron", ak.num(results.objects.Electron.VetoElectron, axis=-1))
 
     if self.dataset_inst.is_mc and not self.dataset_inst.has_tag("is_diboson"):
         events = set_ak_column(events, "cutflow.lhe_ht", events.LHE.HT)
