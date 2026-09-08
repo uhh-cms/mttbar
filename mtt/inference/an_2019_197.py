@@ -2,6 +2,7 @@
 
 """
 mttbar inference model
+NOTE: Not maintained at the moment, but kept as reference. Use zprime model instead.
 """
 from __future__ import annotations
 
