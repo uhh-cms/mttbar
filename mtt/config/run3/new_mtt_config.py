@@ -129,6 +129,12 @@ def add_new_config(
 
     cfg.add_tag("skip_kfactor_weights")
     logger.warning_once("Skipping (some) electron, muon, and k-factor weights for now.")
+    # add tag specifying which mur/f weights to apply
+    cfg.add_tag("apply_normalized_mur_muf_weights")
+    # cfg.add_tag("apply_normalized_murmuf_weights")
+    # cfg.add_tag("apply_normalized_murmuf_envelope_weights")
+    logger.info_once("Applying normalized mur/muf weights seperately.")
+
     #
     # cross sections
     #
@@ -1006,102 +1012,69 @@ def add_new_config(
 
         # event weights due to muon scale factors
         if not cfg.has_tag("skip_muon_weights"):
-            # cfg.add_shift(name="muon_up", id=111, type="shape")
-            # cfg.add_shift(name="muon_down", id=112, type="shape")
-            # add_shift_aliases(cfg, "muon", {"muon_weight": "muon_weight_{direction}"})
-            cfg.add_shift(name="muon_reco_low_up", id=113, type="shape")
-            cfg.add_shift(name="muon_reco_low_down", id=114, type="shape")
-            add_shift_aliases(cfg, "muon_reco_low", {
-                "muon_reco_weight_low_pt": "muon_reco_weight_low_pt_{direction}",
+            cfg.add_shift(name="muon_reco_up", id=113, type="shape")
+            cfg.add_shift(name="muon_reco_down", id=114, type="shape")
+            add_shift_aliases(cfg, "muon_reco", {
+                "muon_reco_weight": "muon_reco_weight_{direction}",
+                "muon_weight": "muon_weight_reco_{direction}",
             })
 
-            cfg.add_shift(name="muon_reco_high_up", id=115, type="shape")
-            cfg.add_shift(name="muon_reco_high_down", id=116, type="shape")
-            add_shift_aliases(cfg, "muon_reco_high", {
-                "muon_reco_weight_high_pt": "muon_reco_weight_high_pt_{direction}",
+            cfg.add_shift(name="muon_id_up", id=117, type="shape")
+            cfg.add_shift(name="muon_id_down", id=118, type="shape")
+            add_shift_aliases(cfg, "muon_id", {
+                "muon_id_weight": "muon_id_weight_{direction}",
+                "muon_weight": "muon_weight_id_{direction}",
             })
 
-            cfg.add_shift(name="muon_id_low_up", id=117, type="shape")
-            cfg.add_shift(name="muon_id_low_down", id=118, type="shape")
-            add_shift_aliases(cfg, "muon_id_low", {
-                "muon_id_weight_low_pt": "muon_id_weight_low_pt_{direction}",
+            cfg.add_shift(name="muon_iso_up", id=121, type="shape")
+            cfg.add_shift(name="muon_iso_down", id=122, type="shape")
+            add_shift_aliases(cfg, "muon_iso", {
+                "muon_iso_weight": "muon_iso_weight_{direction}",
+                "muon_weight": "muon_weight_iso_{direction}",
             })
 
-            cfg.add_shift(name="muon_id_high_up", id=119, type="shape")
-            cfg.add_shift(name="muon_id_high_down", id=120, type="shape")
-            add_shift_aliases(cfg, "muon_id_high", {
-                "muon_id_weight_high_pt": "muon_id_weight_high_pt_{direction}",
-            })
-
-            cfg.add_shift(name="muon_iso_low_up", id=121, type="shape")
-            cfg.add_shift(name="muon_iso_low_down", id=122, type="shape")
-            add_shift_aliases(cfg, "muon_iso_low", {
-                "muon_iso_weight_low_pt": "muon_iso_weight_low_pt_{direction}",
-            })
-
-            cfg.add_shift(name="muon_iso_high_up", id=123, type="shape")
-            cfg.add_shift(name="muon_iso_high_down", id=124, type="shape")
-            add_shift_aliases(cfg, "muon_iso_high", {
-                "muon_iso_weight_high_pt": "muon_iso_weight_high_pt_{direction}",
-            })
-
-            cfg.add_shift(name="muon_trigger_low_up", id=125, type="shape")
-            cfg.add_shift(name="muon_trigger_low_down", id=126, type="shape")
-            add_shift_aliases(cfg, "muon_trigger_low", {
-                "muon_trigger_weight_low_pt": "muon_trigger_weight_low_pt_{direction}",
-            })
-
-            cfg.add_shift(name="muon_trigger_high_up", id=127, type="shape")
-            cfg.add_shift(name="muon_trigger_high_down", id=128, type="shape")
-            add_shift_aliases(cfg, "muon_trigger_high", {
-                "muon_trigger_weight_high_pt": "muon_trigger_weight_high_pt_{direction}",
+            cfg.add_shift(name="muon_trigger_up", id=125, type="shape")
+            cfg.add_shift(name="muon_trigger_down", id=126, type="shape")
+            add_shift_aliases(cfg, "muon_trigger", {
+                "muon_trigger_weight": "muon_trigger_weight_{direction}",
+                "muon_weight": "muon_weight_trigger_{direction}",
             })
 
         # event weights due to electron scale factors
         if not cfg.has_tag("skip_electron_weights"):
-            # cfg.add_shift(name="electron_up", id=131, type="shape")
-            # cfg.add_shift(name="electron_down", id=132, type="shape")
-            # add_shift_aliases(cfg, "electron", {"electron_weight": "electron_weight_{direction}"})
-            cfg.add_shift(name="electron_reco_low_up", id=133, type="shape")
-            cfg.add_shift(name="electron_reco_low_down", id=134, type="shape")
-            add_shift_aliases(cfg, "electron_reco_low", {
-                "electron_reco_weight_low_pt": "electron_reco_weight_low_pt_{direction}",
-            })
-
-            cfg.add_shift(name="electron_reco_high_up", id=135, type="shape")
-            cfg.add_shift(name="electron_reco_high_down", id=136, type="shape")
-            add_shift_aliases(cfg, "electron_reco_high", {
-                "electron_reco_weight_high_pt": "electron_reco_weight_high_pt_{direction}",
+            cfg.add_shift(name="electron_reco_up", id=133, type="shape")
+            cfg.add_shift(name="electron_reco_down", id=134, type="shape")
+            add_shift_aliases(cfg, "electron_reco", {
+                "electron_reco_weight": "electron_reco_weight_{direction}",
+                "electron_weight": "electron_weight_reco_{direction}",
             })
 
             cfg.add_shift(name="electron_id_iso_low_up", id=137, type="shape")
             cfg.add_shift(name="electron_id_iso_low_down", id=138, type="shape")
             add_shift_aliases(cfg, "electron_id_iso_low", {
-                "electron_id_iso_weight_low_pt": "electron_id_iso_weight_low_pt_{direction}",
+                "electron_id_iso_low_weight": "electron_id_iso_low_weight_{direction}",
+                "electron_weight": "electron_weight_id_iso_low_{direction}",
             })
 
-            cfg.add_shift(name="electron_id_high_up", id=139, type="shape")
-            cfg.add_shift(name="electron_id_high_down", id=140, type="shape")
-            add_shift_aliases(cfg, "electron_id_high", {
-                "electron_id_weight_high_pt": "electron_id_weight_high_pt_{direction}",
+            cfg.add_shift(name="electron_id_up", id=139, type="shape")
+            cfg.add_shift(name="electron_id_down", id=140, type="shape")
+            add_shift_aliases(cfg, "electron_id", {
+                "electron_id_weight": "electron_id_weight_{direction}",
+                "electron_weight": "electron_weight_id_{direction}",
             })
 
-            cfg.add_shift(name="electron_iso_high_up", id=141, type="shape")
-            cfg.add_shift(name="electron_iso_high_down", id=142, type="shape")
-            add_shift_aliases(cfg, "electron_iso_high", {
-                "electron_iso_weight_high_pt": "electron_iso_weight_high_pt_{direction}",
+            cfg.add_shift(name="electron_iso_up", id=141, type="shape")
+            cfg.add_shift(name="electron_iso_down", id=142, type="shape")
+            add_shift_aliases(cfg, "electron_iso", {
+                "electron_iso_weight": "electron_iso_weight_{direction}",
+                "electron_weight": "electron_weight_iso_{direction}",
             })
 
-            cfg.add_shift(name="electron_trigger_low_up", id=143, type="shape")
-            cfg.add_shift(name="electron_trigger_low_down", id=144, type="shape")
-            add_shift_aliases(cfg, "electron_trigger_low", {
-                "electron_trigger_weight_low_pt": "electron_trigger_weight_low_pt_{direction}",
-            })
-
-            cfg.add_shift(name="electron_trigger_high_up", id=145, type="shape")
-            cfg.add_shift(name="electron_trigger_high_down", id=146, type="shape")
-            add_shift_aliases(cfg, "electron_trigger_high", {
-                "electron_trigger_weight_high_pt": "electron_trigger_weight_high_pt_{direction}",
+            cfg.add_shift(name="electron_trigger_up", id=143, type="shape")
+            cfg.add_shift(name="electron_trigger_down", id=144, type="shape")
+            add_shift_aliases(cfg, "electron_trigger", {
+                "electron_trigger_weight": "electron_trigger_weight_{direction}",
+                "electron_weight": "electron_weight_trigger_{direction}",
             })
 
         # V+jets reweighting

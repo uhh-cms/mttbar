@@ -217,21 +217,35 @@ def base_init(self: HistProducer) -> None:
         # remove dependency towards vjets weights
         self.local_weight_columns.pop("vjets_weight", None)
 
-    if dataset_inst and has_tag("skip_electron_trigger_weights", self.config_inst, dataset_inst):
-        self.local_weight_columns.pop("electron_trigger_weight_low_pt", None)
-        self.local_weight_columns.pop("electron_trigger_weight_high_pt", None)
-
+    muon_shift_sources = ["muon_reco", "muon_id", "muon_iso", "muon_trigger"]
     if dataset_inst and has_tag("skip_muon_trigger_weights", self.config_inst, dataset_inst):
-        self.local_weight_columns.pop("muon_trigger_weight_low_pt", None)
-        self.local_weight_columns.pop("muon_trigger_weight_high_pt", None)
-
-    if dataset_inst and has_tag("skip_electron_iso_weights", self.config_inst, dataset_inst):
-        self.local_weight_columns.pop("electron_id_iso_weight_low_pt", None)
-        self.local_weight_columns.pop("electron_id_weight_high_pt", None)
-
+        muon_shift_sources.remove("muon_trigger")
     if dataset_inst and has_tag("skip_muon_iso_weights", self.config_inst, dataset_inst):
-        self.local_weight_columns.pop("muon_iso_weight_low_pt", None)
-        self.local_weight_columns.pop("muon_iso_weight_high_pt", None)
+        muon_shift_sources.remove("muon_iso")
+    if "muon_weight" in self.local_weight_columns:
+        self.local_weight_columns["muon_weight"] = muon_shift_sources
+
+    electron_shift_sources = ["electron_reco", "electron_id_iso_low", "electron_id", "electron_iso", "electron_trigger"]
+    if dataset_inst and has_tag("skip_electron_trigger_weights", self.config_inst, dataset_inst):
+        electron_shift_sources.remove("electron_trigger")
+    if dataset_inst and has_tag("skip_electron_iso_weights", self.config_inst, dataset_inst):
+        electron_shift_sources.remove("electron_iso")
+    if dataset_inst and has_tag("skip_electron_id_weights", self.config_inst, dataset_inst):
+        # id_iso_low is gated by the same tag as "id" since it's a joint id+iso SF
+        electron_shift_sources.remove("electron_id_iso_low")
+        electron_shift_sources.remove("electron_id")
+    if "electron_weight" in self.local_weight_columns:
+        self.local_weight_columns["electron_weight"] = electron_shift_sources
+
+    if dataset_inst and not has_tag("apply_normalized_mur_muf_weights", self.config_inst, dataset_inst):
+        self.local_weight_columns.pop("normalized_mur_weight", None)
+        self.local_weight_columns.pop("normalized_muf_weight", None)
+
+    if dataset_inst and not has_tag("apply_normalized_murmuf_weights", self.config_inst, dataset_inst):
+        self.local_weight_columns.pop("normalized_murmuf_weight", None)
+
+    if dataset_inst and not has_tag("apply_normalized_murmuf_envelope_weights", self.config_inst, dataset_inst):
+        self.local_weight_columns.pop("normalized_murmuf_envelope_weight", None)
 
     # keep DY weights option incase we need it later, but currently none are available
     # if dataset_inst and not dataset_inst.has_tag("is_dy"):
@@ -321,26 +335,9 @@ btag_uncs = [
 
 all_correction_weights = {
     "normalization_weight": [],
-    # "dummy_weight": ["dummy_{cpn_tag}"],
     "normalized_pu_weight": ["minbias_xs"],
-    # muon SF
-    # "muon_reco_weight_low_pt": ["muon_reco_low"],  # NOTE: not needed for low pt
-    "muon_reco_weight_high_pt": ["muon_reco_high"],
-    "muon_id_weight_low_pt": ["muon_id_low"],
-    "muon_id_weight_high_pt": ["muon_id_high"],
-    "muon_iso_weight_low_pt": ["muon_iso_low"],
-    "muon_iso_weight_high_pt": ["muon_iso_high"],
-    "muon_trigger_weight_low_pt": ["muon_trigger_low"],
-    "muon_trigger_weight_high_pt": ["muon_trigger_high"],
-    # electron SF
-    "electron_reco_weight_low_pt": ["electron_reco_low"],
-    "electron_reco_weight_high_pt": ["electron_reco_high"],
-    "electron_id_iso_weight_low_pt": ["electron_id_is_low"],
-    "electron_id_weight_high_pt": ["electron_id_high"],
-    "electron_iso_weight_high_pt": ["electron_iso_high"],
-    "electron_trigger_weight_low_pt": ["electron_trigger_low"],
-    "electron_trigger_weight_high_pt": ["electron_trigger_high"],
-    # store all btag weights, pop them later depending on the dataset, year, and cpn tag
+    "muon_weight": ["muon_reco", "muon_id", "muon_iso", "muon_trigger"],
+    "electron_weight": ["electron_reco", "electron_id_iso_low", "electron_id", "electron_iso", "electron_trigger"],
     "btag_weight": [f"btag_{unc}" for unc in all_btag_uncs],
     "normalized_ht_njet_nhf_btag_weight": [f"btag_{unc}" for unc in btag_uncs],
     "normalized_murmuf_envelope_weight": ["murmuf_envelope"],
