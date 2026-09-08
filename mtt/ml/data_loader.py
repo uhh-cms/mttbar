@@ -130,8 +130,8 @@ class MLDatasetLoader:
             self._events = events
         else:
             self._events = events[proc_mask]
-            self._events = events[events.event_weight >= 0.0]
-            # self._events = events[:10_000]
+            self._events = self._events[self._events.event_weight >= 0.0]
+            # self._events = self._events[:10_000]  # DEBUG: limit number of events for testing
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.ml_model_inst.cls_name}, {self.process})"

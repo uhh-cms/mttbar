@@ -78,12 +78,15 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     lepton_channel = ak.where(channel_digit == 2, 1, 0)
     is_boosted = ak.where(boosted_digit == 2, 1, 0)
 
+    lepton_channel = ak.fill_none(lepton_channel, -1)
+    is_boosted = ak.fill_none(is_boosted, -1)
+
     events = set_ak_column(events, f"{ns}.lepton_channel", lepton_channel)
     events = set_ak_column(events, f"{ns}.is_boosted", is_boosted)
 
     # btag score for AK4 jets
     # get btagging working points for the given column from config
-    wp_dict = self.config_inst.x.btag_wp.btagUParTAK4B.fixed_wp
+    wp_dict = self.config_inst.x.btag_wp[btag_col].fixed_wp
     edges = sorted(wp_dict.values())
 
     scores = jet[btag_col]

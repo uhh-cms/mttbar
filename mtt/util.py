@@ -108,7 +108,7 @@ def log_memory(
     }[unit]
 
     current, peak = [x / unit_transform for x in tracemalloc.get_traced_memory()]
-    logger.info(f"Memory after {message}: {current:.3f}{unit} (peak: {peak:.3f}{unit})")
+    logger.info(f"Memory {message}: {current:.3f}{unit} (peak: {peak:.3f}{unit})")
 
 
 def round_sig(

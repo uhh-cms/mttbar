@@ -29,18 +29,21 @@ class DenseClassifier(DenseModelMixin, ModelFitMixin, MLClassifierBase):
         "st",
         "dy",
         "w_lnu",
+        "vv",
     )
     train_nodes: dict = {
         "tt": {"ml_id": 0},
         "st": {"ml_id": 1},
         "dy": {"ml_id": 2},
         "w_lnu": {"ml_id": 3},
+        "vv": {"ml_id": 4},
     }
     _default__class_factors: dict = {
         "tt": 1,
         "st": 1,
         "dy": 1,
         "w_lnu": 1,
+        "vv": 1,
     }
 
     input_features = (
@@ -273,6 +276,12 @@ input_features_config = DotDict({
         "leading_fatjets_deltar",
         "leading_jetfatjet_deltar",
     ),
+    "lepton_channel": (
+        "lepton_channel",
+    ),
+    "is_boosted": (
+        "is_boosted",
+    ),
 })
 
 # how to setup the train nodes (aka output classes)
@@ -289,7 +298,7 @@ train_nodes_config = DotDict({
         },
         "other": {
             "ml_id": 2,
-            "sub_processes": ["dy", "w_lnu"],
+            "sub_processes": ["dy", "w_lnu", "vv"],
             "label": "Other",
             "color": "#2BA02B",  # green
             "class_factor_mode": "xsec",
@@ -325,6 +334,8 @@ class_factors_config = DotDict({
 # which configs/eras to use for training
 configs_config = DotDict({
     "24": lambda self, requested_configs: ["run3_mtt_2024_nano_v15_new"],
+    "25": lambda self, requested_configs: ["run3_mtt_2025_nano_v15_new"],
+    "2425": lambda self, requested_configs: ["run3_mtt_2024_nano_v15_new", "run3_mtt_2025_nano_v15_new"],
 })
 
 #################################
@@ -693,8 +704,59 @@ v7 = v2_AN_v12.derive("v7", cls_dict={
     ),
     "folds": 3,
 })
-# q = __import__('functools').partial(__import__('os')._exit, 0)
-# __import__('IPython').embed()
+
+v1_2425 = v7.derive("v1_2425", cls_dict={
+    "training_configs": configs_config["2425"],
+})
+
+v2_2425 = v1_2425.derive("v2_2425", cls_dict={
+    "input_features": (
+        input_features_config.ak4_jets_all +
+        input_features_config.btag_scores +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity +
+        input_features_config.event_level_all
+    ),
+    "reduce_lr_kwargs": {
+        "monitor": "val_loss",
+        "factor": 0.5,
+        "patience": 10,
+        "min_delta": 0.01,
+        "mode": "min",
+    },
+})
+v3_2425 = v2_2425.derive("v3_2425", cls_dict={
+    # rebalance the "other" node internally so dy/w_lnu/vv get
+    # roughly equal representation instead of w_lnu dominating
+    "sub_process_class_factors": {
+        "tt": 1,
+        "st": 1,
+        "dy": 5,
+        "w_lnu": 1,
+        "vv": 30,
+    },
+    # give the model more data per epoch before LR/early-stopping
+    # bookkeeping kicks in (was fixed at 50)
+    "steps_per_epoch": 200.0,
+    # loosen LR decay a bit so it doesn't collapse to ~1e-7 within
+    # the first ~20-25 "epochs" the way it did before
+    "reduce_lr_patience": 4,
+})
+
+v4_2425 = v3_2425.derive("v4_2425", cls_dict={
+    "input_features": (
+        input_features_config.ak4_jets_all +
+        input_features_config.btag_scores +
+        input_features_config.ak8_fatjets_all +
+        input_features_config.lepton_all +
+        input_features_config.met_all +
+        input_features_config.jet_multiplicity +
+        input_features_config.event_level_all +
+        input_features_config.is_boosted
+    ),
+})
 
 v8 = DenseClassifier.derive("v8", cls_dict={
     "steps_per_epoch": 50.0,

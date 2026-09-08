@@ -177,7 +177,7 @@ def normalized_btag_weights(self: Producer, events: ak.Array, **kwargs) -> ak.Ar
     for mode in self.modes:
         if mode not in ("ht_njet_nhf", "ht_njet", "njet", "ht"):
             raise NotImplementedError(
-                f"Normalization mode {mode} not implemented (see topsf.tasks.corrections.GetBtagNormalizationSF)",
+                f"Normalization mode {mode} not implemented (see mtt.tasks.corrections.GetBtagNormalizationSF)",
             )
         for weight_route in self[btag_weights].produced_columns:
             weight_name = weight_route.string_column
@@ -213,7 +213,7 @@ def normalized_btag_weights_post_init(self: Producer, task: law.Task) -> None:
 
 @normalized_btag_weights.requires
 def normalized_btag_weights_requires(self: Producer, task: law.Task, reqs: dict) -> None:
-    from topsf.tasks.corrections import GetBtagNormalizationSF
+    from mtt.tasks.corrections import GetBtagNormalizationSF
     reqs["btag_renormalization_sf"] = GetBtagNormalizationSF.req(task)
 
 

@@ -129,9 +129,38 @@ def add_new_config(
 
     cfg.add_tag("skip_kfactor_weights")
     logger.warning_once("Skipping (some) electron, muon, and k-factor weights for now.")
+    #
+    # cross sections
+    #
+
+    # cross sections for diboson samples; taken from:
+    # - ww (NNLO): https://arxiv.org/abs/1408.5243
+    # - wz (NLO): https://arxiv.org/abs/1105.0020
+    # - zz (NNLO): https://www.sciencedirect.com/science/article/pii/S0370269314004614?via%3Dihub
+    diboson_xsecs_13 = {
+        "ww": Number(118.7, {"scale": (0.025j, 0.022j)}),
+        "wz": Number(46.74, {"scale": (0.041j, 0.033j)}),
+        # "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)}),  # (W+Z) + (W-Z)  # noqa
+        "zz": Number(16.99, {"scale": (0.032j, 0.024j)}),
+    }
+    diboson_xsecs_14 = {
+        "ww": Number(131.1, {"scale": (0.026j, 0.022j)}),
+        "wz": Number(67.06, {"scale": (0.039j, 0.031j)}),
+        # "wz": Number(31.50, {"scale": (0.039j, 0.030j)}) + Number(20.32, {"scale": (0.039j, 0.031j)}),  # (W+Z) + (W-Z)  # noqa
+        "zz": Number(18.77, {"scale": (0.032j, 0.024j)}),
+    }
+
+    # linear interpolation between 13 and 14 TeV
+    diboson_xsecs_13_6 = {
+        ds: diboson_xsecs_13[ds] + (13.6 - 13.0) * (diboson_xsecs_14[ds] - diboson_xsecs_13[ds]) / (14.0 - 13.0)
+        for ds in diboson_xsecs_13.keys()  # ww: 125.8 wz: 58.932 zz: 18.058  noqa
+    }
 
     # get all root processes
     procs = get_root_processes_from_campaign(campaign)
+
+    for ds in diboson_xsecs_14:
+        procs.n(ds).set_xsec(13.6, diboson_xsecs_13_6[ds])
 
     # add processes and datasets we are interested in
     cfg.add_process(procs.n.data)
@@ -161,6 +190,19 @@ def add_new_config(
     cfg.add_process(procs.n.qcd)
 
     cfg.add_process(procs.n.w_lnu)
+
+    procs.add(
+        name="others",
+        id=373737,
+        label="Others",
+        processes=[
+            procs.n.vv,
+            procs.n.dy,
+            procs.n.w_lnu,
+            procs.n.qcd,
+        ],
+    )
+    cfg.add_process(procs.n.others)
 
     # cfg.add_process(procs.n.w_lnu_1j)
 
@@ -251,7 +293,7 @@ def add_new_config(
             ],
             log=False,
         )
-    logger.info_once(f"Added {len(dataset_names)} datasets to config {cfg.name} (config id: {cfg.id})")
+    logger.debug(f"Added {len(dataset_names)} datasets to config {cfg.name} (config id: {cfg.id})")
 
     # whether to validate the number of obtained LFNs in GetDatasetLFNs
     cfg.x.validate_dataset_lfns = limit_dataset_files is None
@@ -384,6 +426,7 @@ def add_new_config(
         "dy": "#FBFF36",  # yellow
         "vv": "#B900FC",  # pink
         "other": "#999999",  # grey
+        "others": "#FFCC01",  # dark yellow
     }
     zprime_colors = {
         # 1% width signals
@@ -567,7 +610,6 @@ def add_new_config(
     })
 
     # trigger paths for muon/electron channels
-    # TODO update to relevant Run 3 triggers
     cfg.x.triggers = DotDict.wrap({
         "lowpt": {
             "all": {
@@ -640,17 +682,23 @@ def add_new_config(
         cfg.x.luminosity = Number(9_693.1301, {
             "lumi_13p6TeV_2023": 0.013j,
         })
-    elif year == 2024:
-        cfg.x.luminosity = Number(109_950.0 - 130.0, {
-            "lumi_13p6TeV_2024": 0.016j,  # CERN-CMS-DP-2026-003
-        })
+    # elif year == 2024:
         # processed lumi for limited configs
         # cfg.x.luminosity = Number(995.223558512, {
         #     "lumi_13p6TeV_2024": 0.013j,
         # })
+    elif year == 2024:
+        # taken lumi from above, subtracted era B, since not in cmsdb yet
+        cfg.x.luminosity = Number(109_820, {
+            "lumi_13p6TeV_2024": 0.016j,  # https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun3
+        })
     elif year == 2025:
-        cfg.x.luminosity = Number(110_840, {
-            "lumi_13p6TeV_2025": 0.016j,  # FIXME placeholder atm, fill in when available
+        cfg.x.luminosity = Number(110_580, {
+            "lumi_13p6TeV_2025": 0.05j,  # https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun3
+        })
+    elif year == 2026:
+        cfg.x.luminosity = Number(25_310, {
+            "lumi_13p6TeV_2026": 0.05j,  # NOTE: taken from 2025 no official recommendation yet
         })
     else:
         raise NotImplementedError(f"Luminosity for year {year} is not defined.")
@@ -711,37 +759,6 @@ def add_new_config(
     cfg.x.categorization = DotDict({
         "chi2_max": 30,
     })
-
-    #
-    # cross sections
-    #
-
-    # cross sections for diboson samples; taken from:
-    # - ww (NNLO): https://arxiv.org/abs/1408.5243
-    # - wz (NLO): https://arxiv.org/abs/1105.0020
-    # - zz (NNLO): https://www.sciencedirect.com/science/article/pii/S0370269314004614?via%3Dihub
-    diboson_xsecs_13 = {
-        "ww": Number(118.7, {"scale": (0.025j, 0.022j)}),
-        "wz": Number(46.74, {"scale": (0.041j, 0.033j)}),
-        # "wz": Number(28.55, {"scale": (0.041j, 0.032j)}) + Number(18.19, {"scale": (0.041j, 0.033j)}),  # (W+Z) + (W-Z)  # noqa
-        "zz": Number(16.99, {"scale": (0.032j, 0.024j)}),
-    }
-    # TODO Use 14 TeV xs for Run 3?
-    diboson_xsecs_14 = {
-        "ww": Number(131.1, {"scale": (0.026j, 0.022j)}),
-        "wz": Number(67.06, {"scale": (0.039j, 0.031j)}),
-        # "wz": Number(31.50, {"scale": (0.039j, 0.030j)}) + Number(20.32, {"scale": (0.039j, 0.031j)}),  # (W+Z) + (W-Z)  # noqa
-        "zz": Number(18.77, {"scale": (0.032j, 0.024j)}),
-    }
-
-    # linear interpolation between 13 and 14 TeV
-    diboson_xsecs_13_6 = {
-        ds: diboson_xsecs_13[ds] + (13.6 - 13.0) * (diboson_xsecs_14[ds] - diboson_xsecs_13[ds]) / (14.0 - 13.0)
-        for ds in diboson_xsecs_13.keys()  # ww: 125.8 wz: 58.932 zz: 18.058  noqa
-    }
-
-    for ds in diboson_xsecs_14:
-        procs.n(ds).set_xsec(13.6, diboson_xsecs_13_6[ds])
 
     #
     # corrections

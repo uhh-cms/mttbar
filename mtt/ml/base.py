@@ -207,7 +207,7 @@ class MLClassifierBase(MLModel):
         self.train_val_test_split = tuple(self.train_val_test_split)
         if not isinstance(self.sub_process_class_factors, dict):
             # cast tuple to dict
-            self.sub_process_class_factor = {
+            self.sub_process_class_factors = {
                 proc: weight for proc, weight in [s.split(":") for s in self.sub_process_class_factor]
             }
         # cast weights to int and remove processes not used in training
