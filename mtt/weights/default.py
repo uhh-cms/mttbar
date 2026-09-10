@@ -217,25 +217,23 @@ def base_init(self: HistProducer) -> None:
         # remove dependency towards vjets weights
         self.local_weight_columns.pop("vjets_weight", None)
 
-    muon_shift_sources = ["muon_reco", "muon_id", "muon_iso", "muon_trigger"]
+    # lepton SF columns: each weight type (reco/id/iso/trigger) is its own column, combined
+    # across pt regimes inside the producer (see mtt/production/lepton_weights.py). Popping a
+    # per-type column here removes exactly that type's contribution from the total weight,
+    # leaving the others untouched.
     if dataset_inst and has_tag("skip_muon_trigger_weights", self.config_inst, dataset_inst):
-        muon_shift_sources.remove("muon_trigger")
+        self.local_weight_columns.pop("muon_trigger_weight", None)
     if dataset_inst and has_tag("skip_muon_iso_weights", self.config_inst, dataset_inst):
-        muon_shift_sources.remove("muon_iso")
-    if "muon_weight" in self.local_weight_columns:
-        self.local_weight_columns["muon_weight"] = muon_shift_sources
+        self.local_weight_columns.pop("muon_iso_weight", None)
 
-    electron_shift_sources = ["electron_reco", "electron_id_iso_low", "electron_id", "electron_iso", "electron_trigger"]
     if dataset_inst and has_tag("skip_electron_trigger_weights", self.config_inst, dataset_inst):
-        electron_shift_sources.remove("electron_trigger")
+        self.local_weight_columns.pop("electron_trigger_weight", None)
     if dataset_inst and has_tag("skip_electron_iso_weights", self.config_inst, dataset_inst):
-        electron_shift_sources.remove("electron_iso")
+        self.local_weight_columns.pop("electron_iso_weight", None)
     if dataset_inst and has_tag("skip_electron_id_weights", self.config_inst, dataset_inst):
-        # id_iso_low is gated by the same tag as "id" since it's a joint id+iso SF
-        electron_shift_sources.remove("electron_id_iso_low")
-        electron_shift_sources.remove("electron_id")
-    if "electron_weight" in self.local_weight_columns:
-        self.local_weight_columns["electron_weight"] = electron_shift_sources
+        # id_iso_low is gated by the same tag as "id" since it's the joint low-pT id+iso SF
+        self.local_weight_columns.pop("electron_id_iso_low_weight", None)
+        self.local_weight_columns.pop("electron_id_weight", None)
 
     if dataset_inst and not has_tag("apply_normalized_mur_muf_weights", self.config_inst, dataset_inst):
         self.local_weight_columns.pop("normalized_mur_weight", None)
@@ -336,8 +334,24 @@ btag_uncs = [
 all_correction_weights = {
     "normalization_weight": [],
     "normalized_pu_weight": ["minbias_xs"],
-    "muon_weight": ["muon_reco", "muon_id", "muon_iso", "muon_trigger"],
-    "electron_weight": ["electron_reco", "electron_id_iso_low", "electron_id", "electron_iso", "electron_trigger"],
+
+    # muon SF — per-type columns (combined across pt regimes inside the producer); the
+    # product of all four equals the overall muon_weight, but keeping them separate here
+    # lets each type be popped independently (see base_init and the *_except_* derivations)
+    "muon_reco_weight": ["muon_reco"],
+    "muon_id_weight": ["muon_id"],
+    "muon_iso_weight": ["muon_iso"],
+    "muon_trigger_weight": ["muon_trigger"],
+
+    # electron SF — same pattern; id_iso_low is the joint low-pT id+iso SF, kept as its own
+    # type (not part of "id" or "iso") to avoid double-counting it
+    "electron_reco_weight": ["electron_reco"],
+    "electron_id_iso_low_weight": ["electron_id_iso_low"],
+    "electron_id_weight": ["electron_id"],
+    "electron_iso_weight": ["electron_iso"],
+    "electron_trigger_weight": ["electron_trigger"],
+
+    # store all btag weights, pop them later depending on the dataset, year, and cpn tag
     "btag_weight": [f"btag_{unc}" for unc in all_btag_uncs],
     "normalized_ht_njet_nhf_btag_weight": [f"btag_{unc}" for unc in btag_uncs],
     "normalized_murmuf_envelope_weight": ["murmuf_envelope"],
@@ -351,21 +365,14 @@ all_correction_weights = {
     # "vjets_weight": ["vjets"]
 }
 
-# remove temporarily further lepton weights that are not available yet
-temp_lepton_columns_to_remove = [
-    "muon_iso_weight_high_pt",  # NOTE: custom 2D isolation
-    "muon_trigger_weight_high_pt",  # TODO: derive high pT trigger SFs
-    "electron_iso_weight_high_pt",  # NOTE: custom 2D isolation
-    "electron_trigger_weight_high_pt",  # TODO: derive high pT trigger SFs
-]
-remove_weight_columns(all_correction_weights, temp_lepton_columns_to_remove)
+# NOTE: availability of individual SF components (e.g. high-pT muon iso, high-pT electron
+# trigger) is now handled inside the producers themselves (see _muon_type_config /
+# _electron_type_config in mtt/production/lepton_weights.py) rather than at this layer.
 
 weight_columns_except_trigger = all_correction_weights.copy()
 trigger_columns = [
-    "muon_trigger_weight_low_pt",
-    "muon_trigger_weight_high_pt",
-    "electron_trigger_weight_low_pt",
-    "electron_trigger_weight_high_pt",
+    "muon_trigger_weight",
+    "electron_trigger_weight",
 ]
 remove_weight_columns(weight_columns_except_trigger, trigger_columns)
 
@@ -380,10 +387,8 @@ weight_columns_except_btag_and_trigger = all_correction_weights.copy()
 btag_and_trigger_columns = [
     "btag_weight",
     "normalized_ht_njet_nhf_btag_weight",
-    "muon_trigger_weight_low_pt",
-    "muon_trigger_weight_high_pt",
-    "electron_trigger_weight_low_pt",
-    "electron_trigger_weight_high_pt",
+    "muon_trigger_weight",
+    "electron_trigger_weight",
 ]
 remove_weight_columns(weight_columns_except_btag_and_trigger, btag_and_trigger_columns)
 

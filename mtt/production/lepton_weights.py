@@ -213,8 +213,7 @@ def _combine_pt_regimes(
     regime-appropriate value per event.
     """
     suffixes = ("", "_up", "_down") if has_shifts else ("",)
-    pt_col = events[lepton_key.capitalize()]["pt"]
-    totals = {suffix: ak.ones_like(pt_col) * 1.0 for suffix in suffixes}
+    totals = {suffix: ak.Array(np.ones(len(events), dtype=np.float64)) for suffix in suffixes}
 
     for sub_producer, mask in entries:
         mask_kwarg = {f"{lepton_key}_mask": mask}

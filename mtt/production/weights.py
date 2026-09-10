@@ -316,7 +316,7 @@ def weights_init(self: Producer) -> None:
             has_tag("skip_btag_weights", self.config_inst, self.dataset_inst, operator=any) and
             not has_tag("skip_btag_wp_weights", self.config_inst, self.dataset_inst, operator=any)
         ):
-            logger.warning_once("Using fixed wp b-tagging weights for 2024.")
+            logger.warning_once("Using fixed wp b-tagging weights for 2024/2025/2026.")
             self.uses |= {btag_wp_weights}
             self.produces |= {btag_wp_weights}
         elif (
