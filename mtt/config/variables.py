@@ -309,6 +309,32 @@ def add_variables(config: od.Config) -> None:
         y_title="Events",
     )
     config.add_variable(
+        name="ttbar_mass_v2",
+        expression="TTbar.mass",
+        binning=[
+            0, 350, 550, 750, 950, 1150, 1350, 1550, 1750,
+            1950, 2300, 2700, 3200, 3700, 4200, 4700, 5200,
+            6000, 8000, 10000,
+        ],
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
+    )
+    config.add_variable(
+        name="ttbar_mass_v3",
+        expression="TTbar.mass",
+        binning=[
+            200, 300, 400, 500, 600, 700, 800, 900,
+            1000, 1250, 1500, 1750,
+            2000, 2250, 2500, 2750,
+            3000, 3250, 3500, 3750,
+            10000,
+        ],
+        unit="GeV",
+        x_title=r"$m({t}\overline{t})$",
+        y_title="Events",
+    )
+    config.add_variable(
         # binning adjusted to AN v12
         name="ttbar_mass_inf",
         expression="TTbar.mass",

@@ -185,11 +185,12 @@ def add_new_config(
         for process_inst, _, _ in cfg.walk_processes()
         if process_inst.name.startswith("zprime_tt")
     ]
+    cfg.x.signal_norm = Number(0.1)
     for process_inst in process_insts:
         if not process_inst.xsecs.get(13.6, None):
             # print(f"Warning: cross section for process {process_inst.name} at 13.6 TeV is not set.")
             # print("Setting it to 0.1 pb.")
-            process_inst.xsecs[13.6] = Number(0.1)
+            process_inst.xsecs[13.6] = cfg.x.signal_norm
 
     cfg.add_process(procs.n.dy)
 
@@ -209,6 +210,29 @@ def add_new_config(
         ],
     )
     cfg.add_process(procs.n.others)
+
+    procs.add(
+        name="vv__dy__w_lnu",
+        id=373738,
+        label="VV+DY+W",
+        processes=[
+            procs.n.vv,
+            procs.n.dy,
+            procs.n.w_lnu,
+        ],
+    )
+    cfg.add_process(procs.n.vv__dy__w_lnu)
+
+    procs.add(
+        name="dy__w_lnu",
+        id=373739,
+        label="DY+W",
+        processes=[
+            procs.n.dy,
+            procs.n.w_lnu,
+        ],
+    )
+    cfg.add_process(procs.n.dy__w_lnu)
 
     # cfg.add_process(procs.n.w_lnu_1j)
 
@@ -360,16 +384,16 @@ def add_new_config(
                 "ylim": (0.4, 1.6),
             },
         },
-        "DEFAULT": {
+        "my_default": {
             "legend_cfg": {
                 "ncols": 2,
-                "fontsize": 14,
+                "fontsize": 18,
                 "bbox_to_anchor": (0., 0., 1., 1.),
             },
             "annotate_cfg": {
-                "xy": (0.60, 0.60),
+                "xy": (0.60, 0.70),
                 "xycoords": "axes fraction",
-                "fontsize": 14,
+                "fontsize": 18,
             },
             "rax_cfg": {
                 "ylim": (0.4, 1.6),
@@ -409,6 +433,20 @@ def add_new_config(
                 "ylim": (0.000001, 5.0),
             },
         },
+        "fit_templates": {
+            "ax_cfg": {
+                "ylim": (0.1, 10000000.0),
+            },
+            "annotate_cfg": {
+                "fontsize": 22,
+                "xy": (0.55, 0.65),
+                "xycoords": "axes fraction",
+            },
+            "legend_cfg": {
+                "fontsize": 22,
+                "ncols": 2,
+            },
+        },
         "example": {
             "legend_cfg": {"title": "my custom legend title", "ncols": 2},
             "ax_cfg": {"ylabel": "my ylabel", "xlim": (0, 100)},
@@ -433,6 +471,7 @@ def add_new_config(
         "vv": "#B900FC",  # pink
         "other": "#999999",  # grey
         "others": "#FFCC01",  # dark yellow
+        "vv__dy__w_lnu": "#FFCC01",  # also dark yellow
     }
     zprime_colors = {
         # 1% width signals
