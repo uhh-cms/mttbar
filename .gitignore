@@ -17,6 +17,9 @@
 *.pb
 *.out
 *.parquet
+*.tsv
+*.txt
+*.csv
 .env_*.sh
 .env_*.sh.tmp
 .coverage
