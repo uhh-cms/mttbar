@@ -1,11 +1,10 @@
-# coding: utf-8
 
 """
 from hbw analysis
 """
 
-import order as od
 import law
+import order as od
 
 logger = law.logger.get_logger(__name__)
 
@@ -83,7 +82,7 @@ def prepare_ml_processes(config_inst: od.Config, train_nodes, sub_process_class_
             set_proc_attr(proc_inst, "sub_process_class_factor", sub_process_class_factors.get(proc_name, 1))
         else:
             logger.debug(f"create new process {proc_name}")
-            proc_id = process_settings.pop("id", int(1e7) + law.util.create_hash(proc_name, l=6, to_int=True))
+            proc_id = process_settings.pop("id", int(1e7) + law.util.create_hash(proc_name, length=6, to_int=True))
             sub_process_insts = []
             for proc in sub_processes:
                 if not config_inst.has_process(proc):

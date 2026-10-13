@@ -1,19 +1,17 @@
-# coding: utf-8
 
 """
 Selection involving leptons.
 """
 
-from typing import Tuple
 
-from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
+from columnflow.production.cms.electron import electron_sceta
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.util import maybe_import
 
-from columnflow.selection import Selector, SelectionResult, selector
-
-from mtt.selection.util import masked_sorted_indices
-from mtt.selection.early import check_early
 from mtt.production.lepton import choose_lepton
+from mtt.selection.early import check_early
+from mtt.selection.util import masked_sorted_indices
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -23,6 +21,7 @@ ak = maybe_import("awkward")
     uses={
         "event",
         check_early,
+        electron_sceta,
     },
 )
 def electron_selection(
@@ -43,15 +42,20 @@ def electron_selection(
       the separation from the nearest jet, is applied via a
       separate selector.
     """
+    # calculate super cluster eta for electrons
+    events = self[electron_sceta](events, **kwargs)
 
     sel_params = self.config_inst.x.lepton_selection.e
     lepton = events[sel_params.column]
 
     # general lepton kinematics
     lepton_mask_eta = (
-        (abs(lepton.eta + lepton.deltaEtaSC) < sel_params.max_abseta) &
+        (abs(lepton.eta) < sel_params.max_abseta) &
         # filter out electrons in barrel-endcap transition region
-        ((abs(lepton.eta) < sel_params.barrel_veto[0]) | (abs(lepton.eta) > sel_params.barrel_veto[1]))
+        (
+            (abs(lepton.superclusterEta) < sel_params.barrel_veto[0]) |
+            (abs(lepton.superclusterEta) > sel_params.barrel_veto[1])
+        )
     )
 
     # different criteria for low- and high-pt lepton
@@ -130,6 +134,9 @@ def electron_selection_init(self: Selector) -> None:
             f"{column}.{params.mva_id.low_pt}",
             f"{column}.{params.mva_id.high_pt}",
         }
+    self.produces |= {
+        electron_sceta,
+    }
 
 
 @selector(
@@ -291,7 +298,7 @@ def lepton_selection(
     self: Selector,
     events: ak.Array,
     **kwargs,
-) -> Tuple[ak.Array, SelectionResult]:
+) -> tuple[ak.Array, SelectionResult]:
     """Select muons/electrons and determine channel for event."""
 
     # get channels from the config
@@ -329,8 +336,8 @@ def lepton_selection(
         trigger_config = self.config_inst.x.triggers
         triggers = {
             "lowpt": trigger_config.lowpt.all.triggers[lepton_name],
-            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if "early" in trigger_config.highpt else None,  # noqa
-            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if "late" in trigger_config.highpt else None,  # noqa
+            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if "early" in trigger_config.highpt else None,  # noqa: E501
+            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if "late" in trigger_config.highpt else None,  # noqa: E501
             "highpt_all": trigger_config.highpt.all.triggers[lepton_name] if "all" in trigger_config.highpt else None,
         }
 
@@ -473,13 +480,11 @@ def lepton_selection(
     # passing the selection cuts
     merged_steps["DileptonVeto"] = (
         (
-            (
-                ak.num(merged_objects["Muon"]["Muon"], axis=-1) +
-                ak.num(merged_objects["Muon"]["VetoMuon"], axis=-1) +
-                ak.num(merged_objects["Electron"]["Electron"], axis=-1) +
-                ak.num(merged_objects["Electron"]["VetoElectron"], axis=-1)
-            ) <= 1
-        )
+            ak.num(merged_objects["Muon"]["Muon"], axis=-1) +
+            ak.num(merged_objects["Muon"]["VetoMuon"], axis=-1) +
+            ak.num(merged_objects["Electron"]["Electron"], axis=-1) +
+            ak.num(merged_objects["Electron"]["VetoElectron"], axis=-1)
+        ) <= 1
     )
 
     # invalidate channel if both e and mu were found

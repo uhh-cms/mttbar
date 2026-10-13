@@ -1,16 +1,14 @@
-# coding: utf-8
 
 """
 Selection methods for data trigger veto to prevent double counting.
 """
 
-from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.util import maybe_import
 
-from columnflow.selection import Selector, SelectionResult, selector
-
-from mtt.selection.lepton import lepton_selection
 from mtt.selection.early import check_early
+from mtt.selection.lepton import lepton_selection
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

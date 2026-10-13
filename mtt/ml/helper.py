@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Helper functions for ML in mtt analysis
 Taken from hbw analysis.
@@ -6,9 +5,7 @@ Taken from hbw analysis.
 
 
 import order as od
-
 from columnflow.util import maybe_import
-
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")

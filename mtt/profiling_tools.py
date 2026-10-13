@@ -1,15 +1,14 @@
-# coding: utf-8
 """
 Tools for profiling task execution
 """
 import gc
-import tracemalloc
-import time
 import textwrap
-
+import time
+import tracemalloc
 from contextlib import AbstractContextManager
 from enum import Enum, auto, unique
-from law.util import human_duration, human_bytes
+
+from law.util import human_bytes, human_duration
 
 
 def property_with_default(default_value=None):
@@ -34,7 +33,7 @@ class ProfilerBaseMeta(type(AbstractContextManager)):
     to be run on entering or exiting execution context
     """
     def __new__(mcl, name, bases, nmspc):
-        cls = super(ProfilerBaseMeta, mcl).__new__(mcl, name, bases, nmspc)
+        cls = super().__new__(mcl, name, bases, nmspc)
 
         # register hook methods
         cls.__hook_methods__ = {}

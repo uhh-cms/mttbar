@@ -1,4 +1,3 @@
-# coding: utf-8
 
 from columnflow.reduction import Reducer, reducer
 from columnflow.reduction.default import cf_default

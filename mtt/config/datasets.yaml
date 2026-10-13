@@ -1,0 +1,1559 @@
+---
+data_egamma:
+    tags:
+        - is_data
+        - is_egamma_data
+        - is_e_data
+    eras:
+        2022preEE:
+            - data_egamma_c
+            - data_egamma_d
+        2022postEE:
+            - data_egamma_e
+            - data_egamma_f
+            - data_egamma_g
+        2023preBPix:
+            - data_egamma_c1
+            - data_egamma_c2
+            - data_egamma_c3
+            - data_egamma_c4
+        2023postBPix:
+            - data_egamma_d1
+            - data_egamma_d2
+        2024full:
+            - data_e_c
+            - data_e_d
+            - data_e_e
+            - data_e_f
+            - data_e_g
+            - data_e_h
+            - data_e_i
+        2025full:
+            # - data_e_b
+            - data_e_c
+            - data_e_d
+            - data_e_e
+            - data_e_f
+            - data_e_g
+
+data_mu:
+    tags:
+        - is_data
+        - is_mu_data
+    eras:
+        2022preEE:
+            - data_mu_c
+            - data_mu_d
+        2022postEE:
+            - data_mu_e
+            - data_mu_f
+            - data_mu_g
+        2023preBPix:
+            - data_mu_c1
+            - data_mu_c2
+            - data_mu_c3
+            - data_mu_c4
+        2023postBPix:
+            - data_mu_d1
+            - data_mu_d2
+        2024full:
+            - data_mu_c
+            - data_mu_d
+            - data_mu_e
+            - data_mu_f
+            - data_mu_g
+            - data_mu_h
+            - data_mu_i
+        2025full:
+            # - data_mu_b
+            - data_mu_c
+            - data_mu_d
+            - data_mu_e
+            - data_mu_f
+            - data_mu_g
+
+tt:
+    tags:
+        - has_top
+        - has_ttbar
+        - is_sm_ttbar
+        - is_ttbar
+        - has_memory_intensive_reco
+    eras:
+        2022preEE:
+            - tt_sl_powheg
+            - tt_dl_powheg
+            - tt_fh_powheg
+        2022postEE:
+            - tt_sl_powheg
+            - tt_dl_powheg
+            - tt_fh_powheg
+        2023preBPix:
+            - tt_sl_powheg
+            - tt_dl_powheg
+            - tt_fh_powheg
+        2023postBPix:
+            - tt_sl_powheg
+            - tt_dl_powheg
+            - tt_fh_powheg
+        2024full:
+            - tt_sl_powheg
+            - tt_dl_powheg
+            - tt_fh_powheg
+        2025full:
+            - tt_sl_powheg
+            - tt_dl_powheg
+            - tt_fh_powheg
+
+st:
+    tags:
+        - has_top
+    eras:
+        2022preEE:
+            - st_tchannel_t_4f_powheg
+            - st_tchannel_tbar_4f_powheg
+            - st_twchannel_t_sl_powheg
+            - st_twchannel_tbar_sl_powheg
+            - st_twchannel_t_dl_powheg
+            - st_twchannel_tbar_dl_powheg
+            - st_twchannel_t_fh_powheg
+            - st_twchannel_tbar_fh_powheg
+        2022postEE:
+            - st_tchannel_t_4f_powheg
+            - st_tchannel_tbar_4f_powheg
+            - st_twchannel_t_sl_powheg
+            - st_twchannel_tbar_sl_powheg
+            - st_twchannel_t_dl_powheg
+            - st_twchannel_tbar_dl_powheg
+            - st_twchannel_t_fh_powheg
+            - st_twchannel_tbar_fh_powheg
+        2023preBPix:
+            - st_tchannel_t_4f_powheg
+            - st_tchannel_tbar_4f_powheg
+            - st_twchannel_t_sl_powheg
+            - st_twchannel_tbar_sl_powheg
+            - st_twchannel_t_dl_powheg
+            - st_twchannel_tbar_dl_powheg
+            - st_twchannel_t_fh_powheg
+            - st_twchannel_tbar_fh_powheg
+        2023postBPix:
+            - st_tchannel_t_4f_powheg
+            - st_tchannel_tbar_4f_powheg
+            - st_twchannel_t_sl_powheg
+            - st_twchannel_tbar_sl_powheg
+            - st_twchannel_t_dl_powheg
+            - st_twchannel_tbar_dl_powheg
+            - st_twchannel_t_fh_powheg
+            - st_twchannel_tbar_fh_powheg
+        2024full:
+            # t channel
+            - st_tchannel_t_had_4f_powheg
+            - st_tchannel_tbar_had_4f_powheg
+            - st_tchannel_t_lep_4f_powheg
+            - st_tchannel_tbar_lep_4f_powheg
+            # tW channel
+            - st_twchannel_t_sl_powheg
+            - st_twchannel_tbar_sl_powheg
+            - st_twchannel_t_dl_powheg
+            - st_twchannel_tbar_dl_powheg
+            - st_twchannel_t_fh_powheg
+            - st_twchannel_tbar_fh_powheg
+        2025full:
+            # t channel
+            - st_tchannel_t_had_4f_powheg
+            - st_tchannel_tbar_had_4f_powheg
+            - st_tchannel_t_lep_4f_powheg
+            - st_tchannel_tbar_lep_4f_powheg
+            # tW channel
+            - st_twchannel_t_sl_powheg
+            - st_twchannel_tbar_sl_powheg
+            - st_twchannel_t_dl_powheg
+            - st_twchannel_tbar_dl_powheg
+            - st_twchannel_t_fh_powheg
+            - st_twchannel_tbar_fh_powheg
+
+dy:
+    tags:
+        - is_v_jets
+        - is_z_jets
+        - is_dy
+    eras:
+        2022preEE:
+            # DY m4to50
+            - dy_m4to50_ht40to70_madgraph
+            - dy_m4to50_ht70to100_madgraph
+            - dy_m4to50_ht100to400_madgraph
+            - dy_m4to50_ht400to800_madgraph
+            - dy_m4to50_ht800to1500_madgraph
+            - dy_m4to50_ht1500to2500_madgraph
+            - dy_m4to50_ht2500toinf_madgraph
+            # DY m50to120
+            - dy_m50to120_ht40to70_madgraph
+            - dy_m50to120_ht70to100_madgraph
+            - dy_m50to120_ht100to400_madgraph
+            - dy_m50to120_ht400to800_madgraph
+        2022postEE:
+            # DY m4to50
+            - dy_m4to50_ht40to70_madgraph
+            - dy_m4to50_ht70to100_madgraph
+            - dy_m4to50_ht100to400_madgraph
+            - dy_m4to50_ht400to800_madgraph
+            - dy_m4to50_ht800to1500_madgraph
+            - dy_m4to50_ht1500to2500_madgraph
+            - dy_m4to50_ht2500toinf_madgraph
+            # DY m50to120
+            - dy_m50to120_ht40to70_madgraph
+            - dy_m50to120_ht70to100_madgraph
+            - dy_m50to120_ht100to400_madgraph
+            - dy_m50to120_ht400to800_madgraph
+        2023preBPix:
+            # DY m4to50
+            - dy_m4to50_ht40to70_madgraph
+            - dy_m4to50_ht70to100_madgraph
+            - dy_m4to50_ht100to400_madgraph
+            - dy_m4to50_ht400to800_madgraph
+            - dy_m4to50_ht800to1500_madgraph
+            - dy_m4to50_ht1500to2500_madgraph
+            - dy_m4to50_ht2500toinf_madgraph
+            # DY m50to120
+            - dy_m50to120_ht40to70_madgraph
+            - dy_m50to120_ht70to100_madgraph
+            - dy_m50to120_ht100to400_madgraph
+            - dy_m50to120_ht400to800_madgraph
+        2023postBPix:
+            # DY m4to50
+            - dy_m4to50_ht40to70_madgraph
+            - dy_m4to50_ht70to100_madgraph
+            - dy_m4to50_ht100to400_madgraph
+            - dy_m4to50_ht400to800_madgraph
+            - dy_m4to50_ht800to1500_madgraph
+            - dy_m4to50_ht1500to2500_madgraph
+            - dy_m4to50_ht2500toinf_madgraph
+            # DY m50to120
+            - dy_m50to120_ht40to70_madgraph
+            - dy_m50to120_ht70to100_madgraph
+            - dy_m50to120_ht100to400_madgraph
+            - dy_m50to120_ht400to800_madgraph
+        2024full:
+            # check for ht samples in 2024
+            # available, but without xsec...
+            - dy_4j_mumu_m50toinf_madgraph
+            - dy_4j_ee_m50toinf_madgraph
+            - dy_4j_tautau_m50toinf_madgraph
+        2025full:
+            # check for ht samples in 2025
+            # available, but without xsec...
+            - dy_4j_mumu_m50toinf_madgraph
+            - dy_4j_ee_m50toinf_madgraph
+            - dy_4j_tautau_m50toinf_madgraph
+
+dy_nlo:
+    tags:
+        - is_v_jets
+        - is_z_jets
+        - is_dy
+    eras:
+        2024full:
+            # amcatnlo
+            - dy_m50toinf_1j_pt40to100_amcatnlo
+            - dy_m50toinf_1j_pt100to200_amcatnlo
+            - dy_m50toinf_1j_pt200to400_amcatnlo
+            - dy_m50toinf_1j_pt400to600_amcatnlo
+            - dy_m50toinf_1j_pt600toinf_amcatnlo
+            - dy_m50toinf_2j_pt40to100_amcatnlo
+            - dy_m50toinf_2j_pt100to200_amcatnlo
+            - dy_m50toinf_2j_pt200to400_amcatnlo
+            - dy_m50toinf_2j_pt400to600_amcatnlo
+            - dy_m50toinf_2j_pt600toinf_amcatnlo
+        2025full:
+            # amcatnlo
+            - dy_m50toinf_1j_pt40to100_amcatnlo
+            - dy_m50toinf_1j_pt100to200_amcatnlo
+            - dy_m50toinf_1j_pt200to400_amcatnlo
+            - dy_m50toinf_1j_pt400to600_amcatnlo
+            - dy_m50toinf_1j_pt600toinf_amcatnlo
+            - dy_m50toinf_2j_pt40to100_amcatnlo
+            - dy_m50toinf_2j_pt100to200_amcatnlo
+            - dy_m50toinf_2j_pt200to400_amcatnlo
+            - dy_m50toinf_2j_pt400to600_amcatnlo
+            - dy_m50toinf_2j_pt600toinf_amcatnlo
+
+w_lnu:
+    tags:
+        - is_v_jets
+        - is_w_jets
+        - is_w_lnu
+    eras:
+        2022preEE:
+            - w_lnu_mlnu0to120_ht100to400_madgraph
+            - w_lnu_mlnu0to120_ht400to800_madgraph
+            - w_lnu_mlnu0to120_ht800to1500_madgraph
+            - w_lnu_mlnu0to120_ht1500to2500_madgraph
+            - w_lnu_mlnu0to120_ht2500toinf_madgraph
+        2022postEE:
+            - w_lnu_mlnu0to120_ht100to400_madgraph
+            - w_lnu_mlnu0to120_ht400to800_madgraph
+            - w_lnu_mlnu0to120_ht800to1500_madgraph
+            - w_lnu_mlnu0to120_ht1500to2500_madgraph
+            - w_lnu_mlnu0to120_ht2500toinf_madgraph
+        2023preBPix:
+            - w_lnu_mlnu0to120_ht100to400_madgraph
+            - w_lnu_mlnu0to120_ht400to800_madgraph
+            - w_lnu_mlnu0to120_ht800to1500_madgraph
+            - w_lnu_mlnu0to120_ht1500to2500_madgraph
+            - w_lnu_mlnu0to120_ht2500toinf_madgraph
+        2023postBPix:
+            - w_lnu_mlnu0to120_ht100to400_madgraph
+            - w_lnu_mlnu0to120_ht400to800_madgraph
+            - w_lnu_mlnu0to120_ht800to1500_madgraph
+            - w_lnu_mlnu0to120_ht1500to2500_madgraph
+            - w_lnu_mlnu0to120_ht2500toinf_madgraph
+        2024full:
+            # check for ht samples in 2024
+            - w_lnu_1j_madgraph
+            - w_lnu_2j_madgraph
+            - w_lnu_3j_madgraph
+            - w_lnu_4j_madgraph
+        2025full:
+            # check for ht samples in 2025
+            - w_lnu_1j_madgraph
+            - w_lnu_2j_madgraph
+            - w_lnu_3j_madgraph
+            - w_lnu_4j_madgraph
+
+vv:
+    tags:
+        - is_vv
+        - is_diboson
+        - skip_scale
+        - skip_pdf
+    eras:
+        2022preEE:
+            - ww_pythia
+            - wz_pythia
+            - zz_pythia
+        2022postEE:
+            - ww_pythia
+            - wz_pythia
+            - zz_pythia
+        2023preBPix:
+            - ww_pythia
+            - wz_pythia
+            - zz_pythia
+        2023postBPix:
+            - ww_pythia
+            - wz_pythia
+            - zz_pythia
+        2024full:
+            - ww_pythia
+            - wz_pythia
+            - zz_pythia
+        2025full:
+            - ww_pythia
+            - wz_pythia
+            - zz_pythia
+
+qcd_lep:
+    tags:
+        - is_qcd
+        - no_ps_weights
+        - no_lhe_weights
+        - skip_scale
+        - skip_pdf
+    eras:
+        # for 2022 and 2023, use mu/em enriched samples with pt > 120 GeV to cover the high-pt region of the QCD background, which is relevant for our analysis. The pt threshold has been decided on 27.01.25.
+        2022preEE:
+            # mu enriched
+            - qcd_mu_pt120to170_pythia
+            - qcd_mu_pt170to300_pythia
+            - qcd_mu_pt300to470_pythia
+            - qcd_mu_pt470to600_pythia
+            - qcd_mu_pt600to800_pythia
+            - qcd_mu_pt800to1000_pythia
+            - qcd_mu_pt1000toinf_pythia
+            # em enriched
+            - qcd_em_pt120to170_pythia
+            - qcd_em_pt170to300_pythia
+            - qcd_em_pt300toinf_pythia
+        2022postEE:
+            # mu enriched
+            - qcd_mu_pt120to170_pythia
+            - qcd_mu_pt170to300_pythia
+            - qcd_mu_pt300to470_pythia
+            - qcd_mu_pt470to600_pythia
+            - qcd_mu_pt600to800_pythia
+            - qcd_mu_pt800to1000_pythia
+            - qcd_mu_pt1000toinf_pythia
+            # em enriched
+            - qcd_em_pt120to170_pythia
+            - qcd_em_pt170to300_pythia
+            - qcd_em_pt300toinf_pythia
+        2023preBPix:
+            # mu enriched
+            - qcd_mu_pt120to170_pythia
+            - qcd_mu_pt170to300_pythia
+            - qcd_mu_pt300to470_pythia
+            - qcd_mu_pt470to600_pythia
+            - qcd_mu_pt600to800_pythia
+            - qcd_mu_pt800to1000_pythia
+            - qcd_mu_pt1000toinf_pythia
+            # em enriched
+            - qcd_em_pt120to170_pythia
+            - qcd_em_pt170to300_pythia
+            - qcd_em_pt300toinf_pythia
+        2023postBPix:
+            # mu enriched
+            - qcd_mu_pt120to170_pythia
+            - qcd_mu_pt170to300_pythia
+            - qcd_mu_pt300to470_pythia
+            - qcd_mu_pt470to600_pythia
+            - qcd_mu_pt600to800_pythia
+            - qcd_mu_pt800to1000_pythia
+            - qcd_mu_pt1000toinf_pythia
+            # em enriched
+            - qcd_em_pt120to170_pythia
+            - qcd_em_pt170to300_pythia
+            - qcd_em_pt300toinf_pythia
+        2024full:
+            # mu enriched
+            - qcd_mu_pt120to170_pythia
+            - qcd_mu_pt170to300_pythia
+            - qcd_mu_pt300to470_pythia
+            - qcd_mu_pt470to600_pythia
+            - qcd_mu_pt600to800_pythia
+            - qcd_mu_pt800to1000_pythia
+            - qcd_mu_pt1000toinf_pythia
+            # em enriched
+            - qcd_em_pt120to170_pythia
+            - qcd_em_pt170to300_pythia
+            - qcd_em_pt300to470_pythia
+            - qcd_em_pt470to600_pythia
+            - qcd_em_pt600to800_pythia
+            - qcd_em_pt800to1000_pythia
+            - qcd_em_pt1000toinf_pythia
+        2025full:
+            # mu enriched
+            - qcd_mu_pt120to170_pythia
+            - qcd_mu_pt170to300_pythia
+            - qcd_mu_pt300to470_pythia
+            - qcd_mu_pt470to600_pythia
+            - qcd_mu_pt600to800_pythia
+            - qcd_mu_pt800to1000_pythia
+            - qcd_mu_pt1000toinf_pythia
+            # em enriched
+            - qcd_em_pt120to170_pythia
+            - qcd_em_pt170to300_pythia
+            - qcd_em_pt300to470_pythia
+            - qcd_em_pt470to600_pythia
+            - qcd_em_pt600to800_pythia
+            - qcd_em_pt800to1000_pythia
+            - qcd_em_pt1000toinf_pythia
+
+qcd:
+    tags:
+        - is_qcd
+        - no_ps_weights
+        - no_lhe_weights
+        - skip_scale
+        - skip_pdf
+    eras:
+        # for 2022 and 2023, use mu/em enriched samples with pt > 120 GeV to cover the high-pt region of the QCD background, which is relevant for our analysis. The pt threshold has been decided on 27.01.25.
+        2022preEE:
+            - qcd_ht70to100_madgraph
+            - qcd_ht100to200_madgraph
+            - qcd_ht200to400_madgraph
+            - qcd_ht400to600_madgraph
+            - qcd_ht600to800_madgraph
+            - qcd_ht800to1000_madgraph
+            - qcd_ht1000to1200_madgraph
+            - qcd_ht1200to1500_madgraph
+            - qcd_ht1500to2000_madgraph
+            - qcd_ht2000toinf_madgraph
+        2022postEE:
+            - qcd_ht70to100_madgraph
+            - qcd_ht100to200_madgraph
+            - qcd_ht200to400_madgraph
+            - qcd_ht400to600_madgraph
+            - qcd_ht600to800_madgraph
+            - qcd_ht800to1000_madgraph
+            - qcd_ht1000to1200_madgraph
+            - qcd_ht1200to1500_madgraph
+            - qcd_ht1500to2000_madgraph
+            - qcd_ht2000toinf_madgraph
+        2023preBPix:
+            - qcd_ht70to100_madgraph
+            - qcd_ht100to200_madgraph
+            - qcd_ht200to400_madgraph
+            - qcd_ht400to600_madgraph
+            - qcd_ht600to800_madgraph
+            - qcd_ht800to1000_madgraph
+            - qcd_ht1000to1200_madgraph
+            - qcd_ht1200to1500_madgraph
+            - qcd_ht1500to2000_madgraph
+            - qcd_ht2000toinf_madgraph
+        2023postBPix:
+            - qcd_ht70to100_madgraph
+            - qcd_ht100to200_madgraph
+            - qcd_ht200to400_madgraph
+            - qcd_ht400to600_madgraph
+            - qcd_ht600to800_madgraph
+            - qcd_ht800to1000_madgraph
+            - qcd_ht1000to1200_madgraph
+            - qcd_ht1200to1500_madgraph
+            - qcd_ht1500to2000_madgraph
+            - qcd_ht2000toinf_madgraph
+        2024full:
+            # - qcd_ht40to70_madgraph  # empty after selection (nominal, v8)
+            # - qcd_ht70to100_madgraph  # empty after selection (nominal, v8)
+            # - qcd_ht100to200_madgraph  # empty after selection (nominal, v8)
+            - qcd_ht200to400_madgraph
+            - qcd_ht400to600_madgraph
+            - qcd_ht600to800_madgraph
+            - qcd_ht800to1000_madgraph
+            - qcd_ht1000to1200_madgraph
+            - qcd_ht1200to1500_madgraph
+            - qcd_ht1500to2000_madgraph
+            - qcd_ht2000toinf_madgraph
+        2025full:
+            # - qcd_ht40to70_madgraph  # empty after selection (nominal, v8)
+            # - qcd_ht70to100_madgraph  # empty after selection (nominal, v8)
+            # - qcd_ht100to200_madgraph  # empty after selection (nominal, v8)
+            - qcd_ht200to400_madgraph
+            - qcd_ht400to600_madgraph
+            - qcd_ht600to800_madgraph
+            - qcd_ht800to1000_madgraph
+            - qcd_ht1000to1200_madgraph
+            - qcd_ht1200to1500_madgraph
+            - qcd_ht1500to2000_madgraph
+            - qcd_ht2000toinf_madgraph
+
+qcd_pt:
+    tags:
+        - is_qcd
+        - no_ps_weights
+        - no_lhe_weights
+        - skip_scale
+        - skip_pdf
+    eras:
+        # use inclusive pt binned samples for wp analysis
+        2022preEE:
+            - qcd_pt120to170_pythia
+            - qcd_pt170to300_pythia
+            - qcd_pt300to470_pythia
+            - qcd_pt470to600_pythia
+            - qcd_pt600to800_pythia
+            - qcd_pt800to1000_pythia
+            - qcd_pt1000to1400_pythia
+            - qcd_pt1400to1800_pythia
+            - qcd_pt1800to2400_pythia
+            - qcd_pt2400to3200_pythia
+            - qcd_pt3200toinf_pythia
+        2022postEE:
+            - qcd_pt120to170_pythia
+            - qcd_pt170to300_pythia
+            - qcd_pt300to470_pythia
+            - qcd_pt470to600_pythia
+            - qcd_pt600to800_pythia
+            - qcd_pt800to1000_pythia
+            - qcd_pt1000to1400_pythia
+            - qcd_pt1400to1800_pythia
+            - qcd_pt1800to2400_pythia
+            - qcd_pt2400to3200_pythia
+            - qcd_pt3200toinf_pythia
+        2023preBPix:
+            - qcd_pt120to170_pythia
+            - qcd_pt170to300_pythia
+            - qcd_pt300to470_pythia
+            - qcd_pt470to600_pythia
+            - qcd_pt600to800_pythia
+            - qcd_pt800to1000_pythia
+            - qcd_pt1000to1400_pythia
+            - qcd_pt1400to1800_pythia
+            - qcd_pt1800to2400_pythia
+            - qcd_pt2400to3200_pythia
+            - qcd_pt3200toinf_pythia
+        2023postBPix:
+            - qcd_pt120to170_pythia
+            - qcd_pt170to300_pythia
+            - qcd_pt300to470_pythia
+            - qcd_pt470to600_pythia
+            - qcd_pt600to800_pythia
+            - qcd_pt800to1000_pythia
+            - qcd_pt1000to1400_pythia
+            - qcd_pt1400to1800_pythia
+            - qcd_pt1800to2400_pythia
+            - qcd_pt2400to3200_pythia
+            - qcd_pt3200toinf_pythia
+        2024full:
+            - qcd_pt120to170_pythia
+            - qcd_pt170to300_pythia
+            - qcd_pt300to470_pythia
+            - qcd_pt470to600_pythia
+            - qcd_pt600to800_pythia
+            - qcd_pt800to1000_pythia
+            - qcd_pt1000to1500_pythia
+            - qcd_pt1500to2000_pythia
+            - qcd_pt2000to2500_pythia
+            - qcd_pt2500to3000_pythia
+            - qcd_pt3000toinf_pythia
+        2025full:
+            - qcd_pt120to170_pythia
+            - qcd_pt170to300_pythia
+            - qcd_pt300to470_pythia
+            - qcd_pt470to600_pythia
+            - qcd_pt600to800_pythia
+            - qcd_pt800to1000_pythia
+            - qcd_pt1000to1500_pythia
+            - qcd_pt1500to2000_pythia
+            - qcd_pt2000to2500_pythia
+            - qcd_pt2500to3000_pythia
+            - qcd_pt3000toinf_pythia
+
+zprime_full:
+    tags:
+        - is_zprime
+        - has_top
+        - has_ttbar
+        - is_mtt_signal
+
+    eras:
+        2022preEE:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2022postEE:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2023preBPix:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2023postBPix:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2024full:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2025full:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        
+
+zprime_narrow:
+    tags:
+        - is_zprime
+        - has_top
+        - has_ttbar
+        - is_mtt_signal
+        - is_narrow_zprime
+
+    eras:
+        2022preEE:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+        2022postEE:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+        2023preBPix:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+        2023postBPix:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+        2024full:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+        2025full:
+            # 1% width samples
+            - zprime_tt_m400_w4_madgraph
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m600_w6_madgraph
+            - zprime_tt_m700_w7_madgraph
+            - zprime_tt_m800_w8_madgraph
+            - zprime_tt_m900_w9_madgraph
+            - zprime_tt_m1000_w10_madgraph
+            - zprime_tt_m1200_w12_madgraph
+            - zprime_tt_m1400_w14_madgraph
+            - zprime_tt_m1600_w16_madgraph
+            - zprime_tt_m1800_w18_madgraph
+            - zprime_tt_m2000_w20_madgraph
+            - zprime_tt_m2500_w25_madgraph
+            - zprime_tt_m3000_w30_madgraph
+            - zprime_tt_m3500_w35_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m5000_w50_madgraph
+            - zprime_tt_m6000_w60_madgraph
+            - zprime_tt_m7000_w70_madgraph
+            - zprime_tt_m8000_w80_madgraph
+            - zprime_tt_m9000_w90_madgraph
+
+
+zprime_medium:
+    tags:
+        - is_zprime
+        - has_top
+        - has_ttbar
+        - is_mtt_signal
+        - is_medium_zprime
+
+    eras:
+        2022preEE:
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+        2022postEE:
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+        2023preBPix:
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+        2023postBPix:
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+        2024full:
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+        2025full:
+            # 10% width samples
+            - zprime_tt_m400_w40_madgraph
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m600_w60_madgraph
+            - zprime_tt_m700_w70_madgraph
+            - zprime_tt_m800_w80_madgraph
+            - zprime_tt_m900_w90_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m1200_w120_madgraph
+            - zprime_tt_m1400_w140_madgraph
+            - zprime_tt_m1600_w160_madgraph
+            - zprime_tt_m1800_w180_madgraph
+            - zprime_tt_m2000_w200_madgraph
+            - zprime_tt_m2500_w250_madgraph
+            - zprime_tt_m3000_w300_madgraph
+            - zprime_tt_m3500_w350_madgraph
+            - zprime_tt_m4000_w400_madgraph
+            - zprime_tt_m4500_w450_madgraph
+            - zprime_tt_m5000_w500_madgraph
+            - zprime_tt_m6000_w600_madgraph
+            - zprime_tt_m7000_w700_madgraph
+            - zprime_tt_m8000_w800_madgraph
+            - zprime_tt_m9000_w900_madgraph
+
+zprime_wide:
+    tags:
+        - is_zprime
+        - has_top
+        - has_ttbar
+        - is_mtt_signal
+        - is_wide_zprime
+
+    eras:
+        2022preEE:
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2022postEE:
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2023preBPix:
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2023postBPix:
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2024full:
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+        2025full:
+            # 30% width samples
+            - zprime_tt_m400_w120_madgraph
+            - zprime_tt_m500_w150_madgraph
+            - zprime_tt_m600_w180_madgraph
+            - zprime_tt_m700_w210_madgraph
+            - zprime_tt_m800_w240_madgraph
+            - zprime_tt_m900_w270_madgraph
+            - zprime_tt_m1000_w300_madgraph
+            - zprime_tt_m1200_w360_madgraph
+            - zprime_tt_m1400_w420_madgraph
+            - zprime_tt_m1600_w480_madgraph
+            - zprime_tt_m1800_w540_madgraph
+            - zprime_tt_m2000_w600_madgraph
+            - zprime_tt_m2500_w750_madgraph
+            - zprime_tt_m3000_w900_madgraph
+            - zprime_tt_m3500_w1050_madgraph
+            - zprime_tt_m4000_w1200_madgraph
+            - zprime_tt_m4500_w1350_madgraph
+            - zprime_tt_m5000_w1500_madgraph
+            - zprime_tt_m6000_w1800_madgraph
+            - zprime_tt_m7000_w2100_madgraph
+            - zprime_tt_m8000_w2400_madgraph
+            - zprime_tt_m9000_w2700_madgraph
+
+
+zprime_test:
+    tags:
+        - is_zprime
+        - has_top
+        - has_ttbar
+        - is_mtt_signal
+
+    eras:
+        2022preEE:
+            # 10% width samples
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m3000_w300_madgraph
+        2022postEE:
+            # 10% width samples
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m3000_w300_madgraph
+        2023preBPix:
+            # 10% width samples
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m3000_w300_madgraph
+        2023postBPix:
+            # 10% width samples
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m3000_w300_madgraph
+        2024full:
+            # 10% width samples
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m3000_w300_madgraph
+        2025full:
+            # 10% width samples
+            - zprime_tt_m500_w50_madgraph
+            - zprime_tt_m1000_w100_madgraph
+            - zprime_tt_m3000_w300_madgraph
+
+
+zprime_legacy:
+    tags:
+        - is_zprime
+        - has_top
+        - has_ttbar
+        - is_mtt_signal
+
+    eras:
+        2024full:
+            # previously processed samples, using old outputs
+            - zprime_tt_m500_w5_madgraph
+            - zprime_tt_m4000_w40_madgraph
+            - zprime_tt_m4500_w45_madgraph
+            - zprime_tt_m7000_w70_madgraph

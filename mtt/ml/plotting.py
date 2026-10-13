@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Plotting functions for ML in mtt analysis
 Taken from hbw analysis.
@@ -10,15 +9,15 @@ import functools
 
 # import tabulate
 import gc
+
 import law
 import order as od
-
-from mtt.util import round_sig, timeit
 from columnflow.ml import MLModel
-from columnflow.util import maybe_import, DotDict
 from columnflow.plotting.plot_util import get_position
 from columnflow.types import TYPE_CHECKING
+from columnflow.util import DotDict, maybe_import
 
+from mtt.util import round_sig, timeit
 
 np = maybe_import("numpy")
 plt = maybe_import("matplotlib.pyplot")
@@ -89,7 +88,11 @@ def plot_introspection(
     input_features: list | None = None,
     stats: dict | None = None,
 ):
-    from mtt.ml.introspection import sensitivity_analysis, gradient_times_input, shap_ranking
+    from mtt.ml.introspection import (
+        # sensitivity_analysis,
+        # gradient_times_input,
+        shap_ranking,
+    )
 
     # get only signal events for now
     inputs = inputs.features[inputs.labels == 0]
@@ -132,11 +135,7 @@ def plot_history(
     fig, ax = plt.subplots()
     ax.plot(history[metric])
     ax.plot(history[f"val_{metric}"])
-    ax.set(**{
-        "ylabel": ylabel,
-        "yscale": yscale,
-        "xlabel": "Epoch",
-    })
+    ax.set(ylabel=ylabel, yscale=yscale, xlabel="Epoch")
     ax.legend(["train", "validation"], loc="best")
     mplhep.cms.label(ax=ax, **cms_label_kwargs, com=13.6)
 
@@ -155,7 +154,6 @@ def gather_confusion_stats(
         stats: dict,
 ) -> None:
     from math import sqrt
-    print(len(confusion))
     for i in range(len(confusion)):
         # labels must be in the same order as the confusion matrix
         proc_name = process_insts[i].name
@@ -190,7 +188,7 @@ def plot_confusion(
     plt.style.use(mplhep.style.CMS)
     plt.rcParams["figure.figsize"] = (11.6, 10)
 
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
     # Create confusion matrix and normalizes it over predicted (columns)
     confusion = confusion_matrix(
@@ -201,12 +199,12 @@ def plot_confusion(
     if isinstance(stats, dict):
         gather_confusion_stats(confusion, process_insts, input_type, stats)
 
-    # normalize confusion matrix (axis=1: over columns (predicted), axis=0: over rows (truth))
-    if normalize == "columns":
-        # normalize over columns (predicted)
+    # normalize confusion matrix (axis=1: over rows (predicted), axis=0: over columns (truth))
+    if normalize == "rows":
+        # normalize over rows (predicted)
         confusion = confusion / confusion.sum(axis=1, keepdims=True)
-    elif normalize == "rows":
-        # normalize over rows (truth)
+    elif normalize == "columns":
+        # normalize over columns (truth)
         confusion = confusion / confusion.sum(axis=0, keepdims=True)
     elif normalize == "total":
         # normalize over all entries
@@ -231,11 +229,11 @@ def plot_confusion(
     )
 
     # Add title and CMS label
-    ax.set_title(f"Confusion matrix for {input_type} set, rows normalized", fontsize=24, pad=+24 * 2)
+    ax.set_title(f"Confusion matrix for {input_type} set, {normalize} normalized", fontsize=24, pad=+24 * 2)
     mplhep.cms.label(ax=ax, fontsize=24, loc=0, **cms_label_kwargs, com=model.config_inst.campaign.ecm)
 
     plt.tight_layout()
-    output.child(f"Confusion_{input_type}.pdf", type="f").dump(fig, formatter="mpl")
+    output.child(f"Confusion_{input_type}_{normalize}.pdf", type="f").dump(fig, formatter="mpl")
 
 
 @timeit
@@ -257,7 +255,7 @@ def plot_roc_ovr(
     # use CMS plotting style
     plt.style.use(mplhep.style.CMS)
 
-    from sklearn.metrics import roc_curve, roc_auc_score
+    from sklearn.metrics import roc_auc_score, roc_curve
 
     auc_scores = []
     n_classes = len(inputs.target[0])
@@ -269,7 +267,7 @@ def plot_roc_ovr(
     fig, ax = plt.subplots()
     for i in range(n_classes):
         y_true = (inputs.labels == i)
-        fpr, tpr, thresholds = roc_curve(
+        fpr, tpr, _thresholds = roc_curve(
             y_true=y_true,
             y_score=inputs.prediction[:, i],
             sample_weight=weights,
@@ -340,7 +338,7 @@ def plot_roc_ovo(
     # use CMS plotting style
     plt.style.use(mplhep.style.CMS)
 
-    from sklearn.metrics import roc_curve, roc_auc_score
+    from sklearn.metrics import roc_auc_score, roc_curve
 
     n_classes = len(inputs.target[0])
 
@@ -462,7 +460,7 @@ def plot_output_nodes(
         }
 
         # dummy legend entries
-        for input_type in data.keys():
+        for input_type in data:
             plt.hist([], histtype="step", label=labels[input_type][0], linestyle=labels[input_type][1], color="black")
 
         # get the correct normalization factors
@@ -636,9 +634,9 @@ def get_input_weights(model, output, input_features: list | None = None):
 
     # check that the input shape is correct
     if weights.shape[0] != len(input_features):
-        raise Exception(
-            f"The number of weights {weights.shape[0]} in the first denes layer should be equivalent "
-            f"to the numberof input features {len(input_features)}",
+        raise ValueError(
+            f"The number of weights {weights.shape[0]} in the first dense layer should be equivalent "
+            f"to the number of input features {len(input_features)}",
         )
 
     # sum weights per variable and round

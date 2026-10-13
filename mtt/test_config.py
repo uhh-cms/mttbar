@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 A dummy script to test config objects
@@ -56,7 +55,7 @@ for shift_inst in shift_insts:
 
 print("================= Auxiliary ======================")
 aux = cfg.aux
-for key, value in aux.items():
+for key in aux:
     print(key)
 
 # print some features of an exemplary process inst
