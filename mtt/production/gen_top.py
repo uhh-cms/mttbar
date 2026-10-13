@@ -175,7 +175,7 @@ def top_pt_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # fail if not run in ttbar simulation
     if not self.dataset_inst.has_tag("is_sm_ttbar"):
-        raise Exception(f"gen_top_pt_weight should only run for ttbar dataset, got {self.dataset_inst}")
+        raise RuntimeError(f"gen_top_pt_weight should only run for ttbar dataset, got {self.dataset_inst}")
 
     # get SF function parameters from config
     params = self.config_inst.x.top_pt_reweighting_params

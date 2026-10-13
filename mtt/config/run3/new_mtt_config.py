@@ -332,7 +332,7 @@ def add_new_config(
     logger.debug(f"Added {len(cfg.processes)} processes and {len(cfg.datasets)} datasets to config '{cfg.name}'")
 
     # MC splitting settings
-    # taken from https://github.com/uhh-cms/hh2bbtautau/blob/2b227967d8cc86351908ac834144a63e2d3733f1/hbt/config/configs_hbt.py#L2458-L2475  # noqa
+    # taken from https://github.com/uhh-cms/hh2bbtautau/blob/2b227967d8cc86351908ac834144a63e2d3733f1/hbt/config/configs_hbt.py#L2458-L2475
 
     if split_mc:
         # for details see https://gist.github.com/riga/5aad795980919d23ea6b7df0502a999b
@@ -1304,7 +1304,7 @@ def add_new_config(
 
     #
     # external files
-    # setup taken from https://github.com/uhh-cms/hh2bbtautau/blob/ed8f363ac239b0257fc7f470b96f5c09a0572c34/hbt/config/configs_hbt.py#L1574  # noqa: E501
+    # setup taken from https://github.com/uhh-cms/hh2bbtautau/blob/ed8f363ac239b0257fc7f470b96f5c09a0572c34/hbt/config/configs_hbt.py#L1574
     # https://cms-analysis-corrections.docs.cern.ch
     #
 
@@ -1367,7 +1367,7 @@ def add_new_config(
             vnano=15,
             era="26Prompt-Summer24",
             pog_directories={"dc": "Collisions26"},
-            snapshot=CATSnapshot(jme="2026-07-15"),  # noqa: E501
+            snapshot=CATSnapshot(jme="2026-07-15"),
         ),
     }[(year, campaign.x.postfix, vnano)]
     cfg.x.cat_info = cat_info
@@ -1422,10 +1422,10 @@ def add_new_config(
         add_external("btag_sf_corr", (cat_info.get_file("btv", "btagging.json.gz"), "v1"))
     elif year == 2024:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", (f"{run3_data_path}/btagging_merged__2024__2026-03-10.json.gz", "v1"))  # noqa: E501
+        add_external("btag_wp_sf_corr", (f"{run3_data_path}/btagging_merged__2024__2026-03-10.json.gz", "v1"))
     elif year == 2025:
         # use custom file with merged SF for both b/c and light jets
-        add_external("btag_wp_sf_corr", (f"{run3_data_path}/btagging_merged__2025__2026-06-26.json.gz", "v1"))  # noqa: E501
+        add_external("btag_wp_sf_corr", (f"{run3_data_path}/btagging_merged__2025__2026-06-26.json.gz", "v1"))
     elif year == 2026:
         # use custom file with merged SF for both b/c and light jets
         raise NotImplementedError("btag SF for 2026 not yet available")
@@ -1449,7 +1449,7 @@ def add_new_config(
     add_external("electron_ss", (cat_info.get_file("egm", "electronSS_EtDependent.json.gz"), "v1"))  # FIXME correct for us? # noqa: E501
 
     # # top-tagging scale factors (TODO)
-    # "toptag_sf": (f"{sources['jet']}/JMAR/???/???.json", "v1"),  # noqa
+    # "toptag_sf": (f"{sources['jet']}/JMAR/???/???.json", "v1"),
 
     # # V+jets reweighting
     # "vjets_reweighting": f"{sources['local_repo']}/data/json/vjets_reweighting.json",

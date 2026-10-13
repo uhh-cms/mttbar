@@ -2,6 +2,7 @@
 """
 Configuration of corrections for the m(ttbar) analysis.
 """
+from __future__ import annotations
 
 import law
 import order as od
@@ -33,7 +34,7 @@ def vjets_reweighting_cfg(
 
 def jerc_cfg(
         campaign: od.Campaign,
-        year: int = None,
+        year: int | None = None,
 ) -> list[DotDict]:
     # https://cms-jerc.web.cern.ch/Recommendations/#jet-energy-scale
 
@@ -48,7 +49,7 @@ def jerc_cfg(
         jec_campaign = f"Summer23{jerc_postfix}Prompt23"
     elif year == 2024:
         jec_campaign = "Summer24Prompt24"
-        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1  # noqa: E501
+        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1
     elif year == 2025:
         jec_campaign = "Summer24Prompt25"
         jer_campaign = "Summer24Prompt25"
@@ -289,7 +290,7 @@ def jerc_cfg(
 
 def btag_sf_setup(
     config: od.Config,
-    year: int = None,
+    year: int | None = None,
 ) -> list[tuple, list]:
     jec_sources = [
         "",  # same as "Total"
@@ -443,7 +444,7 @@ def toptag_sf_cfg(
 
 def met_phi_cfg(
     config: od.Config,
-    year: int = None,
+    year: int | None = None,
 ):
     met_column = config.x.met_selection.column
     # raw_met_column = config.x.met_selection.raw_column

@@ -166,7 +166,7 @@ def large_weights_killer(self: Producer, events: ak.Array, stats: dict, **kwargs
     Simple producer that sets eventweights to 0 when too large.
     """
     if self.dataset_inst.is_data:
-        raise Exception("large_weights_killer is only callable for MC")
+        raise RuntimeError("large_weights_killer is only callable for MC")
 
     # set mc_weight to zero when genWeight is > 0.5 for powheg HH events
     if self.dataset_inst.has_tag("is_hh") and self.dataset_inst.name.endswith("powheg"):

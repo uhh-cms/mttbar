@@ -634,9 +634,9 @@ def get_input_weights(model, output, input_features: list | None = None):
 
     # check that the input shape is correct
     if weights.shape[0] != len(input_features):
-        raise Exception(
-            f"The number of weights {weights.shape[0]} in the first denes layer should be equivalent "
-            f"to the numberof input features {len(input_features)}",
+        raise ValueError(
+            f"The number of weights {weights.shape[0]} in the first dense layer should be equivalent "
+            f"to the number of input features {len(input_features)}",
         )
 
     # sum weights per variable and round

@@ -2,6 +2,7 @@
 """
 Configuration of default values and groups for the m(ttbar) analysis.
 """
+from __future__ import annotations
 
 import itertools
 
@@ -287,7 +288,7 @@ def set_category_groups(
     def generate_all_category_combinations(
             dimensions: tuple,
             min_depth: int = 1,
-            max_depth: int = None,
+            max_depth: int | None = None,
     ) -> list[str]:
         """
         Generate all combinations of categories from the given dimensions.

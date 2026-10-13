@@ -294,7 +294,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
                 selection=f"sel_dnn_{proc}",
                 label=f"dnn_{proc}",
             )
-        except:
+        except Exception:
             logger.debug(f"Category dnn_{proc} already exists in config, retrieving it")
             cat = config.get_category(f"dnn_{proc}")
         dnn_categories.append(cat)
@@ -326,7 +326,7 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
                     for group, category in categories.items()
                 },
             )
-            raise Exception(
+            raise ValueError(
                 f"cannot compute ID for ML category '{name_cat}': "
                 f"parent category '{name_cat_no_dnn}' does not exist",
             )

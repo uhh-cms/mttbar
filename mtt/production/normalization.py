@@ -105,7 +105,7 @@ def normalization_weights_setup(
     }
     if unregistered_process_ids:
         id_str = ",".join(map(str, sorted(unregistered_process_ids)))
-        raise Exception(
+        raise ValueError(
             f"selection stats contain ids ({id_str}) of processes that were not previously " +
             f"registered to the config '{self.config_inst.name}'",
         )
@@ -135,7 +135,7 @@ def normalization_weights_setup(
         # ensure there is exactly one parent process
         if len(parent_processes) != 1:
             name_str = ",".join(p.name for p in parent_processes)
-            raise Exception(
+            raise ValueError(
                 f"cannot assign a normalization weight for subprocess '{process_inst.name}' with "
                 f"unexpected number of parent processes ({len(parent_processes)}): {name_str}",
             )

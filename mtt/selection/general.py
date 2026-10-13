@@ -2,6 +2,7 @@
 """
 Selection methods for testing purposes.
 """
+from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable

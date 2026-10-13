@@ -128,7 +128,7 @@ def base_init(self: HistProducer) -> None:
     def update_cat_label(config_inst, pre_label):
         for cat_inst, _, _ in config_inst.walk_categories():
             if pre_label not in cat_inst.label:
-                cat_inst.label = "\n".join([cat_inst.label, pre_label])
+                cat_inst.label = f"{cat_inst.label}\n{pre_label}"
             else:
                 logger.debug(f"Category {cat_inst} already includes pre_label '{pre_label}'")
 
@@ -148,7 +148,7 @@ def base_init(self: HistProducer) -> None:
     cpn_tag = self.config_inst.x.cpn_tag
 
     if not self.weight_columns:
-        raise Exception("weight_columns not set")
+        raise ValueError("weight_columns not set")
     self.local_weight_columns = self.weight_columns.copy()
 
     if has_tag("skip_btag_wp_weights", self.config_inst, self.dataset_inst):
@@ -186,7 +186,7 @@ def base_init(self: HistProducer) -> None:
         if not any(
             has_tag(
                 tag, self.config_inst, self.dataset_inst) for tag in ["skip_btag_wp_weights", "skip_btag_weights"]):
-            raise Exception(
+            raise ValueError(
                 "No tag set for btag weights. Please set either 'skip_btag_wp_weights' or "
                 "'skip_btag_weights' tag in the config or dataset.",
             )
@@ -275,7 +275,7 @@ def base_init(self: HistProducer) -> None:
         for shift in shifts:
             if weight_column not in shift.x("column_aliases").keys():
                 # make sure that column aliases are implemented
-                raise Exception(
+                raise ValueError(
                     f"Weight column {weight_column} implements shift {shift}, but does not use it "
                     f"in 'column_aliases' aux {shift.x('column_aliases')}",
                 )

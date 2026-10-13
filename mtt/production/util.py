@@ -2,6 +2,8 @@
 """
 collection of useful function for producers
 """
+from __future__ import annotations
+
 import itertools
 from functools import partial
 
@@ -50,7 +52,7 @@ def ak_arg_grouped_combinations(
     array: ak.Array,
     group_sizes: list[int],
     axis: int = 1,
-    cache: dict[int, tuple[ak.Array]] = None,
+    cache: dict[int, tuple[ak.Array]] | None = None,
     as_type=np.uint8,
 ) -> tuple[tuple[ak.Array]]:
     """

@@ -55,7 +55,7 @@ for shift_inst in shift_insts:
 
 print("================= Auxiliary ======================")
 aux = cfg.aux
-for key in aux.keys():
+for key in aux:
     print(key)
 
 # print some features of an exemplary process inst

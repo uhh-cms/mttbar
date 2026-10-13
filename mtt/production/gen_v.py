@@ -35,14 +35,14 @@ def gen_v_boson(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     v_boson = v_boson[v_boson.hasFlags("isLastCopy")]
     v_boson = v_boson[~ak.is_none(v_boson, axis=1)]
     if ak.any(ak.num(v_boson) > 1):
-        raise Exception("found more than one parton-level Z/W boson")
+        raise ValueError("found more than one parton-level Z/W boson")
     v_boson = ak.firsts(v_boson)
 
     # if not found, reconstruct pair of leptons from hard process
     leptons = events.GenPart[((abs_id >= 11) & (abs_id <= 16))]
     leptons = leptons[leptons.hasFlags("isHardProcess")]
     if ak.any(ak.num(leptons) != 2):
-        raise Exception("number of hard process leptons != 2")
+        raise ValueError("number of hard process leptons != 2")
     dilepton_pair = (leptons[:, 0] + leptons[:, 1])
 
     # assign PDG ID based on lepton flavors: 23 (Z), +/- 24 (W+/W-)
@@ -140,7 +140,7 @@ def vjets_weight(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
 
     # fail if not run in vector boson simulation
     if not self.dataset_inst.has_tag("is_v_jets"):
-        raise Exception(f"vjets_weight should only run for W+Jets and Z+Jets datasets, got {self.dataset_inst}")
+        raise RuntimeError(f"vjets_weight should only run for W+Jets and Z+Jets datasets, got {self.dataset_inst}")
 
     def get_kfactor(obj_name, key, obj):
         """Obtain K factor."""

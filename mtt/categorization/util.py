@@ -2,6 +2,7 @@
 """
 Useful selection methods.
 """
+from __future__ import annotations
 
 from columnflow.categorization import Categorizer, categorizer
 from columnflow.columnar_util import Route, TaskArrayFunction

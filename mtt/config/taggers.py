@@ -97,7 +97,7 @@ def toptag_params(
     Particle Net (2022, from JMAR presentation 21.10.24 (slide 10)):
         https://indico.cern.ch/event/1459087/contributions/6173396/attachments/2951723/5188840/SF_Run3.pdf
     Particle Net (2023, from JMAR presentation 08.09.25 (slide 3)):
-        https://indico.cern.ch/event/1582638/contributions/6670184/subcontributions/569885/attachments/3130712/5553828/WP%20JMAR%20presentation.pdf  # noqa: E501
+        https://indico.cern.ch/event/1582638/contributions/6670184/subcontributions/569885/attachments/3130712/5553828/WP%20JMAR%20presentation.pdf
     """
     run = config.campaign.x.run
     tag = config.x.cpn_tag
