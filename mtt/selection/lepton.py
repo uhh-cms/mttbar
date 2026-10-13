@@ -1,20 +1,17 @@
-# coding: utf-8
 
 """
 Selection involving leptons.
 """
 
-from typing import Tuple
 
-from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
-
-from columnflow.selection import Selector, SelectionResult, selector
 from columnflow.production.cms.electron import electron_sceta
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.util import maybe_import
 
-from mtt.selection.util import masked_sorted_indices
-from mtt.selection.early import check_early
 from mtt.production.lepton import choose_lepton
+from mtt.selection.early import check_early
+from mtt.selection.util import masked_sorted_indices
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -301,7 +298,7 @@ def lepton_selection(
     self: Selector,
     events: ak.Array,
     **kwargs,
-) -> Tuple[ak.Array, SelectionResult]:
+) -> tuple[ak.Array, SelectionResult]:
     """Select muons/electrons and determine channel for event."""
 
     # get channels from the config
@@ -339,8 +336,8 @@ def lepton_selection(
         trigger_config = self.config_inst.x.triggers
         triggers = {
             "lowpt": trigger_config.lowpt.all.triggers[lepton_name],
-            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if "early" in trigger_config.highpt else None,  # noqa
-            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if "late" in trigger_config.highpt else None,  # noqa
+            "highpt_early": trigger_config.highpt.early.triggers[lepton_name] if "early" in trigger_config.highpt else None,  # noqa: E501
+            "highpt_late": trigger_config.highpt.late.triggers[lepton_name] if "late" in trigger_config.highpt else None,  # noqa: E501
             "highpt_all": trigger_config.highpt.all.triggers[lepton_name] if "all" in trigger_config.highpt else None,
         }
 
@@ -483,13 +480,11 @@ def lepton_selection(
     # passing the selection cuts
     merged_steps["DileptonVeto"] = (
         (
-            (
-                ak.num(merged_objects["Muon"]["Muon"], axis=-1) +
-                ak.num(merged_objects["Muon"]["VetoMuon"], axis=-1) +
-                ak.num(merged_objects["Electron"]["Electron"], axis=-1) +
-                ak.num(merged_objects["Electron"]["VetoElectron"], axis=-1)
-            ) <= 1
-        )
+            ak.num(merged_objects["Muon"]["Muon"], axis=-1) +
+            ak.num(merged_objects["Muon"]["VetoMuon"], axis=-1) +
+            ak.num(merged_objects["Electron"]["Electron"], axis=-1) +
+            ak.num(merged_objects["Electron"]["VetoElectron"], axis=-1)
+        ) <= 1
     )
 
     # invalidate channel if both e and mu were found

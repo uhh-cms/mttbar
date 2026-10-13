@@ -1,12 +1,11 @@
-# coding: utf-8
 
 """
 Configuration of default values and groups for the m(ttbar) analysis.
 """
 
-import order as od
 import itertools
 
+import order as od
 from columnflow.util import DotDict
 
 

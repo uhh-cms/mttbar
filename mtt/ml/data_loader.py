@@ -7,10 +7,10 @@ from __future__ import annotations
 
 import law
 import order as od
-
-from columnflow.util import maybe_import
 from columnflow.columnar_util import remove_ak_column
 from columnflow.ml import MLModel
+from columnflow.util import maybe_import
+
 from mtt.ml.helper import predict_numpy_on_batch
 from mtt.util import timeit
 
@@ -101,7 +101,7 @@ class MLDatasetLoader:
     def __init__(
         self,
         ml_model_inst: MLModel,
-        process: "str",
+        process: str,
         events: ak.Array,
         stats: dict | None = None,
         skip_mask=False,
@@ -221,7 +221,9 @@ class MLDatasetLoader:
         self._input_features = tuple(features.fields)
 
         # Create a mapping for sanity checks - convert raw names to what the ML model expects
-        mapped_features_for_check = tuple(f"MLInput.{feat}" if not feat.startswith("MLInput.") else feat for feat in self._input_features)  # noqa
+        mapped_features_for_check = tuple(
+            f"MLInput.{feat}" if not feat.startswith("MLInput.") else feat for feat in self._input_features
+        )
 
         try:
             # Temporarily modify the ml_model_inst.input_features for the sanity check
@@ -280,7 +282,7 @@ class MLDatasetLoader:
                     finite_mask = np.isfinite(feature_col)
                     if np.any(finite_mask):
                         finite_values = feature_col[finite_mask]
-                        logger.error(f"    - Finite values: min={np.min(finite_values):.6f}, max={np.max(finite_values):.6f}, mean={np.mean(finite_values):.6f}")  # noqa
+                        logger.error(f"    - Finite values: min={np.min(finite_values):.6f}, max={np.max(finite_values):.6f}, mean={np.mean(finite_values):.6f}")  # noqa: E501
                     else:
                         logger.error("    - No finite values found!")
 
@@ -533,7 +535,7 @@ class MLDatasetLoader:
 
         if self.shuffle:
             data = data[self.shuffle_indices]
-        logger.info(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa
+        logger.info(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa: E501
 
         return data[:train_end], data[train_end:val_end], data[val_end:]
 
@@ -556,9 +558,7 @@ class MLDatasetLoader:
                 # Get the attribute and explicitly delete it
                 arr = getattr(self, attr, None)
                 if arr is not None:
-                    if hasattr(arr, "__array__"):  # numpy array
-                        del arr
-                    elif hasattr(arr, "__del__"):  # awkward array or other objects with destructor
+                    if hasattr(arr, "__array__") or hasattr(arr, "__del__"):  # numpy array
                         del arr
                     delattr(self, attr)
 
@@ -849,7 +849,7 @@ class MLProcessData:
         if hasattr(self, "_prediction"):
             return self._prediction
 
-        if "prediction" in self._input.keys():
+        if "prediction" in self._input:
             # load prediction if possible
             self._prediction = self.load_data("prediction")
         else:

@@ -1,14 +1,12 @@
-# coding: utf8
 
 """
 collection of useful function for producers
 """
 import itertools
-
 from functools import partial
 
-from columnflow.util import maybe_import
 from columnflow.production.util import _lv_base
+from columnflow.util import maybe_import
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")

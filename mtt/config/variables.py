@@ -1,13 +1,12 @@
-# coding: utf-8
 
 """
 Definition of variables.
 """
 
 import itertools
+
 import numpy as np
 import order as od
-
 from columnflow.columnar_util import EMPTY_FLOAT
 
 
@@ -1019,7 +1018,7 @@ def add_variables_ml(config: od.Config) -> None:
             binning=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             x_title=f"ML input (AK4 jet #{i} UParTAK4B b tag score buckets) - ANv12",
         )
-        for wp in config.x.btag_wp["btagUParTAK4B"].keys():
+        for wp in config.x.btag_wp["btagUParTAK4B"]:
             config.add_variable(
                 name=f"AN_v12_mli_jet_{i}_btagUParTAK4B_pass_{wp}",
                 expression=f"{ns}.jet_{i}_btagUParTAK4B_pass_{wp}",

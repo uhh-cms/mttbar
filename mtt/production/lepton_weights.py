@@ -1,16 +1,14 @@
-# coding: utf-8
 
 """
 Producers related to lepton event weights.
 """
 import law
-
-from columnflow.production import Producer, producer
-from columnflow.production.cms.muon import muon_weights, MuonSFConfig
-from columnflow.production.cms.electron import electron_weights, ElectronSFConfig
-
-from columnflow.util import maybe_import
 from columnflow.columnar_util import set_ak_column
+from columnflow.production import Producer, producer
+from columnflow.production.cms.electron import ElectronSFConfig, electron_weights
+from columnflow.production.cms.muon import MuonSFConfig, muon_weights
+from columnflow.util import maybe_import
+
 from mtt.util import has_tag
 
 ak = maybe_import("awkward")
@@ -374,7 +372,7 @@ def muon_reco_id_iso_trigger_weights(self: Producer, events: ak.Array, **kwargs)
 
     logger.warning(
         "muon_iso and muon_trigger weights for high pT muons are not computed. "
-        "Remember to uncomment the lines in _muon_type_config as soon as they are available."
+        "Remember to uncomment the lines in _muon_type_config as soon as they are available.",
     )
 
     events = _combine_weight_types(self, events, "muon", per_type_totals)
@@ -434,7 +432,7 @@ def electron_reco_id_iso_trigger_weights(self: Producer, events: ak.Array, **kwa
 
     logger.warning(
         "electron_iso and electron_trigger weights for high pT electrons are not computed. "
-        "Remember to uncomment the lines in _electron_type_config as soon as they are available."
+        "Remember to uncomment the lines in _electron_type_config as soon as they are available.",
     )
 
     events = _combine_weight_types(self, events, "electron", per_type_totals)

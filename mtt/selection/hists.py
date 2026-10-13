@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Stat-related methods.
@@ -6,17 +5,17 @@ Stat-related methods.
 
 import law
 import order as od
+from columnflow.columnar_util import set_ak_column
+from columnflow.hist_util import create_hist_from_variables
 
-from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.selection.stats import increment_stats
 # from columnflow.production.cms.btag import btag_weights
 from columnflow.production.cms.btag import btag_weights
-from mtt.production.weights import event_weights_to_normalize
-from columnflow.columnar_util import set_ak_column
-
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.selection.stats import increment_stats
 from columnflow.util import maybe_import
-from mtt.util import has_tag, IF_MC
-from columnflow.hist_util import create_hist_from_variables
+
+from mtt.production.weights import event_weights_to_normalize
+from mtt.util import IF_MC, has_tag
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

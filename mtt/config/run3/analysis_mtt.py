@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Configuration of the Run 3 m(ttbar) analysis.
@@ -8,7 +7,6 @@ import os
 
 import law
 import order as od
-
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -63,7 +61,7 @@ ana.x.config_groups = {}
 
 #
 # set up configs
-# ONLY 2024 CONFIGS WORKING FOR NOW
+# ONLY 2024/2025 CONFIGS WORKING FOR NOW
 #
 
 # from mtt.config.run3.config_mtt import add_config

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Mixin classes to build ML models
@@ -11,12 +10,12 @@ import functools
 import math
 
 import law
+
 # import order as od
-
 from columnflow.types import Union
-from columnflow.util import maybe_import, DotDict
-from mtt.util import log_memory, call_func_safe, timeit
+from columnflow.util import DotDict, maybe_import
 
+from mtt.util import call_func_safe, log_memory, timeit
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -32,7 +31,7 @@ def loop_dataset(data, max_count=10000):
             break
 
 
-class DenseModelMixin(object):
+class DenseModelMixin:
     """
     Mixin that provides an implementation for `prepare_ml_model`
     """
@@ -65,9 +64,10 @@ class DenseModelMixin(object):
         self,
         task: law.Task,
     ):
-        import tensorflow.keras as keras
+        from keras.layers import BatchNormalization, Dense
         from keras.models import Sequential
-        from keras.layers import Dense, BatchNormalization
+        from tensorflow import keras
+
         from mtt.ml.tf_util import cumulated_crossentropy
         # from keras.losses import CategoricalFocalCrossentropy
 
@@ -89,7 +89,7 @@ class DenseModelMixin(object):
             "tanh": ("tanh", "glorot_normal", "Dropout"),
             "softmax": ("softmax", "glorot_normal", "Dropout"),
         })
-        keras_act_name, init_name, dropout_layer = activation_settings[self.activation]
+        keras_act_name, _init_name, dropout_layer = activation_settings[self.activation]
 
         # hidden layers
         for n_nodes in self.layers:
@@ -129,7 +129,7 @@ class DenseModelMixin(object):
         return model
 
 
-class CallbacksBase(object):
+class CallbacksBase:
     """ Base class that handles parametrization of callbacks """
     _default__callbacks: set[str] = {
         "backup", "checkpoint", "reduce_lr",
@@ -172,7 +172,7 @@ class CallbacksBase(object):
         self.early_stopping_min_delta = float(self.early_stopping_min_delta)
 
     def get_callbacks(self, output):
-        import tensorflow.keras as keras
+        from tensorflow import keras
         # check that only valid options have been requested
         callback_options = {"backup", "checkpoint", "reduce_lr", "early_stopping"}
         if diff := self.callbacks.difference(callback_options):
@@ -345,7 +345,7 @@ class ModelFitMixin(CallbacksBase):
         """
         Represents cross-section weighting
         """
-        rel_sumw_dict = {proc_inst: {} for proc_inst in data.keys()}
+        rel_sumw_dict = {proc_inst: {} for proc_inst in data}
         factor = 1
         smallest_sumw = None
         for proc_inst, arrays in data.items():
@@ -372,7 +372,7 @@ class ModelFitMixin(CallbacksBase):
             train_node_proc = self.config_inst.get_process(train_node_proc_name)
             sub_procs = (
                 (set(node_config.get("sub_processes", set())) | {train_node_proc_name}) &
-                {proc.name for proc in data.keys()}
+                {proc.name for proc in data}
             )
             if not sub_procs:
                 raise ValueError(f"Cannot find any sub-processes for {train_node_proc_name} in the data")
@@ -389,8 +389,8 @@ class ModelFitMixin(CallbacksBase):
         for train_node_proc_name, node_config in self.train_nodes.items():
             train_node_proc = self.config_inst.get_process(train_node_proc_name)
             rel_sumw = rel_sumw_dicts[train_node_proc.name]
-            rel_sumw_dicts[train_node_proc.name]["sum"] = sum([rel_sumw[proc_inst] for proc_inst in rel_sumw.keys()])
-            rel_sumw_dicts[train_node_proc.name]["min"] = min([rel_sumw[proc_inst] for proc_inst in rel_sumw.keys()])
+            rel_sumw_dicts[train_node_proc.name]["sum"] = sum([rel_sumw[proc_inst] for proc_inst in rel_sumw])
+            rel_sumw_dicts[train_node_proc.name]["min"] = min([rel_sumw[proc_inst] for proc_inst in rel_sumw])
 
         lcm_list = lambda numbers: functools.reduce(math.lcm, numbers)
         lcm = lcm_list([rel_sumw["sum"] for rel_sumw in rel_sumw_dicts.values()])
@@ -462,8 +462,8 @@ class ModelFitMixin(CallbacksBase):
         Training loop but with custom dataset
         """
         # import tensorflow as tf
-        from mtt.ml.tf_util import MultiDataset
         from mtt.ml.plotting import plot_history
+        from mtt.ml.tf_util import MultiDataset
 
         log_memory("start")
 
@@ -531,7 +531,7 @@ class ModelFitMixin(CallbacksBase):
         tf_validation = MultiDataset(data=validation, kind="valid", buffersize=0)
         log_memory("tf_validation")
 
-        for key, ml_dataset in validation.items():
+        for ml_dataset in validation.values():
             ml_dataset.cleanup()
         log_memory("validation cleanup")
 

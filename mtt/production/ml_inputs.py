@@ -1,20 +1,20 @@
-# coding: utf-8
 
 """
 Producers for ML inputs
 """
-import law
 import functools
 import itertools
 
+import law
+from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
 
-from mtt.config.variables import add_variables_ml
 from mtt.config.categories import add_categories_production
-from mtt.production.weights import weights
+from mtt.config.variables import add_variables_ml
 from mtt.production.lepton import choose_lepton
+from mtt.production.weights import weights
+
 # from mtt.production.ttbar_reco import ttbar
 
 ak = maybe_import("awkward")
@@ -210,7 +210,7 @@ def ml_inputs(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
             f"{btag_col}_pass_medium",
             f"{btag_col}_pass_tight",
             f"{btag_col}_pass_xtight",
-            f"{btag_col}_pass_xxtight"
+            f"{btag_col}_pass_xxtight",
         ),
     )
 
@@ -273,7 +273,7 @@ def ml_inputs_init(self: Producer) -> None:
         for i in range(5)
     } | {
         f"jet_{i + 1}_{btag_col}_pass_{wp}"
-        for wp in self.config_inst.x.btag_wp[btag_col].fixed_wp.keys()
+        for wp in self.config_inst.x.btag_wp[btag_col].fixed_wp
         for i in range(5)
     } | {
         f"fatjet_{i + 1}_{var}"

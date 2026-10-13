@@ -1,11 +1,10 @@
-# coding: utf-8
 
 """
 Column producers related to gen-level top quark(s).
 """
+from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")

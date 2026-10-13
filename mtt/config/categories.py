@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Definition of categories.
@@ -36,9 +35,8 @@ parent category.
 
 import law
 import order as od
-
+from columnflow.config_util import CategoryGroup, create_category_combinations
 from columnflow.ml import MLModel
-from columnflow.config_util import create_category_combinations, CategoryGroup
 
 from mtt.ml.categories import register_ml_selectors
 
@@ -81,7 +79,7 @@ def add_categories_selection(config: od.Config) -> None:
         id=1,
         selection="sel_1e",
         label="1e",
-        #channel=config.get_channel("e"),  # noqa
+        # channel=config.get_channel("e"),
     )
 
     # top category for muon channel
@@ -90,7 +88,7 @@ def add_categories_selection(config: od.Config) -> None:
         id=2,
         selection="sel_1m",
         label=r"1$\mu$",
-        #channel=config.get_channel("mu"),  # noqa
+        # channel=config.get_channel("mu"),
     )
 
     # number of top tags
@@ -290,7 +288,6 @@ def add_categories_ml(config: od.Config, ml_model_inst: MLModel) -> None:
     dnn_categories = []
     for i, proc in enumerate(ml_model_inst.train_nodes.keys()):
         try:
-
             cat = config.add_category(
                 name=f"dnn_{proc}",
                 id=(i + 1) * 100000,

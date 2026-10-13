@@ -1,24 +1,24 @@
-# coding: utf-8
 
 """
 Calibration methods.
 """
 import functools
-import law
 
+import law
 from columnflow.calibration import Calibrator, calibrator
 from columnflow.calibration.cms.met import met_phi
+from columnflow.columnar_util import set_ak_column
+from columnflow.production.cms.jet import fatjet_id, jet_id, msoftdrop
+
 # TODO should we add these later?
 # from columnflow.calibration.cms.egamma import electron_scale_smear
 # from columnflow.calibration.cms.muon import muon_sr
 from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.seeds import deterministic_seeds
-from columnflow.production.cms.jet import msoftdrop, jet_id, fatjet_id
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
 
-from mtt.calibration.jets import jet_energy_nominal, jet_energy, jet_lepton_cleaner
-from mtt.util import record_calls, has_tag
+from mtt.calibration.jets import jet_energy, jet_energy_nominal, jet_lepton_cleaner
+from mtt.util import has_tag, record_calls
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -48,6 +48,7 @@ logger = law.logger.get_logger(__name__)
     jerc_mode=None,  # can be set to "nominal_jercunc" or "all_jercunc" in derived calibrators
 )
 def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
+    # raise ValueError("Remember to switch output locations to local when rerunning. Other things to be changed?? Search for # FIXME")  # noqa: E501
     run_list = []
     with record_calls(self, run_list):
         # use tuneP pT as per recommendation of MUO POG for highPt muons, should be the same as pT for lowPt muons

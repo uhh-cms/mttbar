@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Configuration of datasets for the m(ttbar) analysis.
@@ -6,9 +5,10 @@ Reads data from a YAML file and provides it in a structured way to the analysis 
 """
 
 from __future__ import annotations
-import law
 
+import law
 import yaml
+
 # from mtt.config.dataset_utils import update_dataset_n_files
 
 DATASETS_FILE = "/data/dust/user/matthiej/mttbar/mtt/config/datasets.yaml"

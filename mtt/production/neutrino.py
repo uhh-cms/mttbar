@@ -1,11 +1,10 @@
-# coding: utf-8
 
 """
 Column producers related to neutrino reconstruction.
 """
+from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
 
 from mtt.production.lepton import choose_lepton
 
@@ -101,9 +100,9 @@ def neutrino_candidates(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
     # tolerance of 2e-3 due to one tt_sl event with a 0.00195 GeV difference in pt
     # tolerance of 4e-3 due to one data event with a 0.00390 GeV difference in pt
     tol = 4e-3
-    assert ak.all((abs(nu_cands.delta_phi(events.MET)) < tol)), \
+    assert ak.all(abs(nu_cands.delta_phi(events.MET)) < tol), \
         "Sanity check failed: neutrino candidates and MET 'phi' differ"
-    if ak.any((abs(nu_cands.pt - events.MET.pt) >= tol)):
+    if ak.any(abs(nu_cands.pt - events.MET.pt) >= tol):
         print("Debug info for nu cand pt != MET pt:")
         print("nu_cands.pt:", nu_cands.pt)
         print("events.MET.pt:", events.MET.pt)
@@ -114,7 +113,7 @@ def neutrino_candidates(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
         print("events.MET[bad_event_idx]:", events.MET[bad_event_idx])
         print(f"diff: {nu_cands.pt[bad_event_idx].to_list()[0][0] - events.MET.pt[bad_event_idx].to_list()[0]}")
         print(f"tol: {tol}")
-    assert ak.all((abs(nu_cands.pt - events.MET.pt) < tol)), \
+    assert ak.all(abs(nu_cands.pt - events.MET.pt) < tol), \
         "Sanity check failed: neutrino candidates and MET 'pt' differ"
 
     # build neutrino candidate four-vectors

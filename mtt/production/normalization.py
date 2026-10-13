@@ -1,17 +1,14 @@
-# coding: utf-8
 
 """
 Column production methods related to sample normalization event weights.
 """
-import law
-
 from collections import defaultdict
 
+import law
+from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
 from law.util import InsertableDict
-
 
 np = maybe_import("numpy")
 sp = maybe_import("scipy")

@@ -1,20 +1,17 @@
-# coding: utf-8
 
 """
 Selection involving jets and MET.
 """
 
-from columnflow.util import maybe_import
+from columnflow.production.cms.jet import fatjet_id, jet_id
 from columnflow.production.util import attach_coffea_behavior
-from columnflow.production.cms.jet import jet_id, fatjet_id
-
-from columnflow.selection import Selector, SelectionResult, selector
-
-from mtt.selection.util import masked_sorted_indices
-from mtt.selection.general import jet_energy_shifts
-from mtt.selection.lepton import lepton_selection
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.util import maybe_import
 
 from mtt.production.lepton import choose_lepton
+from mtt.selection.general import jet_energy_shifts
+from mtt.selection.lepton import lepton_selection
+from mtt.selection.util import masked_sorted_indices
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

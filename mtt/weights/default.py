@@ -1,16 +1,16 @@
-# coding: utf-8
 
 """
 Event weight producer.
 """
 import os
-import law
 
-from columnflow.util import maybe_import
+import law
+from columnflow.columnar_util import Route, set_ak_column
+from columnflow.config_util import get_shifts_from_sources
 from columnflow.histogramming import HistProducer
 from columnflow.histogramming.default import cf_default
-from columnflow.config_util import get_shifts_from_sources
-from columnflow.columnar_util import Route, set_ak_column
+from columnflow.util import maybe_import
+
 from mtt.util import has_tag, remove_weight_columns
 
 np = maybe_import("numpy")
@@ -37,7 +37,7 @@ def norm(self: HistProducer, events: ak.Array, **kwargs) -> ak.Array:
 
 @norm.init
 def norm_init(self: HistProducer) -> None:
-    if not getattr(self, "config_inst"):
+    if not self.config_inst:
         return
 
     dataset_inst = getattr(self, "dataset_inst", None)
@@ -81,7 +81,7 @@ def base(self: HistProducer, events: ak.Array, task: law.Task, **kwargs) -> ak.A
         f"HistProducer '{self.cls_name}' (dataset {self.dataset_inst}) uses weight columns: \n"
         f"{', '.join(self.local_weight_columns.keys())}",
     )
-    for column in self.local_weight_columns.keys():
+    for column in self.local_weight_columns:
         new_weight = weight * Route(column).apply(events)
         if not ak.any(new_weight != weight):
             logger.debug(
@@ -122,7 +122,7 @@ def base(self: HistProducer, events: ak.Array, task: law.Task, **kwargs) -> ak.A
 @base.init
 def base_init(self: HistProducer) -> None:
 
-    if not getattr(self, "config_inst"):
+    if not self.config_inst:
         return
 
     def update_cat_label(config_inst, pre_label):
@@ -164,7 +164,7 @@ def base_init(self: HistProducer) -> None:
         )
         def _is_known_btag_unc(column: str) -> bool:
             for flavor, known_uncs in (
-                ("bc", self.config_inst.x.btag_uncs_bc), ("light", self.config_inst.x.btag_uncs_light)
+                ("bc", self.config_inst.x.btag_uncs_bc), ("light", self.config_inst.x.btag_uncs_light),
             ):
                 suffix = f"_{flavor}"
                 if column == f"btag_{flavor}":
@@ -311,6 +311,7 @@ def base_post_init(self: HistProducer, task: law.Task):
 
 # load all possible btag uncs from the yaml file, which is used to set up the btag SFs in the config
 from mtt.config.run3.analysis_mtt import config_2024_new, config_2025_new
+
 btag_uncs_bc = []
 btag_uncs_light = []
 for config in [config_2024_new, config_2025_new]:

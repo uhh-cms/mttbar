@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Selection modules for HH(bbWW) that are used for both SL and DL.
@@ -9,23 +8,22 @@ from __future__ import annotations
 from collections import defaultdict
 
 import law
-from columnflow.util import maybe_import
 from columnflow.columnar_util import EMPTY_FLOAT, fill_at
-from columnflow.production.util import attach_coffea_behavior
-
-from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.selection.cms.met_filters import met_filters
-from columnflow.selection.cms.json_filter import json_filter
-from columnflow.selection.cms.jets import jet_veto_map
-from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.categories import category_ids
-from columnflow.production.processes import process_ids
+from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.seeds import deterministic_seeds
+from columnflow.production.processes import process_ids
+from columnflow.production.util import attach_coffea_behavior
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.selection.cms.jets import jet_veto_map
+from columnflow.selection.cms.json_filter import json_filter
+from columnflow.selection.cms.met_filters import met_filters
+from columnflow.util import maybe_import
 
 from mtt.production.weights import event_weights_to_normalize, large_weights_killer
-from mtt.selection.stats import mtt_selection_step_stats, mtt_increment_stats
-from mtt.selection.hists import mtt_selection_hists
 from mtt.selection.bad_events import extend_bad_events, get_outlier_scale_weights
+from mtt.selection.hists import mtt_selection_hists
+from mtt.selection.stats import mtt_increment_stats, mtt_selection_step_stats
 from mtt.util import IF_MC, record_calls
 
 np = maybe_import("numpy")

@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Plotting functions for ML in mtt analysis
 Taken from hbw analysis.
@@ -10,15 +9,15 @@ import functools
 
 # import tabulate
 import gc
+
 import law
 import order as od
-
-from mtt.util import round_sig, timeit
 from columnflow.ml import MLModel
-from columnflow.util import maybe_import, DotDict
 from columnflow.plotting.plot_util import get_position
 from columnflow.types import TYPE_CHECKING
+from columnflow.util import DotDict, maybe_import
 
+from mtt.util import round_sig, timeit
 
 np = maybe_import("numpy")
 plt = maybe_import("matplotlib.pyplot")
@@ -136,11 +135,7 @@ def plot_history(
     fig, ax = plt.subplots()
     ax.plot(history[metric])
     ax.plot(history[f"val_{metric}"])
-    ax.set(**{
-        "ylabel": ylabel,
-        "yscale": yscale,
-        "xlabel": "Epoch",
-    })
+    ax.set(ylabel=ylabel, yscale=yscale, xlabel="Epoch")
     ax.legend(["train", "validation"], loc="best")
     mplhep.cms.label(ax=ax, **cms_label_kwargs, com=13.6)
 
@@ -193,7 +188,7 @@ def plot_confusion(
     plt.style.use(mplhep.style.CMS)
     plt.rcParams["figure.figsize"] = (11.6, 10)
 
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
     # Create confusion matrix and normalizes it over predicted (columns)
     confusion = confusion_matrix(
@@ -260,7 +255,7 @@ def plot_roc_ovr(
     # use CMS plotting style
     plt.style.use(mplhep.style.CMS)
 
-    from sklearn.metrics import roc_curve, roc_auc_score
+    from sklearn.metrics import roc_auc_score, roc_curve
 
     auc_scores = []
     n_classes = len(inputs.target[0])
@@ -272,7 +267,7 @@ def plot_roc_ovr(
     fig, ax = plt.subplots()
     for i in range(n_classes):
         y_true = (inputs.labels == i)
-        fpr, tpr, thresholds = roc_curve(
+        fpr, tpr, _thresholds = roc_curve(
             y_true=y_true,
             y_score=inputs.prediction[:, i],
             sample_weight=weights,
@@ -343,7 +338,7 @@ def plot_roc_ovo(
     # use CMS plotting style
     plt.style.use(mplhep.style.CMS)
 
-    from sklearn.metrics import roc_curve, roc_auc_score
+    from sklearn.metrics import roc_auc_score, roc_curve
 
     n_classes = len(inputs.target[0])
 
@@ -465,7 +460,7 @@ def plot_output_nodes(
         }
 
         # dummy legend entries
-        for input_type in data.keys():
+        for input_type in data:
             plt.hist([], histtype="step", label=labels[input_type][0], linestyle=labels[input_type][1], color="black")
 
         # get the correct normalization factors

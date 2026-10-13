@@ -1,24 +1,23 @@
-# coding: utf-8
 """
 Analysis-wide utility functions
 """
 from __future__ import annotations
 
+import math
+
 # NOTE: needs to be added to cf sandbox
 import os
-import time
-from typing import Hashable, Callable
-from functools import wraps
-import tracemalloc
-import math
 import re
+import time
+import tracemalloc
+from collections.abc import Callable, Hashable
 from contextlib import contextmanager
+from functools import wraps
 
 import law
-
+from columnflow.columnar_util import ArrayFunction, deferred_column
 from columnflow.types import Any
 from columnflow.util import maybe_import
-from columnflow.columnar_util import ArrayFunction, deferred_column
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -112,7 +111,7 @@ def log_memory(
 
 
 def round_sig(
-    value: int | float | np.number,
+    value: float | np.number,
     sig: int = 4,
     convert: Callable | None = None,
 ) -> int | float | np.number:

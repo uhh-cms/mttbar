@@ -1,16 +1,14 @@
-# coding: utf-8
 
 """
 Selection methods for ML categorization
 """
 import law
-
-from columnflow.ml import MLModel
-from columnflow.util import maybe_import
+from columnflow.categorization import Categorizer, categorizer
 from columnflow.columnar_util import Route, set_ak_column
+from columnflow.ml import MLModel
 from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
-from columnflow.categorization import Categorizer, categorizer
+from columnflow.util import maybe_import
 
 # from mtt.config.categories import add_categories_ml
 from mtt.util import get_subclasses_deep  # for automated producer creation
@@ -29,10 +27,10 @@ def register_ml_selectors(ml_model_inst: MLModel) -> None:
     ml_output_columns = {
         # f"{ml_model_inst.cls_name}.score_{proc}"
         f"mlscore.{proc}"
-        for proc in ml_model_inst.train_nodes.keys()
+        for proc in ml_model_inst.train_nodes
     }
 
-    for proc in ml_model_inst.train_nodes.keys():
+    for proc in ml_model_inst.train_nodes:
         @categorizer(
             uses=ml_output_columns,
             cls_name=f"sel_dnn_{proc}",
@@ -87,7 +85,7 @@ def add_ml_cats_reqs(self: Producer, task: law.Task, reqs: dict) -> None:
         logger.debug("ML requirements already present, skipping addition of MLEvaluation.")
         return
 
-    from columnflow.tasks.ml import MLTraining, MLEvaluation
+    from columnflow.tasks.ml import MLEvaluation, MLTraining
     if task.pilot:
         logger.debug("Pilot task detected, skipping MLEvaluation requirement.")
         # skip MLEvaluation in pilot, but ensure that MLTraining has already been run
@@ -165,6 +163,7 @@ def add_ml_cats_init(self: Producer) -> None:
 # # get all the derived MLModels and instantiate a corresponding producer for each one
 # # FIXME to be tested again, currently disabled
 from mtt.ml.base import MLClassifierBase
+
 ml_model_names = get_subclasses_deep(MLClassifierBase)
 logger.info(f"deriving {len(ml_model_names)} ML categorizers...")
 

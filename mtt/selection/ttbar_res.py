@@ -1,33 +1,35 @@
-# coding: utf-8
 
 """
 Default selection for m(ttbar).
 """
 from __future__ import annotations
 
-import law
-
-from operator import and_
-from functools import reduce
 from collections import defaultdict
+from functools import reduce
+from operator import and_
 
-from columnflow.util import maybe_import, DotDict
+import law
 from columnflow.columnar_util import EMPTY_FLOAT
-from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.selection.cms.btag import fill_btag_wp_count_hists
-from columnflow.production.processes import process_ids
 from columnflow.production.categories import category_ids
+from columnflow.production.processes import process_ids
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.selection.cms.btag import fill_btag_wp_count_hists
+from columnflow.util import DotDict, maybe_import
 
 from mtt.selection.cleanup import cleanup, get_weights_and_no_sel_mask
-from mtt.selection.general import jet_energy_shifts
-from mtt.selection.lepton import lepton_selection
-from mtt.selection.jets import jet_selection, met_selection, lepton_jet_2d_selection, top_tagged_jets
-from mtt.selection.qcd_spikes import qcd_spikes
-from mtt.selection.data_trigger_veto import data_trigger_veto
 from mtt.selection.cutflow_features import cutflow_features
-from mtt.selection.stats import mtt_increment_stats, mtt_selection_step_stats
+from mtt.selection.data_trigger_veto import data_trigger_veto
+from mtt.selection.general import jet_energy_shifts
 from mtt.selection.hists import mtt_selection_hists
-
+from mtt.selection.jets import (
+    jet_selection,
+    lepton_jet_2d_selection,
+    met_selection,
+    top_tagged_jets,
+)
+from mtt.selection.lepton import lepton_selection
+from mtt.selection.qcd_spikes import qcd_spikes
+from mtt.selection.stats import mtt_increment_stats, mtt_selection_step_stats
 from mtt.util import has_tag, record_calls
 
 np = maybe_import("numpy")

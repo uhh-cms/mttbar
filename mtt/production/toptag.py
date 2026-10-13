@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Column producers related to top-tagged jets.
@@ -6,11 +5,10 @@ Column producers related to top-tagged jets.
 
 from __future__ import annotations
 
+from columnflow.columnar_util import flat_np_view, layout_ak_array, set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column, flat_np_view, layout_ak_array
 from law.util import InsertableDict
-
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")

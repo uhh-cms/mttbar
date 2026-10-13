@@ -1,11 +1,9 @@
-# coding: utf-8
 
 """
 Configuration of taggers for the m(ttbar) analysis.
 """
 
 import order as od
-
 from columnflow.util import DotDict
 
 
@@ -153,7 +151,7 @@ def toptag_params(
                     "tight": 0.821,
                     "very_tight": 0.974,
                 },
-                # FIXME: placeholder values, need to be updated when official values are available -> calculated using my own code, but not official values  # noqa
+                # FIXME: placeholder values, need to be updated when official values are available -> calculated using my own code, but not official values  # noqa: E501
                 "GloParTv3": {
                     "medium": 0.491,
                     "tight": 0.756,

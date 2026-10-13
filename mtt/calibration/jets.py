@@ -1,18 +1,23 @@
-# coding: utf-8
 
 """
 Custom jet energy calibration methods that disable data uncertainties (for searches).
 """
 
 from columnflow.calibration import Calibrator, calibrator
+
 # from columnflow.calibration.cms.jets import jec, jer
-from columnflow.calibration.cms.jets import jec_ak4, jer_ak4, jec_ak8, jer_ak8, get_jerc_file_default
-from columnflow.util import maybe_import
-from columnflow.production.util import attach_coffea_behavior
+from columnflow.calibration.cms.jets import (
+    get_jerc_file_default,
+    jec_ak4,
+    jec_ak8,
+    jer_ak4,
+    jer_ak8,
+)
 from columnflow.columnar_util import set_ak_column
+from columnflow.production.util import attach_coffea_behavior
+from columnflow.util import maybe_import
 
-from mtt.production.util import lv_xyzt, lv_mass
-
+from mtt.production.util import lv_mass, lv_xyzt
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")

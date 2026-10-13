@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Configuration for the Run 3 m(ttbar) analysis.
@@ -8,13 +7,9 @@ from __future__ import annotations
 
 # import functools
 import os
+
 import law
-
 import yaml
-from scinum import Number
-
-from columnflow.util import DotDict
-from columnflow.types import Callable
 from columnflow.cms_util import CATInfo, CATSnapshot
 from columnflow.config_util import (
     add_shift_aliases,
@@ -22,30 +17,33 @@ from columnflow.config_util import (
     # get_shifts_from_sources,
     verify_config_processes,
 )
-from columnflow.production.cms.muon import MuonSFConfig
 from columnflow.production.cms.electron import ElectronSFConfig
+from columnflow.production.cms.jet import JetIdConfig
+from columnflow.production.cms.muon import MuonSFConfig
+from columnflow.types import Callable
+from columnflow.util import DotDict, maybe_import
+from scinum import Number
+
 from mtt.config.categories import add_categories_selection
-from mtt.config.variables import add_variables
+from mtt.config.corrections import (
+    btag_sf_setup,
+    jerc_cfg,
+    met_phi_cfg,
+    toptag_sf_cfg,
+    vjets_reweighting_cfg,
+)
 from mtt.config.datasets import add_datasets_from_yaml
-from mtt.config.taggers import btag_params, toptag_params
 from mtt.config.defaults_and_groups import (
+    set_category_groups,
+    set_dataset_groups,
     set_defaults,
     set_process_groups,
-    set_dataset_groups,
-    set_category_groups,
-    set_variables_groups,
-    set_shift_groups,
     set_selector_steps,
+    set_shift_groups,
+    set_variables_groups,
 )
-from mtt.config.corrections import (
-    vjets_reweighting_cfg,
-    jerc_cfg,
-    btag_sf_setup,
-    toptag_sf_cfg,
-    met_phi_cfg,
-)
-from columnflow.production.cms.jet import JetIdConfig
-from columnflow.util import maybe_import
+from mtt.config.taggers import btag_params, toptag_params
+from mtt.config.variables import add_variables
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -159,7 +157,7 @@ def add_new_config(
     # linear interpolation between 13 and 14 TeV
     diboson_xsecs_13_6 = {
         ds: diboson_xsecs_13[ds] + (13.6 - 13.0) * (diboson_xsecs_14[ds] - diboson_xsecs_13[ds]) / (14.0 - 13.0)
-        for ds in diboson_xsecs_13.keys()  # ww: 125.8 wz: 58.932 zz: 18.058  noqa
+        for ds in diboson_xsecs_13  # ww: 125.8 wz: 58.932 zz: 18.058  noqa
     }
 
     # get all root processes
@@ -529,7 +527,7 @@ def add_new_config(
 
     for proc in cfg.processes:
         proc_inst = cfg.get_process(proc)
-        if proc.name not in zprime_colors.keys():
+        if proc.name not in zprime_colors:
             proc_inst.color1 = colors.get(proc.name, "#aaaaaa")
             proc_inst.color2 = colors.get(proc.name, "#000000")
 
@@ -560,7 +558,7 @@ def add_new_config(
             "max_abseta": 2.4,
             "iso": {
                 "column": "pfIsoId",
-                "min_value": 4,  # 1 = PFIsoVeryLoose, 2 = PFIsoLoose, 3 = PFIsoMedium, 4 = PFIsoTight, 5 = PFIsoVeryTight, 6 = PFIsoVeryVeryTight  # noqa
+                "min_value": 4,  # 1 = PFIsoVeryLoose, 2 = PFIsoLoose, 3 = PFIsoMedium, 4 = PFIsoTight, 5 = PFIsoVeryTight, 6 = PFIsoVeryVeryTight  # noqa: E501
             },
             "id": {
                 "low_pt": {
@@ -614,7 +612,7 @@ def add_new_config(
             },
             "btagger": {
                 "column": "btagDeepFlavB" if year not in [2024, 2025, 2026] else "btagUParTAK4B",
-                "wp": cfg.x.btag_wp.btagUParTAK4B.fixed_wp.medium if year in [2024, 2025, 2026] else cfg.x.btag_wp.deepjet.medium,
+                "wp": cfg.x.btag_wp.btagUParTAK4B.fixed_wp.medium if year in [2024, 2025, 2026] else cfg.x.btag_wp.deepjet.medium,  # noqa: E501
             },
         },
         "ak8": {
@@ -631,7 +629,7 @@ def add_new_config(
                     "globalParT3_TopbWq",
                     "globalParT3_QCD",
                 ],
-                "wp": cfg.x.toptag_wp.GloParTv3.tight if year in [2024, 2025, 2026] else cfg.x.toptag_wp.particle_net.tight,
+                "wp": cfg.x.toptag_wp.GloParTv3.tight if year in [2024, 2025, 2026] else cfg.x.toptag_wp.particle_net.tight,  # noqa: E501
             },
             "delta_r_lep": 0.8,
         },

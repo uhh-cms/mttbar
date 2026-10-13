@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 taken from hbw analysis
@@ -9,23 +8,22 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from typing import Any
-import yaml
 
 import law
 import order as od
-
-from columnflow.types import Sequence
-from columnflow.ml import MLModel
-from columnflow.util import maybe_import, dev_sandbox, DotDict, DerivableMeta
+import yaml
 from columnflow.columnar_util import Route, set_ak_column
 from columnflow.config_util import get_datasets_from_process
+from columnflow.ml import MLModel
+from columnflow.types import Sequence
+from columnflow.util import DerivableMeta, DotDict, dev_sandbox, maybe_import
 
-from mtt.util import log_memory
-from mtt.ml.data_loader import MLDatasetLoader, MLProcessData
 from mtt.config.processes import prepare_ml_processes
-# from mtt.config.categories import add_categories_ml
+from mtt.ml.data_loader import MLDatasetLoader, MLProcessData
 
+# from mtt.config.categories import add_categories_ml
 from mtt.tasks.ml import MLPreTraining
+from mtt.util import log_memory
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -382,7 +380,7 @@ class MLClassifierBase(MLModel):
     def train_node_process_insts(self):
         if hasattr(self, "_train_node_process_insts"):
             return self._train_node_process_insts
-        return [self.config_inst.get_process(proc) for proc in self.train_nodes.keys()]
+        return [self.config_inst.get_process(proc) for proc in self.train_nodes]
 
     def preparation_producer(self: MLModel, analysis_inst: od.Analysis):
         """ producer that is run as part of PrepareMLEvents and MLEvaluation (before `evaluate`) """
@@ -463,7 +461,7 @@ class MLClassifierBase(MLModel):
 
     def produces(self, config_inst: od.Config) -> set[Route | str]:
         produced = set()
-        for proc in self.train_nodes.keys():
+        for proc in self.train_nodes:
             produced.add(f"mlscore.{proc}")
 
         return produced
@@ -530,7 +528,7 @@ class MLClassifierBase(MLModel):
         self.datasets(self.config_inst)
 
         input_files = input["model"]["preml"]["collection"]
-        input_files = law.util.merge_dicts(*[input_files[key] for key in input_files.keys()], deep=True)
+        input_files = law.util.merge_dicts(*[input_files[key] for key in input_files], deep=True)
         train = DotDict(
             {proc_inst: MLProcessData(
                 self, input_files, "train", [proc_inst.name], task.fold,
@@ -731,10 +729,10 @@ class ExampleDNN(MLClassifierBase):
         """
         Minimal implementation of a ML model
         """
-        import tensorflow.keras as keras
-
+        from keras.layers import BatchNormalization, Dense
         from keras.models import Sequential
-        from keras.layers import Dense, BatchNormalization
+        from tensorflow import keras
+
         from mtt.ml.tf_util import cumulated_crossentropy
 
         n_inputs = len(set(self.input_features))
@@ -783,6 +781,7 @@ class ExampleDNN(MLClassifierBase):
         Minimal implementation of training loop.
         """
         import tensorflow as tf
+
         from mtt.ml.tf_util import MultiDataset
 
         # with tf.device("CPU"):

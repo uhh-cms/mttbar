@@ -1,12 +1,11 @@
-# coding: utf-8
 
 """
 Selectors to set ak columns for cutflow features
 """
 
+from columnflow.columnar_util import EMPTY_FLOAT, Route, set_ak_column
+from columnflow.selection import SelectionResult, Selector, selector
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column, Route, EMPTY_FLOAT
-from columnflow.selection import Selector, SelectionResult, selector
 
 ak = maybe_import("awkward")
 

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Producers for L1 prefiring weights.
@@ -6,11 +5,10 @@ Producers for L1 prefiring weights.
 
 from __future__ import annotations
 
-from columnflow.production import Producer, producer
-from columnflow.util import maybe_import, DotDict
 from columnflow.columnar_util import set_ak_column
+from columnflow.production import Producer, producer
+from columnflow.util import DotDict, maybe_import
 from law.util import InsertableDict
-
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

@@ -1,11 +1,10 @@
-# coding: utf-8
 
 """
 from hbw analysis
 """
 
-import order as od
 import law
+import order as od
 
 logger = law.logger.get_logger(__name__)
 

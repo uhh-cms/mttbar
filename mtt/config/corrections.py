@@ -1,15 +1,13 @@
-# coding: utf-8
 
 """
 Configuration of corrections for the m(ttbar) analysis.
 """
 
-import order as od
 import law
-
-from columnflow.util import DotDict
-from columnflow.selection.cms.btag import BTagWPCountConfig
+import order as od
 from columnflow.production.cms.btag import BTagSFConfig, BTagWPSFConfig
+from columnflow.selection.cms.btag import BTagWPCountConfig
+from columnflow.util import DotDict
 
 logger = law.logger.get_logger(__name__)
 
@@ -50,7 +48,7 @@ def jerc_cfg(
         jec_campaign = f"Summer23{jerc_postfix}Prompt23"
     elif year == 2024:
         jec_campaign = "Summer24Prompt24"
-        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1 # noqa
+        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1  # noqa: E501
     elif year == 2025:
         jec_campaign = "Summer24Prompt25"
         jer_campaign = "Summer24Prompt25"
@@ -367,7 +365,7 @@ def btag_sf_setup(
             discriminator=discr,
         )
         # implementation from hbt analysis:
-        # https://github.com/uhh-cms/hh2bbtautau/blob/4b2f1bc57a9c2ada18776e5ac6f0372269e1e26c/hbt/config/configs_hbt.py#L1410 # noqa
+        # https://github.com/uhh-cms/hh2bbtautau/blob/4b2f1bc57a9c2ada18776e5ac6f0372269e1e26c/hbt/config/configs_hbt.py#L1410
         # set up btag WP histogram to be stored in SelectEvent step
         config.x.btag_wp_count_config = BTagWPCountConfig(
             jet_name="Jet",
@@ -382,7 +380,7 @@ def btag_sf_setup(
 
         def dataset_groups(dataset_inst: od.Dataset) -> list[od.Dataset]:
             # check which efficiency group the dataset belongs to
-            for group_index in range(0, len(config.x.btag_wp_eff_groups)):
+            for group_index in range(len(config.x.btag_wp_eff_groups)):
                 group_tag = f"btag_wp_eff_group_{group_index}"
                 if dataset_inst.has_tag(group_tag):
                     return [
@@ -407,10 +405,10 @@ def btag_sf_setup(
                 "loose": ["loose"],
                 "medium": ["medium"],
                 "tight": ["tight"],
-                "xtight": ["xtight"],
-                "xxtight": ["xxtight"],
+                "xtight": ["xtight", "xxtight"],
+                # "xxtight": ["xxtight"],
             },
-            pt_edges=(0, 20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000) if not config.has_tag("is_limited") else (0, 10_000),  # no pt binning for testing with limited files # noqa
+            pt_edges=(0, 20, 30, 50, 70, 100, 140, 200, 300, 600, 10_000) if not config.has_tag("is_limited") else (0, 10_000),  # no pt binning for testing with limited files  # noqa: E501
         )
     else:
         config.add_tag("skip_btag_wp_weights")  # skip fixed WP based btag weights for 2022/2023, apply shape based SF

@@ -1,15 +1,12 @@
-# coding: utf-8
 
 """
 Custom increment_stats function to keep track of normalized weights.
 """
 import law
-
-from columnflow.selection import Selector, SelectionResult, selector
-from columnflow.selection.stats import increment_stats
-from columnflow.production.cms.btag import btag_weights
 from columnflow.columnar_util import optional_column as optional
-
+from columnflow.production.cms.btag import btag_weights
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.selection.stats import increment_stats
 from columnflow.util import maybe_import
 
 from mtt.production.weights import event_weights_to_normalize

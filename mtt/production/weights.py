@@ -1,30 +1,31 @@
-# coding: utf-8
 
 """
 Producers related to event weights.
 """
 import law
-
-from columnflow.production import Producer, producer
-from columnflow.selection import SelectionResult
-
-from columnflow.production.cms.pileup import pu_weight
-from columnflow.production.cms.parton_shower import ps_weights
-from columnflow.production.cms.btag import btag_weights, btag_wp_weights
-from columnflow.production.cms.scale import murmuf_weights, murmuf_envelope_weights
-from columnflow.production.cms.pdf import pdf_weights
-
-from columnflow.util import maybe_import
 from columnflow.columnar_util import fill_at
+from columnflow.production import Producer, producer
+from columnflow.production.cms.btag import btag_weights, btag_wp_weights
+from columnflow.production.cms.parton_shower import ps_weights
+from columnflow.production.cms.pdf import pdf_weights
+from columnflow.production.cms.pileup import pu_weight
+from columnflow.production.cms.scale import murmuf_envelope_weights, murmuf_weights
+from columnflow.selection import SelectionResult
+from columnflow.util import maybe_import
 
-from mtt.util import has_tag, record_calls
-from mtt.production.normalized_weights import normalized_weight_factory, normalized_btag_weights
-from mtt.production.normalization import normalization_weights
 from mtt.production.gen_top import top_pt_weight
 from mtt.production.gen_v import vjets_weight
 from mtt.production.lepton_weights import (
-    electron_reco_id_iso_trigger_weights, electron_norm_fix_weights, muon_reco_id_iso_trigger_weights
+    electron_norm_fix_weights,
+    electron_reco_id_iso_trigger_weights,
+    muon_reco_id_iso_trigger_weights,
 )
+from mtt.production.normalization import normalization_weights
+from mtt.production.normalized_weights import (
+    normalized_btag_weights,
+    normalized_weight_factory,
+)
+from mtt.util import has_tag, record_calls
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -70,7 +71,7 @@ def event_weights_to_normalize(self: Producer, events: ak.Array, results: Select
 
     # skip scale/pdf weights for some datasets (missing columns)
     # if self.has_dep(murmuf_envelope_weights):
-    if not has_tag("skip_scale", self.config_inst, self.dataset_inst, operator=any) and self.has_dep(murmuf_envelope_weights):  # noqa
+    if not has_tag("skip_scale", self.config_inst, self.dataset_inst, operator=any) and self.has_dep(murmuf_envelope_weights):  # noqa: E501
         # compute scale weights
         logger.debug("Compute scale weights for normalization")
         events = self[murmuf_envelope_weights](events, **kwargs)
@@ -202,7 +203,7 @@ def weights(self: Producer, events: ak.Array, **kwargs) -> ak.Array:
                 events = self[top_pt_weight](events, **kwargs)
 
             # compute V+jets K factor weights
-            if not has_tag("skip_kfactor_weights", self.config_inst, self.dataset_inst, operator=any) and self.dataset_inst.has_tag("is_v_jets"):  # noqa
+            if not has_tag("skip_kfactor_weights", self.config_inst, self.dataset_inst, operator=any) and self.dataset_inst.has_tag("is_v_jets"):  # noqa: E501
                 events = self[vjets_weight](events, **kwargs)
 
             if not has_tag("skip_electron_weights", self.config_inst, self.dataset_inst, operator=any):
@@ -293,7 +294,7 @@ def weights_init(self: Producer) -> None:
             self.uses |= {top_pt_weight}
             self.produces |= {top_pt_weight}
 
-        if not has_tag("skip_kfactor_weights", self.config_inst, self.dataset_inst, operator=any) and self.dataset_inst.has_tag("is_v_jets"):  # noqa
+        if not has_tag("skip_kfactor_weights", self.config_inst, self.dataset_inst, operator=any) and self.dataset_inst.has_tag("is_v_jets"):  # noqa: E501
             self.uses |= {vjets_weight}
             self.produces |= {vjets_weight}
 

@@ -1,11 +1,10 @@
-# coding: utf-8
 
 """
 Selection methods defining masks for categories.
 """
-from columnflow.util import maybe_import
-from columnflow.columnar_util import Route
 from columnflow.categorization import Categorizer, categorizer
+from columnflow.columnar_util import Route
+from columnflow.util import maybe_import
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

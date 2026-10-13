@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Wrappers for some default sets of producers.
@@ -9,8 +8,8 @@ from columnflow.production.categories import category_ids
 from columnflow.util import maybe_import
 
 from mtt.production.features import features
-from mtt.production.weights import weights
 from mtt.production.ttbar_reco import ttbar
+from mtt.production.weights import weights
 
 ak = maybe_import("awkward")
 

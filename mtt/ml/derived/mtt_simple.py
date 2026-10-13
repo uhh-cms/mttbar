@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 ML model using the MLClassifierBase and Mixins
@@ -7,15 +6,12 @@ Taken from hbw analysis (dl derived ml model).
 
 from __future__ import annotations
 
-from columnflow.types import Union
-
 import law
-
-from columnflow.util import maybe_import, DotDict
+from columnflow.types import Union
+from columnflow.util import DotDict, maybe_import
 
 from mtt.ml.base import MLClassifierBase
 from mtt.ml.mixins import DenseModelMixin, ModelFitMixin
-
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

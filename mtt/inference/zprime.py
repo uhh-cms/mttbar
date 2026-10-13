@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 mttbar inference model
@@ -7,8 +6,13 @@ from __future__ import annotations
 
 import law
 import order as od
-
-from columnflow.inference import inference_model, ParameterType, ParameterTransformation, InferenceModel, FlowStrategy
+from columnflow.inference import (
+    FlowStrategy,
+    InferenceModel,
+    ParameterTransformation,
+    ParameterType,
+    inference_model,
+)
 
 logger = law.logger.get_logger(__name__)
 
@@ -313,7 +317,7 @@ def zprime_base_model(
             unc_name,
             type=ParameterType.rate_gauss,
             effect=effect,
-            # transformations=[ParameterTransformation.symmetrize],  # does weird stuff atm -> fixed in latest cf TODO: update and test
+            # transformations=[ParameterTransformation.symmetrize],  # does weird stuff atm -> fixed in latest cf TODO: update and test  # noqa: E501
         )
     else:
         # scoping each parameter to only the categories belonging to its own era via `category=`

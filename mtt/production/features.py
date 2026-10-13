@@ -1,13 +1,13 @@
-# coding: utf-8
 
 """
 Column production methods related to higher-level features.
 """
 
+from columnflow.columnar_util import EMPTY_FLOAT, set_ak_column
 from columnflow.production import Producer, producer
-from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT
 from columnflow.production.util import attach_coffea_behavior
+from columnflow.util import maybe_import
+
 from mtt.production.ttbar_reco import choose_lepton
 from mtt.selection.util import masked_sorted_indices
 
