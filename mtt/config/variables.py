@@ -46,6 +46,11 @@ def add_variables(config: od.Config) -> None:
         x_title="Number of light jets",
     )
     config.add_variable(
+        name="n_fatjet",
+        binning=(11, -0.5, 10.5),
+        x_title="Number of fat jets",
+    )
+    config.add_variable(
         name="n_electron",
         binning=(11, -0.5, 10.5),
         x_title="Number of electrons",
