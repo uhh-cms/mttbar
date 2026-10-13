@@ -449,11 +449,11 @@ v4_no_btag = v3_AN_v12.derive("v4_no_btag", cls_dict={
         "n_jet",
         "n_fatjet",
     ]) + tuple([
-        f"jet_{var}_{i + 1}"
+        f"jet_{i + 1}_{var}"
         for var in ("energy", "pt", "eta", "phi", "mass")
         for i in range(5)
     ]) + tuple([
-        f"fatjet_{var}_{i + 1}"
+        f"fatjet_{i + 1}_{var}"
         for var in ("energy", "pt", "eta", "phi", "msoftdrop", "tau21", "tau32")
         for i in range(3)
     ]) + tuple([

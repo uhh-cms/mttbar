@@ -25,8 +25,8 @@ np = maybe_import("numpy")
 get_jerc_file_default.map_jet_name_file_key["SubJet"] = "jet_jerc"
 jer_subjets = jer_ak8.derive("jer_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
 jec_subjets = jec_ak8.derive("jec_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
-jec_subjets_nominal = jec_subjets.derive("jec_subjets", cls_dict={"uncertainty_sources": []})
-jer_subjets_nominal = jer_subjets.derive("jer_subjets", cls_dict={"jec_uncertainty_sources": []})
+jec_subjets_nominal = jec_subjets.derive("jec_subjets_nominal", cls_dict={"uncertainty_sources": []})
+jer_subjets_nominal = jer_subjets.derive("jer_subjets_nominal", cls_dict={"jec_uncertainty_sources": []})
 
 
 # custom jec calibrator that only runs nominal correction
