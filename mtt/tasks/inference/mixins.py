@@ -1,16 +1,13 @@
-# coding: utf-8
 
 """
 Mixins for all the combine methods.
 """
 
 import luigi
-import law
-
 from columnflow.tasks.framework.parameters import SettingsParameter
 
 
-class CommonStatsOptionsMixin():
+class CommonStatsOptionsMixin:
     # parameters from -h call
     # defaults from combine
     # currently not implemented:
@@ -101,7 +98,7 @@ class CommonStatsOptionsMixin():
     )
 
 
-class CommonIOOptionsMixin():
+class CommonIOOptionsMixin:
     # parameters from -h call
     # overrideSnapshotMass
 
@@ -202,7 +199,7 @@ class CommonIOOptionsMixin():
     )
 
 
-class CascadeMinimizerOptionsMixin():
+class CascadeMinimizerOptionsMixin:
     # parameters from -h call
     # defaults from combine
     # currently not implemented:
@@ -317,7 +314,7 @@ class CascadeMinimizerOptionsMixin():
     )
 
 
-class CommonMiscOptionsMixin():
+class CommonMiscOptionsMixin:
     # parameters from -h call
     # defaults from combine
     # currently not implemented:
@@ -432,7 +429,7 @@ class CommonMiscOptionsMixin():
     )
 
 
-class AsymptoticLimitsMixin():
+class AsymptoticLimitsMixin:
     # parameters from -h call
 
     rAbsAcc = luigi.FloatParameter(
@@ -511,7 +508,7 @@ class AsymptoticLimitsMixin():
     )
 
 
-class FitterAlgoOptionsMixin():
+class FitterAlgoOptionsMixin:
     # mirrors combine's FitterAlgoBase options group (src/FitterAlgoBase.cc). Unlike the four
     # "Common ..." mixins above, these apply only to MultiDimFit/FitDiagnostics-family methods
     # (AsymptoticLimits does NOT inherit FitterAlgoBase and must not use this mixin) — currently

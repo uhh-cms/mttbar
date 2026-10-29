@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 asymptotic_limits() {
@@ -16,23 +15,18 @@ asymptotic_limits() {
     # run_cmd "$cmd_observed" "${LOG_DIR}/asymptotic_limits_observed_${FIT_VERSION}__${YEAR}.log"  # NOTE: don't use!
 }
 """
-import law
 import os
 import shutil
 
+import law
+
 from mtt.tasks.inference.combine_base import CombineBaseTask
 from mtt.tasks.inference.mixins import (
-    CommonStatsOptionsMixin,
-    CommonIOOptionsMixin,
-    CascadeMinimizerOptionsMixin,
     AsymptoticLimitsMixin,
+    CascadeMinimizerOptionsMixin,
+    CommonIOOptionsMixin,
+    CommonStatsOptionsMixin,
 )
-from columnflow.tasks.framework.base import Requirements
-from columnflow.tasks.framework.remote import RemoteWorkflow
-from columnflow.tasks.histograms import MergeShiftedHistograms
-from mtt.tasks.inference.datacards import CombineDatacards
-
-from mtt.tasks.inference.workspace import CreateWorkspace
 
 logger = law.logger.get_logger(__name__)
 
@@ -108,8 +102,7 @@ class AsymptoticLimits(
         # Write to CSV
         with open(csv_path, "w") as f:
             f.write("limit_type,limit_value\n")
-            for key, value in limits_dict.items():
-                f.write(f"{key},{value}\n")
+            f.writelines(f"{key},{value}\n" for key, value in limits_dict.items())
 
         logger.info(f"Stored limits to CSV file {csv_path}.")
 
