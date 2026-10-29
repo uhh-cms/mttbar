@@ -1,14 +1,14 @@
-# coding: utf8
 
 """
 collection of useful function for producers
 """
-import itertools
+from __future__ import annotations
 
+import itertools
 from functools import partial
 
-from columnflow.util import maybe_import
 from columnflow.production.util import _lv_base
+from columnflow.util import maybe_import
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -52,7 +52,7 @@ def ak_arg_grouped_combinations(
     array: ak.Array,
     group_sizes: list[int],
     axis: int = 1,
-    cache: dict[int, tuple[ak.Array]] = None,
+    cache: dict[int, tuple[ak.Array]] | None = None,
     as_type=np.uint8,
 ) -> tuple[tuple[ak.Array]]:
     """

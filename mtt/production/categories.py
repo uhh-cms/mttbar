@@ -1,13 +1,12 @@
-# coding: utf-8
 
 """
 Categorizers related to defining category masks following the production step.
 """
 from functools import partial
 
+from columnflow.categorization import Categorizer, categorizer
 from columnflow.columnar_util import Route
 from columnflow.util import maybe_import
-from columnflow.categorization import Categorizer, categorizer
 
 from mtt.categorization.util import make_categorizer_not, make_categorizer_range
 

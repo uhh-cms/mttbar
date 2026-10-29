@@ -7,10 +7,10 @@ from __future__ import annotations
 
 import law
 import order as od
-
-from columnflow.util import maybe_import
 from columnflow.columnar_util import remove_ak_column
 from columnflow.ml import MLModel
+from columnflow.util import maybe_import
+
 from mtt.ml.helper import predict_numpy_on_batch
 from mtt.util import timeit
 
@@ -65,8 +65,8 @@ def input_features_sanity_checks(ml_model_inst: MLModel, input_features: list[st
     # check if input features are ordered in the same way for all datasets
     if getattr(ml_model_inst, "input_features_ordered", None):
         if ml_model_inst.input_features_ordered != input_features:
-            raise Exception(
-                f"Input features are not ordered in the sme way for all datasets. "
+            raise ValueError(
+                f"Input features are not ordered in the same way for all datasets. "
                 f"Expected: {ml_model_inst.input_features_ordered}, "
                 f"got: {input_features}",
             )
@@ -76,7 +76,7 @@ def input_features_sanity_checks(ml_model_inst: MLModel, input_features: list[st
 
     # check that the input features contain exactly what was requested by the MLModel
     if set(input_features) != set(ml_model_inst.input_features):
-        raise Exception(
+        raise ValueError(
             f"Input features do not match the input features requested by the MLModel. "
             f"Expected: {ml_model_inst.input_features}, got: {input_features}",
         )
@@ -101,7 +101,7 @@ class MLDatasetLoader:
     def __init__(
         self,
         ml_model_inst: MLModel,
-        process: "str",
+        process: str,
         events: ak.Array,
         stats: dict | None = None,
         skip_mask=False,
@@ -130,7 +130,8 @@ class MLDatasetLoader:
             self._events = events
         else:
             self._events = events[proc_mask]
-            self._events = events[events.event_weight >= 0.0]
+            self._events = self._events[self._events.event_weight >= 0.0]
+            # self._events = self._events[:10_000]  # DEBUG: limit number of events for testing
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.ml_model_inst.cls_name}, {self.process})"
@@ -220,7 +221,9 @@ class MLDatasetLoader:
         self._input_features = tuple(features.fields)
 
         # Create a mapping for sanity checks - convert raw names to what the ML model expects
-        mapped_features_for_check = tuple(f"MLInput.{feat}" if not feat.startswith("MLInput.") else feat for feat in self._input_features)  # noqa
+        mapped_features_for_check = tuple(
+            f"MLInput.{feat}" if not feat.startswith("MLInput.") else feat for feat in self._input_features
+        )
 
         try:
             # Temporarily modify the ml_model_inst.input_features for the sanity check
@@ -236,8 +239,8 @@ class MLDatasetLoader:
 
             input_features_sanity_checks(temp_ml_model, mapped_features_for_check)
 
-        except Exception as e:
-            logger.error(f"Input features sanity check failed: {e}")
+        except Exception:
+            logger.error("Input features sanity check failed")
             logger.error(f"Expected (with MLInput prefix): {expected_with_prefix}")
             logger.error(f"Got (with MLInput prefix): {set(mapped_features_for_check)}")
 
@@ -279,7 +282,7 @@ class MLDatasetLoader:
                     finite_mask = np.isfinite(feature_col)
                     if np.any(finite_mask):
                         finite_values = feature_col[finite_mask]
-                        logger.error(f"    - Finite values: min={np.min(finite_values):.6f}, max={np.max(finite_values):.6f}, mean={np.mean(finite_values):.6f}")  # noqa
+                        logger.error(f"    - Finite values: min={np.min(finite_values):.6f}, max={np.max(finite_values):.6f}, mean={np.mean(finite_values):.6f}")  # noqa: E501
                     else:
                         logger.error("    - No finite values found!")
 
@@ -329,7 +332,7 @@ class MLDatasetLoader:
                     else:
                         logger.error(f"  Original '{feature_name}' column appears clean - issue in conversion?")
 
-            raise Exception(f"Found non-finite values in input features for process {self.process}.")
+            raise ValueError(f"Found non-finite values in input features for process {self.process}.")
 
         self._features = features
 
@@ -366,7 +369,7 @@ class MLDatasetLoader:
             return self._xsec_train_weights
 
         if not self.stats:
-            raise Exception("cannot determine train weights without stats")
+            raise RuntimeError("cannot determine train weights without stats")
 
         _, sub_id = get_proc_mask(self._events, self.process, self.ml_model_inst.config_inst)
         sum_weights = np.sum([self.stats[self.process]["sum_pos_weights_per_process"][str(id)] for id in sub_id])
@@ -394,7 +397,7 @@ class MLDatasetLoader:
             return self._equal_train_weights
 
         if not self.stats:
-            raise Exception("cannot determine train weights without stats")
+            raise RuntimeError("cannot determine train weights without stats")
 
         combined_proc_inst = self.ml_model_inst.config_inst.get_process(self.process)
         _, sub_id_proc = get_proc_mask(self._events, self.process, self.ml_model_inst.config_inst)
@@ -446,7 +449,7 @@ class MLDatasetLoader:
             return self._train_weights
 
         if not self.stats:
-            raise Exception("cannot determine train weights without stats")
+            raise RuntimeError("cannot determine train weights without stats")
 
         # TODO: hier muss np.float gemacht werden
         proc = self.process
@@ -469,7 +472,7 @@ class MLDatasetLoader:
             return self._validation_weights
 
         if not self.stats:
-            raise Exception("cannot determine val weights without stats")
+            raise RuntimeError("cannot determine val weights without stats")
 
         # TODO: per process pls [done] and now please tidy up
         processes = self.ml_model_inst.processes
@@ -532,7 +535,7 @@ class MLDatasetLoader:
 
         if self.shuffle:
             data = data[self.shuffle_indices]
-        logger.debug(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa
+        logger.info(f"Data split into {train_end} training, {val_end - train_end} validation, {self.n_events - val_end} test samples.")  # noqa: E501
 
         return data[:train_end], data[train_end:val_end], data[val_end:]
 
@@ -555,9 +558,7 @@ class MLDatasetLoader:
                 # Get the attribute and explicitly delete it
                 arr = getattr(self, attr, None)
                 if arr is not None:
-                    if hasattr(arr, "__array__"):  # numpy array
-                        del arr
-                    elif hasattr(arr, "__del__"):  # awkward array or other objects with destructor
+                    if hasattr(arr, "__array__") or hasattr(arr, "__del__"):  # numpy array
                         del arr
                     delattr(self, attr)
 
@@ -636,9 +637,9 @@ class MLProcessData:
         """
         try:
             self.cleanup()
-        except Exception:
+        except Exception as e:
             # Ignore errors in destructor
-            pass
+            logger.warning(f"Error during cleanup: {e}")
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self._ml_model_inst.cls_name}, {self._data_split}, {self._processes})"
@@ -691,7 +692,7 @@ class MLProcessData:
         elif self._fold_modus == "all":
             self._folds = list(range(self._ml_model_inst.folds))
         else:
-            raise Exception(f"unknown fold modus {self._fold_modus} for MLProcessData")
+            raise ValueError(f"unknown fold modus {self._fold_modus} for MLProcessData")
         return self._folds
 
     @timeit
@@ -751,7 +752,7 @@ class MLProcessData:
                 else:
                     fold_data = self.load_file(data_str, self._data_split, process, fold)
                 if np.any(~np.isfinite(fold_data)):
-                    raise Exception(f"Found non-finite values in {data_str} for {process} in fold {fold}.")
+                    raise ValueError(f"Found non-finite values in {data_str} for {process} in fold {fold}.")
                 data.append(fold_data)
 
         data = np.concatenate(data)
@@ -848,14 +849,14 @@ class MLProcessData:
         if hasattr(self, "_prediction"):
             return self._prediction
 
-        if "prediction" in self._input.keys():
+        if "prediction" in self._input:
             # load prediction if possible
             self._prediction = self.load_data("prediction")
         else:
             # calcluate prediction if needed
             if not hasattr(self._ml_model_inst, "best_model"):
                 # if not hasattr(self._ml_model_inst, "trained_model"):
-                raise Exception("No trained model found in the MLModel instance. Cannot calculate prediction.")
+                raise RuntimeError("No trained model found in the MLModel instance. Cannot calculate prediction.")
             # self._prediction = predict_numpy_on_batch(self._ml_model_inst.trained_model, self.features)
             self._prediction = predict_numpy_on_batch(self._ml_model_inst.best_model, self.features)
 

@@ -1,13 +1,11 @@
-# coding: utf-8
 
 """
 Selection methods for m(ttbar).
 """
 
-from columnflow.util import maybe_import
 from columnflow.calibration.cms.jets import ak_random  # TODO: move function
 from columnflow.selection import Selector, selector
-
+from columnflow.util import maybe_import
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

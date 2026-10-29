@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 production methods regarding ml stats
@@ -10,15 +9,13 @@ from __future__ import annotations
 import functools
 
 import law
-
-from columnflow.production import Producer, producer
 from columnflow.categorization import Categorizer
-from columnflow.util import maybe_import
-from columnflow.ml import MLModel
 from columnflow.columnar_util import set_ak_column
-from columnflow.selection.stats import increment_stats
 from columnflow.histogramming.default import all_weights
-
+from columnflow.ml import MLModel
+from columnflow.production import Producer, producer
+from columnflow.selection.stats import increment_stats
+from columnflow.util import maybe_import
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
