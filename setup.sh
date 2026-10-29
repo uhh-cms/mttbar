@@ -98,6 +98,7 @@ setup_mtt() {
     export CF_CONDA_BASE="${CF_CONDA_BASE:-${CF_SOFTWARE_BASE}/conda}"
     export CF_VENV_BASE="${CF_VENV_BASE:-${CF_SOFTWARE_BASE}/venvs}"
     export CF_CMSSW_BASE="${CF_CMSSW_BASE:-${CF_SOFTWARE_BASE}/cmssw}"
+    export CF_COMBINE_BASE="${CF_COMBINE_BASE:-${CF_SOFTWARE_BASE}/combine}"
     export CF_CI_JOB="$( [ "${GITHUB_ACTIONS}" = "true" ] && echo 1 || echo 0 )"
     export CF_ORIG_PATH="${PATH}"
     export CF_ORIG_PYTHONPATH="${PYTHONPATH}"
