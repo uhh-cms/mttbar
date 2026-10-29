@@ -1,13 +1,12 @@
-# coding: utf-8
 
 """
 Useful selection methods.
 """
-from typing import Optional
+from __future__ import annotations
 
+from columnflow.categorization import Categorizer, categorizer
 from columnflow.columnar_util import Route, TaskArrayFunction
 from columnflow.util import maybe_import
-from columnflow.categorization import Categorizer, categorizer
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -72,7 +71,7 @@ def make_categorizer_range(
     route: str,
     min_val: float,
     max_val: float,
-    route_func: Optional[callable] = None,
+    route_func: callable | None = None,
     **decorator_kwargs,
 ):
     """

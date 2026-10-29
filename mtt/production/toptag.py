@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Column producers related to top-tagged jets.
@@ -6,11 +5,10 @@ Column producers related to top-tagged jets.
 
 from __future__ import annotations
 
+from columnflow.columnar_util import flat_np_view, layout_ak_array, set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column, flat_np_view, layout_ak_array
 from law.util import InsertableDict
-
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -37,13 +35,14 @@ def toptag_weights(
     **kwargs,
 ) -> ak.Array:
     """
-    Creates weights from top-tagging scale factors using the correctionlib. Requires an external file in the config under
+    Creates weights from top-tagging scale factors using the correctionlib. Requires an external file in the
+    config under
     ``toptag_sf``:
 
     .. code-block:: python
 
         cfg.x.external_files = DotDict.wrap({
-            "toptag_sf": "/afs/cern.ch/user/d/dsavoiu/public/mirrors/cms-jet-JSON_Format-54860a23/JMAR/DeepAK8/2017_DeepAK8_Top.json",  # noqa
+            "toptag_sf": "/SOME_PATH/cms-jet-JSON_Format-54860a23/JMAR/DeepAK8/2017_DeepAK8_Top.json",  # noqa: E501
         })
 
     *get_toptag_file* can be adapted in a subclass in case it is stored differently in the external

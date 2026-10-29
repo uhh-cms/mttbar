@@ -1,13 +1,11 @@
-# coding: utf-8
 
 """
 Selection reducing spiking QCD behavior.
 """
 
-from columnflow.util import maybe_import
 from columnflow.production.util import attach_coffea_behavior
-
-from columnflow.selection import Selector, SelectionResult, selector
+from columnflow.selection import SelectionResult, Selector, selector
+from columnflow.util import maybe_import
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")

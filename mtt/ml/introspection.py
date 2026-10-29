@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Functions for model introspection.
 Taken from hbw analysis.
@@ -8,9 +7,10 @@ from __future__ import annotations
 
 import copy
 import functools
-import tensorflow as tf
-import shap
+
 import numpy as np
+import shap
+import tensorflow as tf
 
 
 def get_input_post_batchnorm(model: tf.keras.models.Model, inputs: np.array) -> np.array:

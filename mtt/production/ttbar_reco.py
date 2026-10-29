@@ -1,28 +1,30 @@
-# coding: utf-8
 
 """
 Column production methods related to ttbar mass reconstruction.
 """
 import itertools
 import math
+
 import law
-
-from law.util import human_duration
-
+from columnflow.columnar_util import EMPTY_FLOAT, attach_coffea_behavior, set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.production.categories import category_ids
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column, EMPTY_FLOAT, attach_coffea_behavior
+from law.util import human_duration
 
 from mtt.config.categories import add_categories_production
-from mtt.util import iter_chunks
-from mtt.production.util import (
-    ak_argcartesian, ak_arg_grouped_combinations, lv_xyzt, lv_mass, lv_sum,
-)
 from mtt.production.lepton import choose_lepton
 from mtt.production.neutrino import neutrino_candidates
 from mtt.production.ttbar_gen import ttbar_gen
+from mtt.production.util import (
+    ak_arg_grouped_combinations,
+    ak_argcartesian,
+    lv_mass,
+    lv_sum,
+    lv_xyzt,
+)
 from mtt.profiling_tools import Profiler
+from mtt.util import iter_chunks
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")
@@ -351,10 +353,10 @@ def ttbar(
             indent_level=2,
             min_verbose_level=2,
         ):
-            jet_sum_lep = lv_sum((
+            jet_sum_lep = lv_sum(
                 jet_lv[jet_idx]
                 for jet_idx in jet_idx_comb_lep
-            ))
+            )
 
         with profile_task(
             f"construct leptonic top hypotheses {n_jets}",
@@ -385,10 +387,10 @@ def ttbar(
                 indent_level=2,
                 min_verbose_level=2,
             ):
-                jet_sum_had = lv_sum((
+                jet_sum_had = lv_sum(
                     jet_lv[jet_idx]
                     for jet_idx in jet_idx_comb_had
-                ))
+                )
 
             with profile_task(
                 f"construct hadronic top hypotheses {n_jets}",
@@ -774,19 +776,10 @@ def add_prod_cats_reqs(self: Producer, task: law.Task, reqs: dict) -> None:
     if "ttbar" in reqs or task.producer != "add_prod_cats":
         return
 
-    producer_inst = task.build_producer_inst("ttbar", params={
-        "dataset": task.dataset,
-        "dataset_inst": task.dataset_inst,
-        "config": task.config,
-        "config_inst": task.config_inst,
-        "analysis": task.analysis,
-        "analysis_inst": task.analysis_inst,
-    })
     from columnflow.tasks.production import ProduceColumns
-    reqs["ttbar"] = ProduceColumns.req(
+    reqs["ttbar"] = ProduceColumns.req_other_producer(
         task,
         producer="ttbar",
-        producer_inst=producer_inst,
     )
 
 

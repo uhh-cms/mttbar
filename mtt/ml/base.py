@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 taken from hbw analysis
@@ -9,23 +8,22 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from typing import Any
-import yaml
 
 import law
 import order as od
-
-from columnflow.types import Sequence
-from columnflow.ml import MLModel
-from columnflow.util import maybe_import, dev_sandbox, DotDict, DerivableMeta
+import yaml
 from columnflow.columnar_util import Route, set_ak_column
 from columnflow.config_util import get_datasets_from_process
+from columnflow.ml import MLModel
+from columnflow.types import Sequence
+from columnflow.util import DerivableMeta, DotDict, dev_sandbox, maybe_import
 
-from mtt.util import log_memory
-from mtt.ml.data_loader import MLDatasetLoader, MLProcessData
 from mtt.config.processes import prepare_ml_processes
-# from mtt.config.categories import add_categories_ml
+from mtt.ml.data_loader import MLDatasetLoader, MLProcessData
 
+# from mtt.config.categories import add_categories_ml
 from mtt.tasks.ml import MLPreTraining
+from mtt.util import log_memory
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -148,17 +146,17 @@ class MLClassifierBase(MLModel):
 
         # checks
         if diff := self.settings_parameters.difference(self.bookkeep_params):
-            raise Exception(
+            raise ValueError(
                 f"settings_parameters {diff} not in bookkeep_params; all customizable settings should"
                 "be bookkept in the parameters.yaml file and the self.parameters_repr to ensure reproducibility",
             )
         if diff := self.preml_params.difference(self.bookkeep_params):
-            raise Exception(
+            raise ValueError(
                 f"preml_params {diff} not in bookkeep_params; all parameters that change the preml_store_name"
                 "should be bookkept via the 'self.bookkeep_params' attribute",
             )
         if unknown_params := set(self.parameters.keys()).difference(self.settings_parameters):
-            raise Exception(
+            raise ValueError(
                 f"unknown parameters {unknown_params} passed to the MLModel; only the following "
                 f"parameters are allowed: {', '.join(self.settings_parameters)}",
             )
@@ -207,7 +205,7 @@ class MLClassifierBase(MLModel):
         self.train_val_test_split = tuple(self.train_val_test_split)
         if not isinstance(self.sub_process_class_factors, dict):
             # cast tuple to dict
-            self.sub_process_class_factor = {
+            self.sub_process_class_factors = {
                 proc: weight for proc, weight in [s.split(":") for s in self.sub_process_class_factor]
             }
         # cast weights to int and remove processes not used in training
@@ -223,7 +221,7 @@ class MLClassifierBase(MLModel):
 
         # checks
         if self.negative_weights not in ("ignore", "abs", "handle"):
-            raise Exception(
+            raise ValueError(
                 f"negative_weights {self.negative_weights} not in ('ignore', 'abs', 'handle')",
             )
 
@@ -236,7 +234,7 @@ class MLClassifierBase(MLModel):
         preml_params = {param: self.parameters[param] for param in self.preml_params}
         preml_store_name = law.util.create_hash(sorted(preml_params.items()))
         if hasattr(self, "_preml_store_name") and self._preml_store_name != preml_store_name:
-            raise Exception(
+            raise ValueError(
                 f"preml_store_name changed from {self._preml_store_name} to {preml_store_name};"
                 "this should not happen",
             )
@@ -259,7 +257,7 @@ class MLClassifierBase(MLModel):
             return ""
         parameters_repr = law.util.create_hash(sorted(self.parameters.items()))
         if hasattr(self, "_parameters_repr") and self._parameters_repr != parameters_repr:
-            raise Exception(
+            raise ValueError(
                 f"parameters_repr changed from {self._parameters_repr} to {parameters_repr};"
                 "this should not happen",
             )
@@ -285,7 +283,7 @@ class MLClassifierBase(MLModel):
         ml_ids = sorted(set(p.x.ml_id for p in self.process_insts) - {-1})
 
         if len(ml_ids) != len(self.train_nodes.keys()):
-            raise Exception(f"ml_ids {ml_ids} does not match number of requested train_nodes {self.train_nodes.keys()}")
+            raise ValueError(f"ml_ids {ml_ids} does not match number of requested train_nodes {self.train_nodes.keys()}")
 
         expected_id = 0
         while ml_ids:
@@ -320,7 +318,7 @@ class MLClassifierBase(MLModel):
 
         # setup variables
         # for proc in self.processes:
-        for proc, node_config in self.train_nodes.items():
+        for proc in self.train_nodes:
             for config_inst in self.config_insts:
                 if f"mlscore.{proc}" not in config_inst.variables:
                     config_inst.add_variable(
@@ -382,7 +380,7 @@ class MLClassifierBase(MLModel):
     def train_node_process_insts(self):
         if hasattr(self, "_train_node_process_insts"):
             return self._train_node_process_insts
-        return [self.config_inst.get_process(proc) for proc in self.train_nodes.keys()]
+        return [self.config_inst.get_process(proc) for proc in self.train_nodes]
 
     def preparation_producer(self: MLModel, analysis_inst: od.Analysis):
         """ producer that is run as part of PrepareMLEvents and MLEvaluation (before `evaluate`) """
@@ -423,7 +421,7 @@ class MLClassifierBase(MLModel):
         used_datasets = set()
         for i, proc in enumerate(self.processes):
             if not config_inst.has_process(proc):
-                raise Exception(f"Process {proc} not included in the config {config_inst.name}")
+                raise KeyError(f"Process {proc} not included in the config {config_inst.name}")
 
             proc_inst = config_inst.get_process(proc)
             # NOTE: this info is accessible during training but probably not afterwards in other tasks
@@ -444,7 +442,7 @@ class MLClassifierBase(MLModel):
 
             # check that no dataset is used multiple times
             if datasets_already_used := used_datasets.intersection(dataset_insts):
-                raise Exception(f"{datasets_already_used} datasets are used for multiple processes")
+                raise ValueError(f"{datasets_already_used} datasets are used for multiple processes")
             used_datasets |= set(dataset_insts)
 
         return used_datasets
@@ -463,7 +461,7 @@ class MLClassifierBase(MLModel):
 
     def produces(self, config_inst: od.Config) -> set[Route | str]:
         produced = set()
-        for proc in self.train_nodes.keys():
+        for proc in self.train_nodes:
             produced.add(f"mlscore.{proc}")
 
         return produced
@@ -530,7 +528,7 @@ class MLClassifierBase(MLModel):
         self.datasets(self.config_inst)
 
         input_files = input["model"]["preml"]["collection"]
-        input_files = law.util.merge_dicts(*[input_files[key] for key in input_files.keys()], deep=True)
+        input_files = law.util.merge_dicts(*[input_files[key] for key in input_files], deep=True)
         train = DotDict(
             {proc_inst: MLProcessData(
                 self, input_files, "train", [proc_inst.name], task.fold,
@@ -573,9 +571,9 @@ class MLClassifierBase(MLModel):
         logger.warning(f"Found {len(physical_devices)} physical GPU devices: {physical_devices}")
         try:
             tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        except:
+        except Exception as e:
             # Invalid device or cannot modify virtual devices once initialized.
-            pass
+            logger.warning(f"Failed to set memory growth: {e}")
 
         # input preparation
         train, validation = self.load_data(task, input, output)
@@ -671,7 +669,7 @@ class MLClassifierBase(MLModel):
         for i, params in enumerate(parameters[1:]):
             if params != parameters[0]:
                 diff = dict_diff(params, parameters[0])
-                raise Exception(
+                raise ValueError(
                     "The MLTraining parameters (see 'parameters.yaml') from "
                     f"fold {i} differ from fold 0; diff: {diff}",
                 )
@@ -687,7 +685,7 @@ class MLClassifierBase(MLModel):
             # NOTE: the next line triggers some warning concering tf.function retracing
             pred = ak.from_numpy(model.predict_on_batch(ml_dataset.features))
             if len(pred[0]) != len(node_processes):
-                raise Exception("Number of output nodes should be equal to number of processes")
+                raise ValueError("Number of output nodes should be equal to number of processes")
             predictions.append(pred)
             # store predictions for each model
             for j, proc in enumerate(node_processes):
@@ -705,7 +703,7 @@ class MLClassifierBase(MLModel):
 
         # sanity check of the number of output nodes
         if len(outputs[0]) != len(node_processes):
-            raise Exception(
+            raise ValueError(
                 f"The number of output nodes {len(outputs[0])} should be equal to "
                 f"the number of processes {len(node_processes)}",
             )
@@ -731,10 +729,10 @@ class ExampleDNN(MLClassifierBase):
         """
         Minimal implementation of a ML model
         """
-        import tensorflow.keras as keras
-
+        from keras.layers import BatchNormalization, Dense
         from keras.models import Sequential
-        from keras.layers import Dense, BatchNormalization
+        from tensorflow import keras
+
         from mtt.ml.tf_util import cumulated_crossentropy
 
         n_inputs = len(set(self.input_features))
@@ -783,6 +781,7 @@ class ExampleDNN(MLClassifierBase):
         Minimal implementation of training loop.
         """
         import tensorflow as tf
+
         from mtt.ml.tf_util import MultiDataset
 
         # with tf.device("CPU"):

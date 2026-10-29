@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Simple task that compares the stats of each of the requested MLModels and stores for each stat
@@ -13,29 +12,28 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-import numpy as np
-
-from mtt.ml.data_loader import get_proc_mask
-from mtt.util import log_memory
 import law
 import luigi
-
-from columnflow.tasks.framework.base import Requirements, DatasetTask
+import numpy as np
+from columnflow.columnar_util import EMPTY_FLOAT
+from columnflow.tasks.framework.base import DatasetTask, Requirements
+from columnflow.tasks.framework.decorators import view_output_plots
 from columnflow.tasks.framework.mixins import (
     CalibratorsMixin,
-    SelectorMixin,
-    ReducerMixin,
-    ProducersMixin,
-    MLModelTrainingMixin,
-    MLModelsMixin,
     MLModelDataMixin,
+    MLModelsMixin,
+    MLModelTrainingMixin,
+    ProducersMixin,
+    ReducerMixin,
+    SelectorMixin,
 )
 from columnflow.tasks.framework.remote import RemoteWorkflow
-from columnflow.tasks.framework.decorators import view_output_plots
-from columnflow.util import dev_sandbox, DotDict
-from columnflow.columnar_util import EMPTY_FLOAT
-from columnflow.tasks.ml import PrepareMLEvents, MergeMLEvents, MergeMLStats, MLTraining
+from columnflow.tasks.ml import MergeMLEvents, MergeMLStats, MLTraining, PrepareMLEvents
+from columnflow.util import DotDict, dev_sandbox
+
+from mtt.ml.data_loader import get_proc_mask
 from mtt.tasks.base import MTTTask
+from mtt.util import log_memory
 
 logger = law.logger.get_logger(__name__)
 
@@ -396,7 +394,7 @@ class MLPreTraining(
                         else:
                             raise e
 
-        for process in events.keys():
+        for process in events:
             events[process] = ak.concatenate(events[process])
         return dict(events)
 
@@ -586,7 +584,7 @@ class MLEvaluationSingleFold(
         output = self.output()
         process = self.branch_data["process"]
 
-        logger.info(f"evaluating model {str(self.ml_model_inst)} for process {process} and fold {self.fold}")
+        logger.info(f"evaluating model {self.ml_model_inst!s} for process {process} and fold {self.fold}")
 
         # open trained model and assign to ml_model_inst
         training_results = self.ml_model_inst.open_model(inputs["training"])
@@ -594,7 +592,7 @@ class MLEvaluationSingleFold(
         self.ml_model_inst.best_model = training_results["best_model"]
 
         input_files = inputs["preml"]["collection"]
-        input_files = law.util.merge_dicts(*[input_files[key] for key in input_files.keys()], deep=True)
+        input_files = law.util.merge_dicts(*[input_files[key] for key in input_files], deep=True)
 
         for fold in range(self.ml_model_inst.folds):
             data = MLProcessData(
@@ -702,7 +700,7 @@ class PlotMLResultsSingleFold(
     @law.decorator.timeit()
     @view_output_plots
     def run(self):
-        logger.info(f"creating plots for model {str(self.ml_model_inst)} for fold {self.fold}")
+        logger.info(f"creating plots for model {self.ml_model_inst!s} for fold {self.fold}")
         log_memory("Start")
         # prepare inputs and outputs
         inputs = self.input()
@@ -719,11 +717,11 @@ class PlotMLResultsSingleFold(
         input_files_preml = inputs["preml"]["collection"]
         input_files_mlpred = {data_split: value["collection"] for data_split, value in inputs["mlpred"].items()}
         input_files = law.util.merge_dicts(
-            *[input_files_preml[key] for key in input_files_preml.keys()],
+            *[input_files_preml[key] for key in input_files_preml],
             *[
                 input_files_mlpred[data_split][key]
-                for data_split in input_files_mlpred.keys()
-                for key in input_files_mlpred[data_split].keys()
+                for data_split in input_files_mlpred
+                for key in input_files_mlpred[data_split]
             ],
             deep=True,
         )
@@ -744,6 +742,7 @@ class PlotMLResultsSingleFold(
     def create_plots(self, data):
         """Create plots with matplotlib cleanup for memory efficiency"""
         import gc
+
         import matplotlib
         matplotlib.use("Agg")  # Use non-interactive backend
         import matplotlib.pyplot as plt
@@ -752,11 +751,11 @@ class PlotMLResultsSingleFold(
         stats = {}
         from mtt.ml.plotting import (
             plot_confusion,
-            plot_roc_ovr,
-            plot_roc_ovo,
-            plot_output_nodes,
             plot_input_features,
             plot_introspection,
+            plot_output_nodes,
+            plot_roc_ovo,
+            plot_roc_ovr,
         )
 
         # create plots
@@ -798,15 +797,17 @@ class PlotMLResultsSingleFold(
             logger.info(f"Creating plots for {data_split} split...")
 
             log_memory("Before plotting confusion matrix")
-            # confusion matrix
-            plot_confusion(
-                self.ml_model_inst,
-                data[data_split],
-                output["plots"],
-                data_split,
-                self.ml_model_inst.train_node_process_insts,
-                stats,
-            )
+            for norm_mode in ["rows", "columns", "total"]:
+                # confusion matrix
+                plot_confusion(
+                    self.ml_model_inst,
+                    data[data_split],
+                    output["plots"],
+                    data_split,
+                    self.ml_model_inst.train_node_process_insts,
+                    stats,
+                    normalize=norm_mode,
+                )
             log_memory("After plotting confusion matrix")
             plt.close("all")
             gc.collect()
@@ -871,6 +872,7 @@ class PlotMLResultsSingleFoldTest(PlotMLResultsSingleFold):
     def create_plots(self, data):
         """Memory-efficient plotting for test-only data"""
         import gc
+
         import matplotlib
         matplotlib.use("Agg")  # Use non-interactive backend
         import matplotlib.pyplot as plt
@@ -879,10 +881,10 @@ class PlotMLResultsSingleFoldTest(PlotMLResultsSingleFold):
         stats = {}
         from mtt.ml.plotting import (
             plot_confusion,
-            plot_roc_ovr,
-            plot_roc_ovo,
-            plot_output_nodes,
             plot_introspection,
+            plot_output_nodes,
+            plot_roc_ovo,
+            plot_roc_ovr,
         )
 
         # Since we only have test data, process sequentially with cleanup

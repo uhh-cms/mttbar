@@ -1,26 +1,23 @@
-# coding: utf-8
 """
 MultiDataset class for handling multiple datasets with process-specific batching.
 Taken from hbw analysis.
 """
 
 from __future__ import annotations
-import gc
 
+import gc
 import math
-import numpy as np
-import tensorflow as tf
 
 import law
-
-from columnflow.util import DotDict
-
+import numpy as np
 import order as od
+import tensorflow as tf
+from columnflow.util import DotDict
 
 logger = law.logger.get_logger(__name__)
 
 
-class MultiDataset(object):
+class MultiDataset:
 
     def __init__(
         self,
@@ -73,7 +70,7 @@ class MultiDataset(object):
         if isinstance(batch_size, int):
             total_batch_size = batch_size
         else:
-            total_batch_size = sum([batch_size[proc_inst] for proc_inst in data.keys()])
+            total_batch_size = sum([batch_size[proc_inst] for proc_inst in data])
 
         self.total_batch_size = total_batch_size  # Store for alternative method
 
@@ -102,7 +99,7 @@ class MultiDataset(object):
         else:
             # NOTE: when passing a dict, the batch size and sub_process_class_factors have been pre-calculated
             # therefore no check is needed
-            self.batch_sizes = [batch_size[proc_inst] for proc_inst in data.keys()]
+            self.batch_sizes = [batch_size[proc_inst] for proc_inst in data]
 
         if total_batch_size != sum(self.batch_sizes):
             print(f"total_batch_size is {sum(self.batch_sizes)} but should be {batch_size}")

@@ -1,13 +1,12 @@
-# coding: utf-8
 
 """
 Column production methods related to ttbar mass reconstruction.
 """
+from columnflow.columnar_util import set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.util import maybe_import
-from columnflow.columnar_util import set_ak_column
 
-from mtt.production.util import lv_mass, delta_r_match, delta_r_match_multiple
+from mtt.production.util import delta_r_match, delta_r_match_multiple, lv_mass
 
 ak = maybe_import("awkward")
 np = maybe_import("numpy")

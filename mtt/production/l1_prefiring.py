@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
 Producers for L1 prefiring weights.
@@ -7,16 +6,14 @@ Producers for L1 prefiring weights.
 from __future__ import annotations
 
 import operator as op
-
 from collections import defaultdict
 from functools import reduce
 
+from columnflow.columnar_util import flat_np_view, layout_ak_array, set_ak_column
 from columnflow.production import Producer, producer
 from columnflow.production.util import attach_coffea_behavior
-from columnflow.util import maybe_import, DotDict
-from columnflow.columnar_util import set_ak_column, flat_np_view, layout_ak_array
+from columnflow.util import DotDict, maybe_import
 from law.util import InsertableDict
-
 
 np = maybe_import("numpy")
 ak = maybe_import("awkward")
@@ -122,7 +119,7 @@ def l1_prefiring_weights(
             eff_jet[key],
         )
 
-    weights = defaultdict(lambda: [])
+    weights = defaultdict(list)
     for eff in (eff_jet_no_photon_overlap, eff_photon):
         val = eff.value
         err = np.sqrt((eff.value * 0.2)**2 + eff.error)
