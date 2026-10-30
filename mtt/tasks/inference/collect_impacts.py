@@ -26,7 +26,7 @@ class CollectImpacts(LimitsPlottingBaseTask):
         description="relative signal widths (in percent of mass) to scan",
     )
     impacts_modes = law.CSVParameter(
-        default=("default",),
+        default=("bkgonly",),
         description="Impacts task 'impacts_mode' values to scan",
     )
     source_csv = luigi.Parameter(

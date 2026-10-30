@@ -268,7 +268,7 @@ def get_fit_settings(
             return (FALLBACK_EXPECT_SIGNAL, *FALLBACK_R_RANGE)
         r_max = 4 * limits["expected_97.5"]
         return (limits["expected_50"], -0.3 * r_max, r_max)
-    raise ValueError(f"Invalid impacts_mode: {impacts_mode} ['bkgonly', 'sens', 'default'].")
+    raise ValueError(f"Invalid impacts_mode: {impacts_mode} ['bkgonly', 'sens'].")
 
 
 class _Impacts(
@@ -322,8 +322,7 @@ class Impacts(
 
     def impacts_name(self):
         name = f"impacts__{self.impacts_mode}"
-        if self.impacts_mode == "default":
-            name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
+        name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
         return name
 
     def store_parts(self) -> law.util.InsertableDict:
@@ -482,8 +481,7 @@ class PlotImpacts(
 
     def impacts_plot_name(self):
         name = f"impacts_plot__{self.impacts_mode}"
-        if self.impacts_mode == "default":
-            name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
+        name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
         return name
 
     def store_parts(self) -> law.util.InsertableDict:
