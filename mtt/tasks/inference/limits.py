@@ -139,20 +139,23 @@ class AsymptoticLimits(
         # touch the output_dirname
         if not os.path.exists(output_dirname):
             os.makedirs(output_dirname, exist_ok=True)
+        workdir = os.path.join(output_dirname, "work")
+        os.makedirs(workdir, exist_ok=True)
 
         command_to_run = self.build_command()
 
-        p, outp = self.run_command(command_to_run, echo=True)
+        p, outp = self.run_command(command_to_run, echo=True, cwd=workdir)
 
         self.output()["asymptotic_limits_log"].dump(outp, formatter="text")
         # move the output root file to the output location
         # /data/dust/user/matthiej/mttbar/higgsCombineTest.AsymptoticLimits.mH120.root
         name_extension = f".{self.name}" if self.name else ""
         raw_output_root = f"higgsCombine{name_extension}.AsymptoticLimits.mH{self.mass}.root"
-        full_raw_output_root = os.path.join(os.getcwd(), raw_output_root)
+        full_raw_output_root = os.path.join(workdir, raw_output_root)
         if not os.path.exists(full_raw_output_root):
             raise FileNotFoundError(f"Expected output root file {full_raw_output_root} not found.")
         shutil.move(full_raw_output_root, output_root)
+        shutil.rmtree(workdir, ignore_errors=True)
 
         logger.info(f"Moved output root file {full_raw_output_root} to {output_root}.")
         self.store_limits()

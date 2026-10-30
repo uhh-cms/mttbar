@@ -385,6 +385,9 @@ class Impacts(
         outputs = self.output()
         for target in outputs.values():
             target.parent.touch()
+        # dedicated working directory next to the outputs, shared by the three commands
+        workdir = os.path.join(os.path.dirname(next(iter(outputs.values())).path), "work")
+        os.makedirs(workdir, exist_ok=True)
 
         # signal strength and range of the fits, based on the limits in the limits CSV (if needed)
         expect_signal, r_min, r_max = get_fit_settings(
@@ -408,30 +411,31 @@ class Impacts(
         logger.info("Running impacts commands...")
         if "initial_impacts_log" in outputs:
             logger.info("Running initial fit...")
-            p, outp = self.run_command(commands["initial_fit"], echo=True)
+            p, outp = self.run_command(commands["initial_fit"], echo=True, cwd=workdir)
             outputs["initial_impacts_log"].dump(outp, formatter="text")
         if "impacts_log" in outputs:
             logger.info("Running fits...")
-            p, outp = self.run_command(commands["fits"], echo=False)
+            p, outp = self.run_command(commands["fits"], echo=False, cwd=workdir)
             outputs["impacts_log"].dump(outp, formatter="text")
         if "impacts_json" in outputs:
             logger.info("Running JSON collection...")
-            p, outp = self.run_command(commands["json"], echo=True)
+            p, outp = self.run_command(commands["json"], echo=True, cwd=workdir)
 
         logger.info("Finished running impacts commands.")
 
-        # optionally cleanup intermediate .root files
-        if self.cleanup_root_files:
-            workdir = os.getcwd()
+        # optionally clean up the intermediate .root files, but only after the json step has read them
+        if self.cleanup_root_files and "impacts_json" in outputs:
             logger.info(f"Cleaning up intermediate .root files in {workdir}")
             for file in os.listdir(workdir):
                 if file.endswith(".root") and file.startswith("higgsCombine_"):
-                    file_path = os.path.join(workdir, file)
                     try:
-                        os.remove(file_path)
-                        logger.info(f"Deleted {file_path}")
+                        os.remove(os.path.join(workdir, file))
                     except Exception as e:
-                        logger.warning(f"Failed to delete {file_path}: {e}")
+                        logger.warning(f"Failed to delete {file}: {e}")
+            try:
+                os.rmdir(workdir)  # only succeeds if it is empty
+            except OSError:
+                pass
 
 
 class PlotImpacts(
