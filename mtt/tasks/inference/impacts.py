@@ -270,8 +270,7 @@ def get_fit_settings(
         return (limits["expected_50"], -0.3 * r_max, r_max)
     raise ValueError(f"Invalid impacts_mode: {impacts_mode} ['bkgonly', 'sens', 'default'].")
 
-
-class Impacts(
+class _Impacts(
     CombineBaseTask,
     CommonStatsOptionsMixin,
     CommonIOOptionsMixin,
@@ -280,13 +279,20 @@ class Impacts(
     FitterAlgoOptionsMixin,
 ):
     """
-    Run combine tool with Impacts method.
+    Base class for the Impacts task.
     """
     impacts_mode = luigi.ChoiceParameter(
         choices=["bkgonly", "sens", "default"],
         default="bkgonly",
         description="Impacts mode: background-only or sensitivity or use combine's defaults",
     )
+
+class Impacts(
+    _Impacts,
+):
+    """
+    Run combine tool with Impacts method.
+    """
 
     cleanup_root_files = luigi.BoolParameter(
         default=True,
@@ -307,14 +313,15 @@ class Impacts(
     )
 
     def requires(self):
-        reqs = {
-            "workspace": self.reqs.CreateWorkspace.req(self),
-            "asymptotic_limits": self.reqs.AsymptoticLimits.req(self),
-        }
+        reqs = {"workspace": self.reqs.CreateWorkspace.req(self)}
+        if self.impacts_mode == "sens":
+            reqs["asymptotic_limits"] = self.reqs.AsymptoticLimits.req(self)
         return reqs
 
     def impacts_name(self):
-        name = "impacts"
+        name = f"impacts__{self.impacts_mode}"
+        if self.impacts_mode == "default":
+            name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
         return name
 
     def store_parts(self) -> law.util.InsertableDict:
@@ -371,7 +378,9 @@ class Impacts(
     @law.decorator.safe_output
     def run(self):
         input_workspace = self.input()["workspace"]["workspace"].path
-        input_limits = self.input()["asymptotic_limits"]["asymptotic_limits_csv"].path
+        limits = {}
+        if "asymptotic_limits" in self.input():
+            limits = read_expected_limits(self.input()["asymptotic_limits"]["asymptotic_limits_csv"].path)
         outputs = self.output()
         for target in outputs.values():
             target.parent.touch()
@@ -379,7 +388,7 @@ class Impacts(
         # signal strength and range of the fits, based on the limits in the limits CSV (if needed)
         expect_signal, r_min, r_max = get_fit_settings(
             self.impacts_mode,
-            read_expected_limits(input_limits),
+            limits,
             default_settings=(self.expectSignal, self.rMin, self.rMax),
         )
         logger.info(
@@ -425,6 +434,7 @@ class Impacts(
 
 
 class PlotImpacts(
+    _Impacts,
     InferenceBaseTask,
 ):
     summary_plot = luigi.BoolParameter(
@@ -469,7 +479,9 @@ class PlotImpacts(
         return reqs
 
     def impacts_plot_name(self):
-        name = "impacts_plot"  # indicates that this is the impacts task
+        name = f"impacts_plot__{self.impacts_mode}"
+        if self.impacts_mode == "default":
+            name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
         return name
 
     def store_parts(self) -> law.util.InsertableDict:

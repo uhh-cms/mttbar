@@ -55,8 +55,7 @@ class AsymptoticLimits(
         return reqs
 
     def asymptotic_limits_name(self):
-        name = "asymptotic_limits"  # indicates that this is the asymptotic limits task
-        return name
+        return f"asymptotic_limits__{self.run_mode}__{'asimov' if self.asimov_data else 'data'}"
 
     def store_parts(self) -> law.util.InsertableDict:
         parts = super().store_parts()
@@ -105,6 +104,8 @@ class AsymptoticLimits(
                 elif "Expected 97.5%:" in line:
                     limits_dict["expected_97.5"] = float(line.split("<")[1].strip())
 
+        if "expected_50" not in limits_dict: raise RuntimeError(f"no limits found in {log_path}")
+
         # Write to CSV
         with open(csv_path, "w") as f:
             f.write("limit_type,limit_value\n")
@@ -112,10 +113,11 @@ class AsymptoticLimits(
 
         logger.info(f"Stored limits to CSV file {csv_path}.")
 
-    def build_command(self, input_workspace: str) -> str:
+    def build_command(self) -> str:
         """
         Builds the combine command that runs the AsymptoticLimits method on *input_workspace*.
         """
+        input_workspace = self.input()["workspace"]["workspace"].path
         command_to_run = "combine -M AsymptoticLimits"
         command_to_run += f" {input_workspace}"
         command_to_run += f" -v {self.verbosity}"
@@ -138,7 +140,7 @@ class AsymptoticLimits(
         if not os.path.exists(output_dirname):
             os.makedirs(output_dirname, exist_ok=True)
 
-        command_to_run = self.build_command(input_workspace)
+        command_to_run = self.build_command()
 
         p, outp = self.run_command(command_to_run, echo=True)
 
