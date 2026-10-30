@@ -270,6 +270,7 @@ def get_fit_settings(
         return (limits["expected_50"], -0.3 * r_max, r_max)
     raise ValueError(f"Invalid impacts_mode: {impacts_mode} ['bkgonly', 'sens', 'default'].")
 
+
 class _Impacts(
     CombineBaseTask,
     CommonStatsOptionsMixin,
@@ -286,6 +287,7 @@ class _Impacts(
         default="bkgonly",
         description="Impacts mode: background-only or sensitivity or use combine's defaults",
     )
+
 
 class Impacts(
     _Impacts,

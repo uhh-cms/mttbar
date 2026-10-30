@@ -104,7 +104,8 @@ class AsymptoticLimits(
                 elif "Expected 97.5%:" in line:
                     limits_dict["expected_97.5"] = float(line.split("<")[1].strip())
 
-        if "expected_50" not in limits_dict: raise RuntimeError(f"no limits found in {log_path}")
+        if "expected_50" not in limits_dict:
+            raise RuntimeError(f"no limits found in {log_path}")
 
         # Write to CSV
         with open(csv_path, "w") as f:
@@ -115,7 +116,7 @@ class AsymptoticLimits(
 
     def build_command(self) -> str:
         """
-        Builds the combine command that runs the AsymptoticLimits method on *input_workspace*.
+        Builds the combine command that runs the AsymptoticLimits method.
         """
         input_workspace = self.input()["workspace"]["workspace"].path
         command_to_run = "combine -M AsymptoticLimits"
@@ -133,7 +134,6 @@ class AsymptoticLimits(
     @law.decorator.log
     @law.decorator.safe_output
     def run(self):
-        input_workspace = self.input()["workspace"]["workspace"].path
         output_root = self.output()["asymptotic_limits_root"].path
         output_dirname = os.path.dirname(output_root)
         # touch the output_dirname
