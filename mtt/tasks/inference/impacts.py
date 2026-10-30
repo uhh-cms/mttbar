@@ -193,6 +193,7 @@ plot_impacts_exp() {
     cd ${BASE_DIR}
 }
 """
+from __future__ import annotations
 
 import os
 
@@ -212,6 +213,62 @@ from mtt.tasks.inference.mixins import (
 )
 
 logger = law.logger.get_logger(__name__)
+
+
+# background-only impacts use the same signal strength and range as the bash workflow
+# (impacts_exp bkgonly 0 -10 10)
+BKGONLY_EXPECT_SIGNAL = 0.0
+BKGONLY_R_RANGE = (-10.0, 10.0)
+
+# fallback for the "sens" mode when the limits to derive the range from are not available
+FALLBACK_EXPECT_SIGNAL = 1.0
+FALLBACK_R_RANGE = (0.0, 10.0)
+
+
+def read_expected_limits(limits_csv: str) -> dict[str, float]:
+    """
+    Reads a limits CSV (lines of ``limit_type,limit_value``, see ``AsymptoticLimits.store_limits``)
+    into a dictionary, e.g. ``{"expected_50": 3.2, "expected_97.5": 7.9}``.
+    """
+    limits = {}
+    with open(limits_csv) as f:
+        for line in f:
+            key, _, value = line.strip().partition(",")
+            try:
+                limits[key] = float(value)
+            except ValueError:
+                continue  # header or malformed line
+    return limits
+
+
+def get_fit_settings(
+    impacts_mode: str,
+    limits: dict[str, float],
+    default_settings: tuple[float, float, float],
+) -> tuple[float, float, float]:
+    """
+    Returns the tuple ``(expectSignal, rMin, rMax)`` to use for the impacts fits in *impacts_mode*.
+
+    - ``default``: the values given in *default_settings*
+    - ``bkgonly``: background-only fits in a fixed range, as in the bash workflow
+    - ``sens``: signal strength at the median expected limit, with a range derived from the 97.5% limit
+
+    When the limits needed for ``sens`` are missing, a warning is emitted and a fallback is used.
+    """
+    if impacts_mode == "default":
+        return default_settings
+    if impacts_mode == "bkgonly":
+        return (BKGONLY_EXPECT_SIGNAL, *BKGONLY_R_RANGE)
+    if impacts_mode == "sens":
+        if "expected_50" not in limits or "expected_97.5" not in limits:
+            logger.warning(
+                "could not find expected_50 and expected_97.5 limits, using "
+                f"r={FALLBACK_EXPECT_SIGNAL} and the range {FALLBACK_R_RANGE} as a fallback",
+            )
+            return (FALLBACK_EXPECT_SIGNAL, *FALLBACK_R_RANGE)
+        r_max = 4 * limits["expected_97.5"]
+        return (limits["expected_50"], -0.3 * r_max, r_max)
+    raise ValueError(f"Invalid impacts_mode: {impacts_mode} ['bkgonly', 'sens', 'default'].")
 
 
 class Impacts(
@@ -266,62 +323,32 @@ class Impacts(
         return parts
 
     def output(self):
-        output_dict = {
-            "initial_impacts_log": self.target("initial_impacts.log"),
-            "impacts_log": self.target("impacts.log"),
-            "impacts_json": self.target("impacts.json"),
-        }
+        # only declare what the selected steps actually write, otherwise the task could never be complete
+        # when only some of the steps are run
+        output_dict = {}
+        if self.what_to_run in ["initial_fit", "all"]:
+            output_dict["initial_impacts_log"] = self.target("initial_impacts.log")
+        if self.what_to_run in ["fits", "all"]:
+            output_dict["impacts_log"] = self.target("impacts.log")
+        if self.what_to_run in ["json", "all"]:
+            output_dict["impacts_json"] = self.target("impacts.json")
         return output_dict
 
-    @law.decorator.log
-    @law.decorator.safe_output
-    def run(self):
-        input_workspace = self.input()["workspace"]["workspace"].path
-        input_limits = self.input()["asymptotic_limits"]["asymptotic_limits_csv"].path
-        output_dirname = os.path.dirname(self.output()["impacts_json"].path)
-        if not os.path.exists(output_dirname):
-            logger.warning("Output path didn't exist yet.")
-            os.makedirs(output_dirname)
-            logger.info(f"Created output directory {output_dirname}.")
-
-        # read the limits CSV to get the expected signal strength (r) for the impacts calculation
-        expected_signal = None
-        r_min = None
-        r_max = None
-        with open(input_limits, "r") as f:
-            for line in f:
-                if line.startswith("expected_50"):
-                    expected_signal = float(line.split(",")[1])
-                elif line.startswith("expected_97.5"):
-                    r_max = 4 * float(line.split(",")[1])
-                    r_min = -0.3 * r_max
-        if expected_signal is None:
-            logger.warning(f"Could not find expected_50 limit in {input_limits}. Using r=1 as default.")
-            expected_signal = 1.0
-            r_min = 0.0
-            r_max = 10.0
-        if self.impacts_mode == "default":
-            expected_signal = self.expectSignal
-            r_min = self.rMin
-            r_max = self.rMax
-        elif self.impacts_mode == "bkgonly":
-            expected_signal = 0.0
-            r_min = r_min
-            r_max = r_max
-        elif self.impacts_mode == "sens":
-            expected_signal = expected_signal
-            r_min = r_min
-            r_max = r_max
-        else:
-            raise ValueError(f"Invalid impacts_mode: {self.impacts_mode} ['bkgonly', 'sens', 'default'].")
-
-        logger.info(
-            f"Using expected signal strength r={expected_signal}, rMin={r_min}, rMax={r_max} for impacts calculation."
-        )
-
+    def build_commands(
+        self,
+        input_workspace: str,
+        expect_signal: float,
+        r_min: float,
+        r_max: float,
+        json_path: str | None = None,
+    ) -> dict[str, str]:
+        """
+        Builds the combineTool.py commands of the individual steps, keyed by "initial_fit", "fits" and
+        (when *json_path* is given) "json".
+        """
         command_to_run = "combineTool.py -M Impacts"
         command_to_run += f" -d {input_workspace}"
-        command_to_run += f" --expectSignal {expected_signal} --rMin {r_min} --rMax {r_max}"
+        command_to_run += f" --expectSignal {expect_signal} --rMin {r_min} --rMax {r_max}"
         command_to_run += f" -n {self.impacts_mode}_m{self.mass}_{self.inference_model}"
         command_to_run += " --robustFit 1" if self.robustFit else ""
         command_to_run += " --cminSingleNuisFit" if self.cminSingleNuisFit else ""
@@ -332,31 +359,54 @@ class Impacts(
         command_to_run += f" -m {self.mass}"
         command_to_run += " --dry-run" if self.dry_run else ""
 
-        initial_impacts_command = command_to_run + " --doInitialFit"
+        commands = {
+            "initial_fit": command_to_run + " --doInitialFit",
+            "fits": command_to_run + " --doFits --parallel 4",
+        }
+        if json_path:
+            commands["json"] = command_to_run + f" -o {json_path}"
+        return commands
 
-        impacts_command = command_to_run + " --doFits --parallel 4"
+    @law.decorator.log
+    @law.decorator.safe_output
+    def run(self):
+        input_workspace = self.input()["workspace"]["workspace"].path
+        input_limits = self.input()["asymptotic_limits"]["asymptotic_limits_csv"].path
+        outputs = self.output()
+        for target in outputs.values():
+            target.parent.touch()
 
-        impact_json_command = command_to_run + f" -o {self.output()['impacts_json'].path}"
+        # signal strength and range of the fits, based on the limits in the limits CSV (if needed)
+        expect_signal, r_min, r_max = get_fit_settings(
+            self.impacts_mode,
+            read_expected_limits(input_limits),
+            default_settings=(self.expectSignal, self.rMin, self.rMax),
+        )
+        logger.info(
+            f"Using expected signal strength r={expect_signal}, rMin={r_min}, rMax={r_max} "
+            "for impacts calculation.",
+        )
 
-        # impact_json_command = f"combineTool.py -M Impacts -d {input_workspace}"
-        # impact_json_command += f" -v {self.verbosity} -m {self.mass}"
-        # impact_json_command += f" -o {self.output()['impacts_json'].path}"
-        # impact_json_command += f" -n {self.impacts_mode}"
-        # impact_json_command += " -h" if self.print_help else ""
-        # impact_json_command += " --dry-run" if self.dry_run else ""
+        commands = self.build_commands(
+            input_workspace,
+            expect_signal,
+            r_min,
+            r_max,
+            json_path=outputs["impacts_json"].path if "impacts_json" in outputs else None,
+        )
 
         logger.info("Running impacts commands...")
-        if self.what_to_run in ["initial_fit", "all"]:
+        if "initial_impacts_log" in outputs:
             logger.info("Running initial fit...")
-            p, outp = self.run_command(initial_impacts_command, echo=True)
-            self.output()["initial_impacts_log"].dump(outp, formatter="text")
-        if self.what_to_run in ["fits", "all"]:
+            p, outp = self.run_command(commands["initial_fit"], echo=True)
+            outputs["initial_impacts_log"].dump(outp, formatter="text")
+        if "impacts_log" in outputs:
             logger.info("Running fits...")
-            p, outp = self.run_command(impacts_command, echo=False)
-            self.output()["impacts_log"].dump(outp, formatter="text")
-        if self.what_to_run in ["json", "all"]:
+            p, outp = self.run_command(commands["fits"], echo=False)
+            outputs["impacts_log"].dump(outp, formatter="text")
+        if "impacts_json" in outputs:
             logger.info("Running JSON collection...")
-            p, outp = self.run_command(impact_json_command, echo=True)
+            p, outp = self.run_command(commands["json"], echo=True)
 
         logger.info("Finished running impacts commands.")
 

@@ -49,6 +49,7 @@ combine_datacards() {
     run_cmd "$cmd" "${LOG_DIR}/combine_datacards_${FIT_VERSION}__${YEAR}.log"
 }
 """
+from __future__ import annotations
 
 import os
 
@@ -59,6 +60,26 @@ from columnflow.util import dev_sandbox
 from mtt.tasks.inference.inference_base import InferenceBaseTask
 
 logger = law.logger.get_logger(__name__)
+
+
+def build_combine_cards_cmd(
+    cards: dict[str, str],
+    output_card: str,
+    log_path: str,
+    print_help: bool = False,
+) -> str:
+    """
+    Builds the shell command that merges per-category datacards with ``combineCards.py``.
+
+    *cards* maps category names to datacard paths. combineCards prints the merged card to stdout, so
+    stdout is redirected into *output_card* and stderr (warnings, errors) into *log_path*, to keep the
+    two apart. This matters as anything on stderr would otherwise end up inside the datacard.
+    """
+    cmd = "combineCards.py"
+    cmd += "".join(f" {name}={path}" for name, path in cards.items())
+    cmd += " -h" if print_help else ""
+    cmd += f" > {output_card} 2> {log_path}"
+    return cmd
 
 
 class CombineDatacards(
@@ -87,29 +108,31 @@ class CombineDatacards(
     @law.decorator.log
     @law.decorator.safe_output
     def run(self):
-        regions = self.input()["datacards"].keys()
-        cards = []
-        for reg in regions:
-            cards.append(self.input()["datacards"][reg]['card'].path)
-        if "default" in self.inference_model or "zp" in self.inference_model:
-            logger.info("Using merged datacards as inputs.")
-        else:
-            raise ValueError("Only 'default' inf model currently implemented.")
-        input_datacards = cards
+        if not ("default" in self.inference_model or "zp" in self.inference_model):
+            raise ValueError(
+                f"inference model '{self.inference_model}' not supported, its name must contain "
+                "'default' or 'zp' (only these use merged datacards so far)",
+            )
+        logger.info("Using merged datacards as inputs.")
+
+        # the keys of the CreateDatacards output are the category names, so use them directly
+        # instead of relying on the order of the categories in the inference model
+        datacards = self.input()["datacards"]
+        cards = {cat_name: datacards[cat_name]["card"].path for cat_name in datacards.keys()}
+
         output_card = self.output()["combined_card"].path
-        if not os.path.exists(os.path.dirname(output_card)):
-            logger.warning("Output path didn't exist yet.")
-            os.makedirs(os.path.dirname(output_card))
+        log_path = self.output()["log"].path
+        os.makedirs(os.path.dirname(output_card), exist_ok=True)
 
-        logger.warning("Make sure the cards are assigned to the correct cats!")
+        command_to_run = build_combine_cards_cmd(cards, output_card, log_path, print_help=self.print_help)
 
-        command_to_run = "combineCards.py"
-        for i, card in enumerate(input_datacards):
-            command_to_run += f" {self.inference_model_inst.categories[i].name}={card}"
-
-        command_to_run += f" &> {output_card}"
-        command_to_run += " -h" if self.print_help else ""
-
+        # stdout and stderr of combineCards.py are redirected to files, so run_command only captures its
+        # own header; stderr is already in the log file and is appended to the header below
         p, outp = self.run_command(command_to_run, echo=True)
+        with open(log_path) as f:
+            stderr = f.read()
+        self.output()["log"].dump(f"{outp}\n{stderr}", formatter="text")
 
-        self.output()["log"].dump("\n".join(outp), formatter="text")
+        if os.path.getsize(output_card) == 0:
+            # note: safe_output removes all outputs (including the log) when raising, so include stderr here
+            raise RuntimeError(f"combineCards.py created an empty datacard {output_card}, stderr:\n{stderr}")

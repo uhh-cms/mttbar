@@ -19,6 +19,8 @@ asymptotic_limits() {
     # run_cmd "$cmd_observed" "${LOG_DIR}/asymptotic_limits_observed_${FIT_VERSION}__${YEAR}.log"  # NOTE: don't use!
 }
 """
+from __future__ import annotations
+
 import os
 import shutil
 
@@ -110,16 +112,10 @@ class AsymptoticLimits(
 
         logger.info(f"Stored limits to CSV file {csv_path}.")
 
-    @law.decorator.log
-    @law.decorator.safe_output
-    def run(self):
-        input_workspace = self.input()["workspace"]["workspace"].path
-        output_root = self.output()["asymptotic_limits_root"].path
-        output_dirname = os.path.dirname(output_root)
-        # touch the output_dirname
-        if not os.path.exists(output_dirname):
-            os.makedirs(output_dirname, exist_ok=True)
-
+    def build_command(self, input_workspace: str) -> str:
+        """
+        Builds the combine command that runs the AsymptoticLimits method on *input_workspace*.
+        """
         command_to_run = "combine -M AsymptoticLimits"
         command_to_run += f" {input_workspace}"
         command_to_run += f" -v {self.verbosity}"
@@ -130,6 +126,19 @@ class AsymptoticLimits(
         command_to_run += " --validateModel" if self.validateModel else ""
         command_to_run += f" --name .{self.name}" if self.name else ""
         command_to_run += " -t -1" if self.asimov_data else ""
+        return command_to_run
+
+    @law.decorator.log
+    @law.decorator.safe_output
+    def run(self):
+        input_workspace = self.input()["workspace"]["workspace"].path
+        output_root = self.output()["asymptotic_limits_root"].path
+        output_dirname = os.path.dirname(output_root)
+        # touch the output_dirname
+        if not os.path.exists(output_dirname):
+            os.makedirs(output_dirname, exist_ok=True)
+
+        command_to_run = self.build_command(input_workspace)
 
         p, outp = self.run_command(command_to_run, echo=True)
 
