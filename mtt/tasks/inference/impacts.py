@@ -283,9 +283,9 @@ class _Impacts(
     Base class for the Impacts task.
     """
     impacts_mode = luigi.ChoiceParameter(
-        choices=["bkgonly", "sens", "default"],
+        choices=["bkgonly", "sens"],
         default="bkgonly",
-        description="Impacts mode: background-only or sensitivity or use combine's defaults",
+        description="Impacts mode: background-only or sensitivity.",
     )
 
 
