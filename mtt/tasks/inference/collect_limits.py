@@ -56,7 +56,7 @@ class CollectLimits(LimitsPlottingBaseTask):
     width_percentages = law.CSVParameter(
         cls=luigi.IntParameter,
         default=(10,),
-        description="relative signal widths (as % of mass) to scan",
+        description="relative signal widths (in percent of mass) to scan",
     )
     source_csv = luigi.Parameter(
         default=law.NO_STR,
@@ -121,7 +121,7 @@ class CollectLimits(LimitsPlottingBaseTask):
         if missing:
             raise Exception(
                 f"source CSV '{self.source_csv}' is missing {len(missing)} requested "
-                f"combinations: {sorted(missing)}"
+                f"combinations: {sorted(missing)}",
             )
         idx = src.set_index(["mass", "width_pct", "variant"]).index
         subset = src[idx.isin(requested)]

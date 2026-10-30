@@ -70,7 +70,8 @@ impacts_exp() {
         -n ${shared_tag}
     )
     if [[ "$job_mode" == "condor" ]]; then
-        local sub_opts="+RequestRuntime=${CONDOR_RUNTIME_SEC}\nRequestMemory=${CONDOR_REQUEST_MEMORY_MB}\nRequestCpus=${CONDOR_REQUEST_CPUS}"
+        local \
+            sub_opts="+RequestRuntime=${CONDOR_RUNTIME_SEC}\nRequestMemory=${CONDOR_REQUEST_MEMORY_MB}\nRequestCpus=${CONDOR_REQUEST_CPUS}"
         if [[ -n "$CONDOR_MYPROJECT" ]]; then
             sub_opts="${sub_opts}\n+MyProject=\"${CONDOR_MYPROJECT}\""
         fi
@@ -95,7 +96,8 @@ impacts_exp() {
 
     if [[ "$job_mode" == "condor" ]]; then
         if [[ "$CONDOR_DRY_RUN" == "true" ]]; then
-            echo "CONDOR_DRY_RUN=true: condor_impacts_${label}_${FIT_VERSION}__${YEAR}.sub was written but NOT submitted (in ${OUTPUT_DIR}/impacts)."
+            echo "CONDOR_DRY_RUN=true: condor_impacts_${label}_${FIT_VERSION}__${YEAR}.sub was written but \
+                NOT submitted (in ${OUTPUT_DIR}/impacts)."
             echo "Inspect it, submit manually (condor_submit ...), then once done run: impacts_collect_json ${label}"
             cd "${BASE_DIR}"
             return
@@ -104,7 +106,8 @@ impacts_exp() {
         local cluster_id
         cluster_id=$(grep -oP 'submitted to cluster \\K[0-9]+' "$impacts_log" | tail -1 || true)
         if [[ -z "$cluster_id" ]]; then
-            echo "ERROR: could not determine condor cluster ID from ${impacts_log}. Check it manually, then run: impacts_collect_json ${label}" >&2
+            echo "ERROR: could not determine condor cluster ID from ${impacts_log}. Check it manually, then \
+                run: impacts_collect_json ${label}" >&2
             exit 1
         fi
         wait_for_condor_cluster "$cluster_id" "$label"
@@ -139,7 +142,8 @@ impacts_collect_json() {
     if [[ -f "$json_file" ]]; then
         cleanup_impacts_files "$label"
     else
-        echo "WARNING: ${json_file} was not created -- skipping cleanup so the raw fit outputs are still there to debug." >&2
+        echo "WARNING: ${json_file} was not created -- skipping cleanup so the raw fit outputs are still \
+            there to debug." >&2
     fi
 
     cd "${BASE_DIR}"

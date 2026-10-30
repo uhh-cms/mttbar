@@ -31,7 +31,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
     sandbox = dev_sandbox("bash::$CF_BASE/sandboxes/venv_columnar.sh")
 
     variants = law.CSVParameter(default=("v2",), description="inference-model variants to compare")
-    width_percentage = luigi.IntParameter(default=10, description="relative signal width (% of mass)")
+    width_percentage = luigi.IntParameter(default=10, description="relative signal width (in percent of mass)")
     impacts_mode = luigi.Parameter(default="default", description="Impacts task mode to plot")
     params = law.CSVParameter(description="nuisance parameter name(s) to plot, one figure each")
     impact_yscale = luigi.ChoiceParameter(choices=("linear", "symlog"), default="linear")

@@ -12,7 +12,8 @@ np = maybe_import("numpy")
 
 logger = law.logger.get_logger(__name__)
 
-PATH_TO_RUN2_LIMITS = "/data/dust/user/matthiej/run2_datacards/limits/limits_{model}.csv"  # model in RSGluon, ZprimeDM, ZPrime_w10, ZPrime_w1, ZPrime_w30
+# model in RSGluon, ZprimeDM, ZPrime_w10, ZPrime_w1, ZPrime_w30
+PATH_TO_RUN2_LIMITS = "/data/dust/user/matthiej/run2_datacards/limits/limits_{model}.csv"
 
 RUN2_THEORY_LINES = {
     "ZPrime_w1": {
@@ -39,7 +40,7 @@ RUN2_THEORY_LINES = {
             1.12874e-01, 7.53710e-02, 5.15542e-02, 3.61230e-02,
             2.59114e-02, 1.90265e-02, 1.42839e-02, 1.09496e-02,
             8.55804e-03, 6.80722e-03, 5.50276e-03, 4.50943e-03,
-            3.74190e-03, 3.13889e-03, 2.65864e-03
+            3.74190e-03, 3.13889e-03, 2.65864e-03,
         ]),
         "X_th": np.array([
             0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75,
@@ -55,7 +56,7 @@ RUN2_THEORY_LINES = {
             5.53916e-01, 3.95485e-01, 2.88839e-01, 2.15406e-01,
             1.63747e-01, 1.26704e-01, 9.95997e-02, 7.94496e-02,
             6.42139e-02, 5.25241e-02, 4.34250e-02, 3.62486e-02,
-            3.05223e-02, 2.59064e-02, 2.21476e-02
+            3.05223e-02, 2.59064e-02, 2.21476e-02,
         ]),
         "X_th": np.array([
             0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75,
@@ -73,9 +74,17 @@ class PlotLimits(LimitsPlottingBaseTask):
     sandbox = dev_sandbox("bash::$CF_BASE/sandboxes/venv_columnar.sh")
 
     variant = luigi.Parameter(default="v2", description="inference-model variant to plot")
-    width_percentage = luigi.IntParameter(default=10, description="relative signal width (% of mass)")
-    include_run2 = luigi.ChoiceParameter(default="None", choices=["none", "raw", "lumi-scaled"], description="Include Run 2 limits in plot.")
-    include_theory = luigi.BoolParameter(default=False, description="Include Run 2 limits in plot.")
+    width_percentage = luigi.IntParameter(default=10, description="relative signal width (in percent of mass)")
+    include_run2 = luigi.ChoiceParameter(
+        default="none",
+        choices=["none", "raw", "lumi-scaled"],
+        description="Include Run 2 expected limits in the plot, either as published ('raw') or scaled "
+        "by the luminosity ratio ('lumi-scaled'); default: 'none'",
+    )
+    include_theory = luigi.BoolParameter(
+        default=False,
+        description="Include the Run 2 theory cross section line for the selected signal width.",
+    )
 
     reqs = Requirements(RemoteWorkflow.reqs, CollectLimits=CollectLimits)
 
@@ -112,7 +121,7 @@ class PlotLimits(LimitsPlottingBaseTask):
         lumi = 0
         for cfg in self.config_insts:
             lumi += cfg.x.luminosity.nominal / 1000
-        
+
         # reading prefit signal norm from config (should be the same (0.1) for all configs)
         prefit_norm = self.config_insts[0].x.signal_norm.nominal
 
@@ -120,7 +129,7 @@ class PlotLimits(LimitsPlottingBaseTask):
         df = df[df["variant"] == self.variant].sort_values("mass")
         if df.empty:
             raise Exception(f"no limits found for variant '{self.variant}' in collected CSV")
-        if self.include_run2:
+        if self.include_run2 != "none":
             df_run2 = pd.read_csv(PATH_TO_RUN2_LIMITS.format(model=f"ZPrime_w{self.width_percentage}"))
 
         plt.style.use(hep.style.CMS)
@@ -129,26 +138,26 @@ class PlotLimits(LimitsPlottingBaseTask):
             ax.plot(
                 df["mass"] / 1000,
                 df["observed"] * prefit_norm,
-                color="black", label="Observed"
+                color="black", label="Observed",
             )
 
         ax.plot(
             df["mass"] / 1000,
             df["expected_50"] * prefit_norm,
-            color="black", linestyle="--", label="Expected"
+            color="black", linestyle="--", label="Expected",
         )
 
         ax.fill_between(
             df["mass"] / 1000,
             df["expected_2.5"] * prefit_norm,
             df["expected_97.5"] * prefit_norm,
-            color="#fdd835", label="95% expected"
+            color="#fdd835", label="95% expected",
         )
         ax.fill_between(
             df["mass"] / 1000,
             df["expected_16"] * prefit_norm,
             df["expected_84"] * prefit_norm,
-            color="#4caf50", label="68% expected"
+            color="#4caf50", label="68% expected",
         )
 
         # include expected Run 2 limits in blue
@@ -179,9 +188,9 @@ class PlotLimits(LimitsPlottingBaseTask):
                 color="red",
                 linestyle="-",
                 zorder=5,
-                label=rf"Z' {self.width_percentage}% width (13 TeV)"
+                label=rf"Z' {self.width_percentage}% width (13 TeV)",
             )
-        if self.include_run2 == "None":
+        if self.include_run2 == "none":
             lumi_str = f"{lumi:,.1f}"
             com_str = "13.6 TeV"
         else:
@@ -210,7 +219,7 @@ class PlotLimitsComparison(LimitsPlottingBaseTask):
     sandbox = dev_sandbox("bash::$CF_BASE/sandboxes/venv_columnar.sh")
 
     variants = law.CSVParameter(default=("default", "v2"), description="inference-model variants to compare")
-    width_percentage = luigi.IntParameter(default=10, description="relative signal width (% of mass)")
+    width_percentage = luigi.IntParameter(default=10, description="relative signal width (in percent of mass)")
     reference_variant = luigi.Parameter(
         default=law.NO_STR,
         description="variant used as the ratio denominator; defaults to the first entry in --variants",
@@ -303,7 +312,10 @@ class PlotLimitsComparison(LimitsPlottingBaseTask):
             if common_mass.empty:
                 continue
             ratio = (sub.loc[common_mass] / ref.loc[common_mass]).sort_index()
-            ax.plot(ratio.index, ratio.values, marker="o", color=colors[i % 10], label=f"{variant} / {self.ref_variant}")
+            ax.plot(
+                ratio.index, ratio.values, marker="o", color=colors[i % 10],
+                label=f"{variant} / {self.ref_variant}",
+            )
         ax.axhline(1.0, color="gray", linestyle=":", linewidth=1)
         ax.set_xlabel("Mass [GeV]")
         ax.set_ylabel(f"Expected limit ratio (ref: {self.ref_variant})")

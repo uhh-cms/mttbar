@@ -7,10 +7,14 @@ asymptotic_limits() {
         --validateModel
         --saveWorkspace
     )
-    local cmd_blind="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run blind -n .asymptotic_limits_blind_${FIT_VERSION}__${INF_MODEL}"
-    local cmd_expected="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run expected -n .asymptotic_limits_expected_${FIT_VERSION}__${INF_MODEL}"
-    local cmd_observed="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run observed -n .asymptotic_limits_observed_${FIT_VERSION}__${INF_MODEL}"
-    # run_cmd "$cmd_blind" "${LOG_DIR}/asymptotic_limits_blind_${FIT_VERSION}__${YEAR}.log"  # NOTE: takes 5x longer than expected, so don't run by default, limits don't change due to blinded datacards
+    local cmd_blind="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run blind -n \
+        .asymptotic_limits_blind_${FIT_VERSION}__${INF_MODEL}"
+    local cmd_expected="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run expected -n \
+        .asymptotic_limits_expected_${FIT_VERSION}__${INF_MODEL}"
+    local cmd_observed="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run observed -n \
+        .asymptotic_limits_observed_${FIT_VERSION}__${INF_MODEL}"
+    # run_cmd "$cmd_blind" "${LOG_DIR}/asymptotic_limits_blind_${FIT_VERSION}__${YEAR}.log"  # NOTE: takes 5x
+    # longer than expected, so don't run by default, limits don't change due to blinded datacards
     run_cmd "$cmd_expected" "${LOG_DIR}/asymptotic_limits_expected_${FIT_VERSION}__${YEAR}.log"
     # run_cmd "$cmd_observed" "${LOG_DIR}/asymptotic_limits_observed_${FIT_VERSION}__${YEAR}.log"  # NOTE: don't use!
 }
