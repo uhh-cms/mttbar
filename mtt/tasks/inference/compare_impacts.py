@@ -32,7 +32,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
 
     variants = law.CSVParameter(default=("v2",), description="inference-model variants to compare")
     width_percentage = luigi.IntParameter(default=10, description="relative signal width (in percent of mass)")
-    impacts_mode = luigi.Parameter(default="default", description="Impacts task mode to plot")
+    impacts_mode = luigi.Parameter(default="bkgonly", description="Impacts task mode to plot")
     params = law.CSVParameter(description="nuisance parameter name(s) to plot, one figure each")
     impact_yscale = luigi.ChoiceParameter(choices=("linear", "symlog"), default="linear")
     impact_linthresh = luigi.FloatParameter(default=-1.0, significant=False)  # <0 => auto

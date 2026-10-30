@@ -255,8 +255,6 @@ def get_fit_settings(
 
     When the limits needed for ``sens`` are missing, a warning is emitted and a fallback is used.
     """
-    if impacts_mode == "default":
-        return default_settings
     if impacts_mode == "bkgonly":
         return (BKGONLY_EXPECT_SIGNAL, *BKGONLY_R_RANGE)
     if impacts_mode == "sens":

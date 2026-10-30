@@ -53,6 +53,7 @@ def inference_models_wrapper(require_cls, cls_name=None):
 
     return Wrapper
 
+
 CombineDatacardsWrapper = inference_models_wrapper(CombineDatacards)
 CreateWorkspaceWrapper = inference_models_wrapper(CreateWorkspace)
 AsymptoticLimitsWrapper = inference_models_wrapper(AsymptoticLimits)
