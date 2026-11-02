@@ -58,7 +58,7 @@ setup_mtt() {
     CF_SKIP_SETUP="1" source "${CF_BASE}/setup.sh" "" || return "$?"
 
     # interactive setup
-    if [ "! ${CF_REMOTE_ENV}" ]; then
+    if [ "${CF_REMOTE_ENV}" != "true" ]; then
         cf_setup_interactive_body() {
             # start querying for variables
             query CF_CERN_USER "CERN username" "$( whoami )"
