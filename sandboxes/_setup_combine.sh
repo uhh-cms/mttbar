@@ -2,7 +2,7 @@
 
 # Script that installs, removes and / or sources an environment containing the HiggsAnalysis-CombinedLimit
 # tool, a.k.a. `combine`. Distinctions are made depending on whether the installation is already present,
-# and whether the script is called as part of a remote (law) job (CF_REMOTE_JOB=1).
+# and whether the script is called as part of a remote (law) job (CF_REMOTE_ENV=true).
 #
 # Six environment variables are expected to be set before this script is called:
 #   CF_SANDBOX_FILE
@@ -78,7 +78,8 @@ setup_combine() {
     fi
 
     # force install mode for remote jobs
-    [ "${CF_REMOTE_JOB}" = "1" ] && mode="install"
+    # [ "${CF_REMOTE_JOB}" = "1" ] && mode="install"
+    ${CF_REMOTE_ENV} && mode="install"
 
     # value checks
     if [ "${mode}" != "install" ] && [ "${mode}" != "clear" ] && [ "${mode}" != "reinstall" ] && [ "${mode}" != "update" ]; then
@@ -148,7 +149,8 @@ setup_combine() {
     # ensure CF_COMBINE_BASE exists
     mkdir -p "${CF_COMBINE_BASE}"
 
-    if [ "${CF_REMOTE_JOB}" != "1" ]; then
+    # if [ "${CF_REMOTE_JOB}" != "1" ]; then
+    if ! ${CF_REMOTE_ENV}; then
         # optionally remove the current installation
         if [ "${mode}" = "clear" ] || [ "${mode}" = "reinstall" ]; then
             echo "removing current installation at ${install_path} (mode '${mode}')"
@@ -268,13 +270,16 @@ setup_combine() {
                     #     return "3004"
                     # }
 
-                    # compile
-                    cd ${CMSSW_BASE}
-                    scram b -j4
+                    # # compile
+                    # cd ${CMSSW_BASE}
+                    # scram b -j4
 
-                    # write the flag into a file
-                    echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
-                    rm -f "${pending_flag_file}"
+                    # # write the flag into a file
+                    # echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
+                    # rm -f "${pending_flag_file}"
+                                        # compile
+                    cd "${CMSSW_BASE}" || { clear_pending; return "3004"; }
+                    scram b -j4 || { clear_pending; return "3005"; }
                 )
             else
                 (
@@ -303,24 +308,24 @@ setup_combine() {
                     elif [ "$install_type" == "lcg" ]; then
                         . env_lcg.sh
                         make LCG=1 -j 4
-                    elif [ "$install_type" == "cmssw" ]; then
-                        mkdir -p "${install_path}"
-                        cd "${install_path}"
-                        source "/cvmfs/cms.cern.ch/cmsset_default.sh" ""
-                        export SCRAM_ARCH="${CF_COMBINE_SCRAM_ARCH}"
-                        scramv1 project CMSSW "${CF_COMBINE_CMSSW_VERSION}"
-                        cd "${CF_COMBINE_CMSSW_VERSION}/src"
-                        eval "$( scramv1 runtime -sh )"
-                        scram b
+                    # elif [ "$install_type" == "cmssw" ]; then
+                    #     mkdir -p "${install_path}"
+                    #     cd "${install_path}"
+                    #     source "/cvmfs/cms.cern.ch/cmsset_default.sh" ""
+                    #     export SCRAM_ARCH="${CF_COMBINE_SCRAM_ARCH}"
+                    #     scramv1 project CMSSW "${CF_COMBINE_CMSSW_VERSION}"
+                    #     cd "${CF_COMBINE_CMSSW_VERSION}/src"
+                    #     eval "$( scramv1 runtime -sh )"
+                    #     scram b
                     else
                         >&2 echo "invalid compile mode '${install_type}'"
                         clear_pending
                         return "3003"
                     fi
 
-                    # write the flag into a file
-                    echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
-                    rm -f "${pending_flag_file}"
+                    # # write the flag into a file
+                    # echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
+                    # rm -f "${pending_flag_file}"
                 )
             fi
             local ret="$?"
@@ -350,9 +355,18 @@ setup_combine() {
                     source "${cf_cmssw_custom_install}" "" &&
                     source "/cvmfs/cms.cern.ch/cmsset_default.sh" "" &&
                     cd "${src_dir}" &&
-                    scram b
+        #             scram b
+        #         fi
+        #     )
+        # fi
+                            scram b
                 fi
             )
+            ret="$?"
+            [ "${ret}" != "0" ] && clear_pending && return "${ret}"
+
+            # write the flag into a file, only after everything above succeeded
+            echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
         fi
 
         # remove the pending_flag
@@ -360,7 +374,8 @@ setup_combine() {
     fi
 
     # handle remote job environments
-    if [ "${CF_REMOTE_JOB}" = "1" ]; then
+    # if [ "${CF_REMOTE_JOB}" = "1" ]; then
+    if ${CF_REMOTE_ENV}; then
         # fetch, unpack and set up the bundle
         if [ ! -d "${install_path}" ]; then
             # fetch the bundle and unpack it

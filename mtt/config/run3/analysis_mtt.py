@@ -45,10 +45,10 @@ ana_new.x.bash_sandboxes = [
 
 # cmssw sandboxes that should be bundled for remote jobs in case they are needed
 ana.x.cmssw_sandboxes = [
-    # "$CF_BASE/sandboxes/cmssw_default.sh",
+    "$CF_BASE/sandboxes/cmssw_default.sh",
 ]
 ana_new.x.cmssw_sandboxes = [
-    # "$CF_BASE/sandboxes/cmssw_default.sh",
+    "$CF_BASE/sandboxes/cmssw_default.sh",
 ]
 
 # clear the list when cmssw bundling is disabled
