@@ -78,7 +78,6 @@ setup_combine() {
     fi
 
     # force install mode for remote jobs
-    # [ "${CF_REMOTE_JOB}" = "1" ] && mode="install"
     ${CF_REMOTE_ENV} && mode="install"
 
     # value checks
@@ -132,6 +131,12 @@ setup_combine() {
     # define variables
     #
 
+    # in remote jobs with a shared software installation (no bundles), use the combine installation that
+    # sits next to the shared venvs instead of an empty job-local directory
+    if [ "${CF_REMOTE_ENV}" = "true" ] && [ -z "${CF_JOB_CMSSW_SANDBOX_NAMES}" ]; then
+        CF_COMBINE_BASE="$( dirname "${CF_VENV_BASE}" )/combine"
+    fi
+
     local install_hash="$( cf_sandbox_file_hash "${sandbox_file}" )"
     local combine_env_name_hashed="${CF_COMBINE_ENV_NAME}_${install_hash}"
     local install_base="${CF_COMBINE_BASE}/${combine_env_name_hashed}"
@@ -149,7 +154,6 @@ setup_combine() {
     # ensure CF_COMBINE_BASE exists
     mkdir -p "${CF_COMBINE_BASE}"
 
-    # if [ "${CF_REMOTE_JOB}" != "1" ]; then
     if ! ${CF_REMOTE_ENV}; then
         # optionally remove the current installation
         if [ "${mode}" = "clear" ] || [ "${mode}" = "reinstall" ]; then
@@ -270,14 +274,7 @@ setup_combine() {
                     #     return "3004"
                     # }
 
-                    # # compile
-                    # cd ${CMSSW_BASE}
-                    # scram b -j4
-
-                    # # write the flag into a file
-                    # echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
-                    # rm -f "${pending_flag_file}"
-                                        # compile
+                    # compile
                     cd "${CMSSW_BASE}" || { clear_pending; return "3004"; }
                     scram b -j4 || { clear_pending; return "3005"; }
                 )
@@ -308,24 +305,11 @@ setup_combine() {
                     elif [ "$install_type" == "lcg" ]; then
                         . env_lcg.sh
                         make LCG=1 -j 4
-                    # elif [ "$install_type" == "cmssw" ]; then
-                    #     mkdir -p "${install_path}"
-                    #     cd "${install_path}"
-                    #     source "/cvmfs/cms.cern.ch/cmsset_default.sh" ""
-                    #     export SCRAM_ARCH="${CF_COMBINE_SCRAM_ARCH}"
-                    #     scramv1 project CMSSW "${CF_COMBINE_CMSSW_VERSION}"
-                    #     cd "${CF_COMBINE_CMSSW_VERSION}/src"
-                    #     eval "$( scramv1 runtime -sh )"
-                    #     scram b
                     else
                         >&2 echo "invalid compile mode '${install_type}'"
                         clear_pending
                         return "3003"
                     fi
-
-                    # # write the flag into a file
-                    # echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
-                    # rm -f "${pending_flag_file}"
                 )
             fi
             local ret="$?"
@@ -355,10 +339,6 @@ setup_combine() {
                     source "${cf_cmssw_custom_install}" "" &&
                     source "/cvmfs/cms.cern.ch/cmsset_default.sh" "" &&
                     cd "${src_dir}" &&
-        #             scram b
-        #         fi
-        #     )
-        # fi
                             scram b
                 fi
             )
@@ -374,22 +354,32 @@ setup_combine() {
     fi
 
     # handle remote job environments
-    # if [ "${CF_REMOTE_JOB}" = "1" ]; then
     if ${CF_REMOTE_ENV}; then
+        if [ "${install_type}" != "cmssw" ]; then
+            >&2 echo "remote jobs are only supported for install_type 'cmssw', got '${install_type}'"
+            return "23"
+        fi
+
         # fetch, unpack and set up the bundle
-        if [ ! -d "${install_path}" ]; then
-            # fetch the bundle and unpack it
+        if [ ! -d "${install_path}/${CF_COMBINE_CMSSW_VERSION}/src" ]; then
+            if [ -z "${CF_WLCG_TOOLS}" ] || [ ! -f "${CF_WLCG_TOOLS}" ]; then
+                >&2 echo "CF_WLCG_TOOLS (${CF_WLCG_TOOLS}) is empty or does not exist"
+                return "24"
+            fi
+
+            # fetch the bundle
             echo "looking for combine sandbox bundle for ${CF_COMBINE_ENV_NAME}"
-            local sandbox_names=(${CF_JOB_COMBINE_SANDBOX_NAMES})
-            local sandbox_uris=(${CF_JOB_COMBINE_SANDBOX_URIS})
-            local sandbox_patterns=(${CF_JOB_COMBINE_SANDBOX_PATTERNS})
+            local sandbox_names=(${CF_JOB_CMSSW_SANDBOX_NAMES})
+            local sandbox_uris=(${CF_JOB_CMSSW_SANDBOX_URIS})
+            local sandbox_patterns=(${CF_JOB_CMSSW_SANDBOX_PATTERNS})
             local found_sandbox="false"
             for (( i=0; i<${#sandbox_names[@]}; i+=1 )); do
                 if [ "${sandbox_names[i]}" = "${CF_COMBINE_ENV_NAME}" ]; then
                     echo "found bundle ${CF_COMBINE_ENV_NAME}, index ${i}, pattern ${sandbox_patterns[i]}, uri ${sandbox_uris[i]}"
                     (
-                        mkdir -p "${install_base}" &&
-                        cd "${install_base}" &&
+                        source "${CF_WLCG_TOOLS}" "" &&
+                        mkdir -p "${install_path}" &&
+                        cd "${install_path}" &&
                         law_wlcg_get_file "${sandbox_uris[i]}" "${sandbox_patterns[i]}" "combine.tgz"
                     ) || return "$?"
                     found_sandbox="true"
@@ -401,29 +391,20 @@ setup_combine() {
                 return "22"
             fi
 
-            # unpack the bundled combine repo
-            if [ "$install_type" == "cmssw" ]; then
-                (
-                    echo "unpacking bundle to ${install_path}"
-                    cd "${install_base}" &&
-                    source "/cvmfs/cms.cern.ch/cmsset_default.sh" "" &&
-                    export SCRAM_ARCH="${CF_SCRAM_ARCH}" &&
-                    scramv1 project CMSSW "${CF_CMSSW_VERSION}" &&
-                    cd "${CF_CMSSW_VERSION}" &&
-                    tar -xzf "../combine.tgz" &&
-                    rm "../combine.tgz" &&
-                    cd "src" &&
-                    eval "$( scramv1 runtime -sh )" &&
-                    scram b python
-                ) || return "$?"
-            else
-                (
-                    echo "unpacking combine bundle to ${install_path}"
-                    cd "${install_base}" &&
-                    tar -xzf "../combine.tgz" &&
-                    rm "../combine.tgz"
-                ) || return "$?"
-            fi
+            # create a new CMSSW area, unpack the bundle on top of it and rebuild the python symlinks
+            (
+                echo "unpacking bundle to ${install_path}" &&
+                cd "${install_path}" &&
+                export SCRAM_ARCH="${CF_COMBINE_SCRAM_ARCH}" &&
+                source "/cvmfs/cms.cern.ch/cmsset_default.sh" "" &&
+                scramv1 project CMSSW "${CF_COMBINE_CMSSW_VERSION}" &&
+                cd "${CF_COMBINE_CMSSW_VERSION}" &&
+                tar -xzf "../combine.tgz" &&
+                rm "../combine.tgz" &&
+                cd "src" &&
+                eval "$( scramv1 runtime -sh )" &&
+                scram b python
+            ) || return "$?"
 
             # write the flag into a file
             echo "version ${CF_COMBINE_FLAG}" > "${CF_SANDBOX_FLAG_FILE}"
