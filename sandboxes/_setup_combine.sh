@@ -47,7 +47,7 @@
 #      is defined, its value is used instead.
 #
 # Note on remote jobs:
-# When the CF_REMOTE_JOB variable is found to be "1" (usually set by a remote job bootstrap script),
+# When the CF_REMOTE_JOB variable is found to be "true" (usually set by a remote job bootstrap script),
 # no mode is supported and no installation will happen but the desired combine setup is reused from a
 # pre-compiled combine bundle that is fetched from a local or remote location and unpacked.
 
