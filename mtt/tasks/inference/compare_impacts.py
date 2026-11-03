@@ -60,9 +60,10 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
 
     def output(self):
         return {
-            f"{param}__w{width}": self.target(f"impacts_compare__{param}__w{width}.pdf")
+            f"{param}__w{width}__{file_ext}": self.target(f"impacts_compare__{param}__w{width}.{file_ext}")
             for width in self.width_percentages
             for param in self.params
+            for file_ext in ("png", "pdf")
         }
 
     def store_parts(self):
@@ -91,7 +92,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         for width in self.width_percentages:
             for param in self.params:
                 key = f"{param}__w{width}"
-                if key not in pending:
+                if all(outputs[f"{key}__{ext}"].exists() for ext in ("png", "pdf")):
                     continue
                 sub = df[
                     (df["param_name"] == param) &
@@ -103,6 +104,12 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
                     self._write_placeholder(key, param, width, plt)
                     continue
                 self._plot_param(sub, key, param, width, plt)
+    
+    def _save(self, fig, key, **kwargs):
+        for ext in ("png", "pdf"):
+            target = self.output()[f"{key}__{ext}"]
+            target.parent.touch()
+            fig.savefig(target.path, **kwargs)
 
     def _plot_param(self, sub, key, param, width, plt):
         found_variants = [v for v in self.variants if v in set(sub["variant"])]
@@ -182,10 +189,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         ax_impact.set_xticklabels([str(m) for m in masses_sorted], rotation=45, ha="right")
 
         fig.tight_layout()
-        target = self.output()[key]
-        target.parent.touch()
-        fig.savefig(target.path, dpi=150)
-        plt.close(fig)
+        self._save(fig, key, bbox_inches="tight")
 
     def _write_placeholder(self, key, param, width, plt):
         fig, ax = plt.subplots(figsize=(6, 3))
@@ -195,7 +199,4 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
             f"no data for parameter '{param}' (width {width}%)\nin variants {', '.join(self.variants)}",
             ha="center", va="center",
         )
-        target = self.output()[key]
-        target.parent.touch()
-        fig.savefig(target.path)
-        plt.close(fig)
+        self._save(fig, key, bbox_inches="tight")
