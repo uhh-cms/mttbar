@@ -39,7 +39,6 @@ for fit_mode in v2__wo_qcd__dec_th; do
                 --inference-model ${inf_model} \
                 --workflow local \
                 --run-mode expected \
-                --cminPreFit 1 \
                 "${common_args[@]}"
             echo "Running impacts for mass=${mass}, width=${width}, fit_mode=${fit_mode}, inf_model=${inf_model}"
             echo claw run mtt.PlotImpacts \
@@ -78,12 +77,6 @@ for width in 1 10 30; do
         --variants v2__wo_qcd__dec_th \
         "${common_args[@]}"
 done
-
-echo claw run mtt.PlotLimitsComparison \
-    --masses 1200 \
-    --width-percentage 1,10,30 \
-    --variants v2__wo_qcd__dec_th \
-    "${common_args[@]}"
 
 
 # two Impacts plots at the same time for testing
