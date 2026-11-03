@@ -176,7 +176,7 @@ class PlotLimits(LimitsPlottingBaseTask):
             run2_label = "Run 2 Expected (lumi scaled)\n(CMS-PAS-B2G-22-006)"
             ax.plot(
                 df_run2["m"] / 1000,
-                df_run2["exp"] * RUN2_LUMI / lumi,  # scale by ratio of Run 2 / Run 3 luminosity
+                df_run2["exp"] * np.sqrt(RUN2_LUMI / lumi),  # scale by ratio of Run 2 / Run 3 luminosity
                 label=run2_label,
                 color="purple",
                 linestyle=":",
