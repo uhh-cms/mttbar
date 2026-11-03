@@ -594,6 +594,7 @@ class FitterAlgoOptionsMixin:
         description="Search manually for 1 and 2 sigma bands instead of using Minos (1=on, 0=off).",
     )
 
+
 # option mixins that mirror combine options, and the options among them that the tasks translate into
 # command line arguments; setting any other option to a non-default value raises an error
 COMBINE_OPTION_MIXINS = (

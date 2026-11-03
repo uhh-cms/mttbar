@@ -66,6 +66,8 @@ RUN2_THEORY_LINES = {
     },
 }
 
+RUN2_LUMI = 138  # fb^-1
+
 
 class PlotLimits(LimitsPlottingBaseTask):
     """
@@ -174,7 +176,7 @@ class PlotLimits(LimitsPlottingBaseTask):
             run2_label = "Run 2 Expected (lumi scaled)\n(CMS-PAS-B2G-22-006)"
             ax.plot(
                 df_run2["m"] / 1000,
-                df_run2["exp"] * 0.79,
+                df_run2["exp"] * RUN2_LUMI / lumi,  # scale by ratio of Run 2 / Run 3 luminosity
                 label=run2_label,
                 color="purple",
                 linestyle=":",
@@ -194,7 +196,7 @@ class PlotLimits(LimitsPlottingBaseTask):
             lumi_str = f"{lumi:,.1f}"
             com_str = "13.6 TeV"
         else:
-            lumi_str = f"138/{lumi:,.1f}"
+            lumi_str = f"{RUN2_LUMI}/{lumi:,.1f}"
             com_str = "13/13.6 TeV"
         hep.cms.label("Private Work", data=False, ax=ax, lumi=lumi_str, com=com_str)
 
