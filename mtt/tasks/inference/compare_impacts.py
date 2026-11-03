@@ -104,7 +104,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
                     self._write_placeholder(key, param, width, plt)
                     continue
                 self._plot_param(sub, key, param, width, plt)
-    
+
     def _save(self, fig, key, **kwargs):
         for ext in ("png", "pdf"):
             target = self.output()[f"{key}__{ext}"]
@@ -189,7 +189,8 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         ax_impact.set_xticklabels([str(m) for m in masses_sorted], rotation=45, ha="right")
 
         fig.tight_layout()
-        self._save(fig, key, bbox_inches="tight")
+        self._save(fig, key, dpi=150, bbox_inches="tight")
+        plt.close(fig)
 
     def _write_placeholder(self, key, param, width, plt):
         fig, ax = plt.subplots(figsize=(6, 3))
@@ -199,4 +200,5 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
             f"no data for parameter '{param}' (width {width}%)\nin variants {', '.join(self.variants)}",
             ha="center", va="center",
         )
-        self._save(fig, key, bbox_inches="tight")
+        self._save(fig, key, dpi=150, bbox_inches="tight")
+        plt.close(fig)
