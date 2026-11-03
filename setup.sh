@@ -139,7 +139,7 @@ setup_mtt() {
     # initialze submodules
     if [ -d "${MTT_BASE}/.git" ]; then
         for m in $( ls -1q "${MTT_BASE}/modules" ); do
-            cf_init_submodule "${MTT_BASE}/modules/${m}"
+            cf_init_submodule "${MTT_BASE}" "modules/${m}"
         done
     fi
 
