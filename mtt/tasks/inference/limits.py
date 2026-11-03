@@ -1,24 +1,3 @@
-
-"""
-asymptotic_limits() {
-    local args=(
-        -v 2
-        -m ${MASS}
-        --validateModel
-        --saveWorkspace
-    )
-    local cmd_blind="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run blind -n \
-        .asymptotic_limits_blind_${FIT_VERSION}__${INF_MODEL}"
-    local cmd_expected="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run expected -n \
-        .asymptotic_limits_expected_${FIT_VERSION}__${INF_MODEL}"
-    local cmd_observed="combine -M AsymptoticLimits ${WORKSPACE} ${args[@]} --run observed -n \
-        .asymptotic_limits_observed_${FIT_VERSION}__${INF_MODEL}"
-    # run_cmd "$cmd_blind" "${LOG_DIR}/asymptotic_limits_blind_${FIT_VERSION}__${YEAR}.log"  # NOTE: takes 5x
-    # longer than expected, so don't run by default, limits don't change due to blinded datacards
-    run_cmd "$cmd_expected" "${LOG_DIR}/asymptotic_limits_expected_${FIT_VERSION}__${YEAR}.log"
-    # run_cmd "$cmd_observed" "${LOG_DIR}/asymptotic_limits_observed_${FIT_VERSION}__${YEAR}.log"  # NOTE: don't use!
-}
-"""
 from __future__ import annotations
 
 import os
@@ -113,8 +92,10 @@ class AsymptoticLimits(
                 elif "Expected 97.5%:" in line:
                     limits_dict["expected_97.5"] = float(line.split("<")[1].strip())
 
-        if "expected_50" not in limits_dict or "expected_97.5" not in limits_dict:
-            raise RuntimeError(f"limits csv is missing expected_50 / expected_97.5 in {log_path}.")
+        expected_keys = ("expected_2.5", "expected_16", "expected_50", "expected_84", "expected_97.5")
+        missing = [k for k in expected_keys if k not in limits_dict]
+        if missing:
+            raise RuntimeError(f"limits log is missing {', '.join(missing)} in {log_path}.")
 
         # Write to CSV
         with open(csv_path, "w") as f:

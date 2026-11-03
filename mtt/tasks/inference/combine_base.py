@@ -20,6 +20,12 @@ class CombineBaseTask(
         description="Use Asimov data",
     )
 
+    unblind = luigi.BoolParameter(
+       default=False,
+       significant=False,
+       description="Allow fits to real data (--asimov-data False, or run mode 'observed'/'both').",
+   )
+
     # upstream requirements
     reqs = Requirements(
         InferenceBaseTask.reqs,
@@ -34,10 +40,6 @@ class CombineBaseTask(
             "workspace": self.reqs.CreateWorkspace.req(self),
         }
         return reqs
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.check_unimplemented_options()
 
     def check_unimplemented_options(self):
         unimplemented = {}
@@ -58,3 +60,16 @@ class CombineBaseTask(
                 f"{', '.join(f'{k}={v!r}' for k, v in sorted(unimplemented.items()))}; add them to the command "
                 f"construction and to implemented_options of {self.__class__.__name__}",
             )
+    
+    def check_blinding(self):
+        uses_data = not self.asimov_data or getattr(self, "run_mode", "expected") in ("observed", "both")
+        if uses_data and not self.unblind:
+            raise ValueError(
+                f"{self.__class__.__name__} would use real data (asimov_data={self.asimov_data}, "
+                f"run_mode={getattr(self, 'run_mode', None)}); pass --unblind if this is intended",
+            )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.check_unimplemented_options()
+        self.check_blinding()

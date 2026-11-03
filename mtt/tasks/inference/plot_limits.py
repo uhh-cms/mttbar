@@ -115,7 +115,7 @@ class PlotLimits(LimitsPlottingBaseTask):
     def store_parts(self):
         parts = super().store_parts()
         masses_str = self.masses_id
-        plot_id = f"{masses_str}__w{self.width_percentage}__{self.variant}"
+        plot_id = f"{masses_str}__w{self.width_percentage}__{self.variant}__{self.range_id}"
         parts.insert_after("hist_producer", "limits_plot", plot_id)
         return parts
 
@@ -130,6 +130,7 @@ class PlotLimits(LimitsPlottingBaseTask):
         prefit_norm = self.config_insts[0].x.signal_norm.nominal
 
         df = pd.read_csv(self.input()["limits"]["limits_csv"].path)
+        missing = self.input()["limits"]["manifest"].load(formatter="json")["missing"]
         df = df[df["variant"] == self.variant].sort_values("mass")
         if df.empty:
             raise Exception(f"no limits found for variant '{self.variant}' in collected CSV")
@@ -202,6 +203,10 @@ class PlotLimits(LimitsPlottingBaseTask):
             com_str = "13/13.6 TeV"
         hep.cms.label("Private Work", data=False, ax=ax, lumi=lumi_str, com=com_str)
 
+        if missing:
+            ax.annotate(
+                f"{len(missing)} mass point(s) missing", xy=(0.02, 0.02), xycoords="axes fraction", color="red",
+            )
         ax.set_xlabel("Mass [TeV]")
         ax.set_ylabel(r"$\sigma \times BR (Z\prime \rightarrow t \bar{t})$ [pb]")
         ax.set_yscale("log")
@@ -265,7 +270,7 @@ class PlotLimitsComparison(LimitsPlottingBaseTask):
         parts = super().store_parts()
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
-        plot_id = f"{masses_str}__w{self.width_percentage}__{variants_str}"
+        plot_id = f"{masses_str}__w{self.width_percentage}__{variants_str}__{self.range_id}"
         parts.insert_after("hist_producer", "limits_comparison", plot_id)
         return parts
 

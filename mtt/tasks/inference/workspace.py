@@ -1,20 +1,3 @@
-
-"""
-A script that calls the text2workspace combine command.
-
-# from workflow.sh script
-make_workspace() {
-    local args=(
-        -v 2
-        -m ${MASS}
-        # -o ${WORKSPACE}  # already passed explicitly in the cmd string below
-        # -h
-    )
-    local cmd="text2workspace.py ${DATACARD} -o ${WORKSPACE} ${args[@]}"
-    run_cmd "$cmd" "${LOG_DIR}/workspace_${FIT_VERSION}__${YEAR}.log"
-}
-"""
-
 import os
 
 import law

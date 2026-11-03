@@ -41,6 +41,18 @@ class LimitsPlottingBaseTask(
         default=False,
         description="require every requested combination to exist instead of skipping missing ones",
     )
+    rMin = luigi.FloatParameter(default=0.0, description="rMin of the underlying limits/impacts (sens) tasks")
+    rMax = luigi.FloatParameter(default=20.0, description="rMax of the underlying limits/impacts (sens) tasks")
+    expectSignal = luigi.FloatParameter(default=0.0, description="expectSignal of the underlying tasks")
+
+    @property
+    def range_id(self):
+        tag = ""
+        if (self.rMin, self.rMax) != (0.0, 20.0):
+            tag += f"__r{self.rMin}_{self.rMax}"
+        if self.expectSignal:
+            tag += f"__s{self.expectSignal}"
+        return tag
 
     def workflow_requires(self):
         reqs = super().workflow_requires()
@@ -51,6 +63,12 @@ class LimitsPlottingBaseTask(
     def masses_id(self):
         masses = sorted(self.masses)
         return f"m{masses[0]}-{masses[-1]}_n{len(masses)}_{law.util.create_hash(masses, 6)}"
+    
+    @staticmethod
+    def model_name(mass, width_pct):
+        # same grid as in mtt/inference/an_2019_197.py (absolute width = (mass // 100) * width_pct)
+        width = (mass // 100) * width_pct
+        return width, f"zp_m{mass}_w{width}"
 
 
 class CollectLimits(LimitsPlottingBaseTask):
@@ -81,14 +99,10 @@ class CollectLimits(LimitsPlottingBaseTask):
     def create_branch_map(self):
         return [{}]
 
-    def _model_name(self, mass, width_pct):
-        width = (mass // 100) * width_pct
-        return width, f"zp_m{mass}_w{width}"  # base name; variant suffix appended by caller
-
     def _candidates(self):
         for mass in self.masses:
             for width_pct in self.width_percentages:
-                width, base_name = self._model_name(mass, width_pct)
+                width, base_name = self.model_name(mass, width_pct)
                 for variant in self.variants:
                     model = f"{base_name}__{variant}"
                     task = self.reqs.AsymptoticLimits.req(self, inference_model=model, branch=0)
@@ -109,7 +123,7 @@ class CollectLimits(LimitsPlottingBaseTask):
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
-        scan_id = f"{masses_str}__w{widths_str}__{variants_str}"
+        scan_id = f"{masses_str}__w{widths_str}__{variants_str}__{self.range_id}"
         parts.insert_after("hist_producer", "limits_scan", scan_id)
         return parts
 

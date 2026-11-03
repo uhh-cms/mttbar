@@ -44,19 +44,19 @@ class CollectImpacts(LimitsPlottingBaseTask):
     def create_branch_map(self):
         return [{}]
 
-    def _model_name(self, mass, width_pct):
-        width = (mass // 100) * width_pct
-        return width, f"zp_m{mass}_w{width}"
-
     def _candidates(self):
         for mass in self.masses:
             for width_pct in self.width_percentages:
-                width, base_name = self._model_name(mass, width_pct)
+                width, base_name = self.model_name(mass, width_pct)
                 for variant in self.variants:
                     model = f"{base_name}__{variant}"
                     for impacts_mode in self.impacts_modes:
+                        fit_opts = (
+                            {"rMin": self.rMin, "rMax": self.rMax, "expectSignal": self.expectSignal}
+                            if impacts_mode == "sens" else {"rMin": 0.0, "rMax": 20.0, "expectSignal": 0.0}
+                        )
                         task = self.reqs.Impacts.req(
-                            self, inference_model=model, impacts_mode=impacts_mode, branch=0,
+                            self, inference_model=model, impacts_mode=impacts_mode, branch=0, **fit_opts,
                         )
                         yield mass, width_pct, width, variant, impacts_mode, task
 
@@ -76,7 +76,7 @@ class CollectImpacts(LimitsPlottingBaseTask):
         variants_str = "-".join(sorted(self.variants))
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
         modes_str = "-".join(sorted(self.impacts_modes))
-        scan_id = f"{masses_str}__w{widths_str}__{variants_str}__{modes_str}"
+        scan_id = f"{masses_str}__w{widths_str}__{variants_str}__{modes_str}__{self.range_id}"
         parts.insert_after("hist_producer", "impacts_scan", scan_id)
         return parts
 

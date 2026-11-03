@@ -20,10 +20,12 @@ from mtt.tasks.inference.mixins import (
 logger = law.logger.get_logger(__name__)
 
 
-# background-only impacts use the same signal strength and range as the bash workflow
-# (impacts_exp bkgonly 0 -10 10)
-BKGONLY_EXPECT_SIGNAL = 0.0
-BKGONLY_R_RANGE = (-10.0, 10.0)
+# impacts modes with fixed settings: (expectSignal, rMin, rMax). "bkgonly" matches the bash workflow
+# (impacts_exp bkgonly 0 -10 10). The settings are part of the output path.
+# add more modes here if needed, e.g. an r=1 mode
+FIXED_FIT_SETTINGS = {
+    "bkgonly": (0.0, -10.0, 10.0),
+}
 
 
 def read_expected_limits(limits_csv: str) -> dict[str, float]:
@@ -52,8 +54,8 @@ def get_fit_settings(
     - ``bkgonly``: background-only fits in a fixed range, as in the bash workflow
     - ``sens``: signal strength at the median expected limit, with a range derived from the 97.5% limit
     """
-    if impacts_mode == "bkgonly":
-        return (BKGONLY_EXPECT_SIGNAL, *BKGONLY_R_RANGE)
+    if impacts_mode in FIXED_FIT_SETTINGS:
+        return FIXED_FIT_SETTINGS[impacts_mode]
     if impacts_mode == "sens":
         if "expected_50" not in limits or "expected_97.5" not in limits:
             raise RuntimeError("limits csv is missing expected_50 / expected_97.5, cannot derive the sens fit range")
@@ -86,8 +88,12 @@ class _Impacts(
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.impacts_mode == "bkgonly" and (self.rMin, self.rMax, self.expectSignal) != (0.0, 20.0, 0.0):
+        if self.impacts_mode in FIXED_FIT_SETTINGS and (self.rMin, self.rMax, self.expectSignal) != (0.0, 20.0, 0.0):
             raise ValueError("rMin, rMax and expectSignal only apply in impacts_mode 'sens'")
+    
+    def fit_settings_tag(self):
+        s, lo, hi = FIXED_FIT_SETTINGS.get(self.impacts_mode, (self.expectSignal, self.rMin, self.rMax))
+        return f"s{s}_r{lo}_{hi}"
 
 
 class Impacts(
@@ -131,7 +137,7 @@ class Impacts(
 
     def impacts_name(self):
         name = f"impacts__{self.impacts_mode}"
-        name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
+        name += f"__{self.fit_settings_tag()}"
         if not self.asimov_data:
             name += "__data"
         return name
@@ -296,7 +302,7 @@ class PlotImpacts(
 
     def impacts_plot_name(self):
         name = f"impacts_plot__{self.impacts_mode}"
-        name += f"__s{self.expectSignal}_r{self.rMin}_{self.rMax}"
+        name += f"__{self.fit_settings_tag()}"
         if not self.asimov_data:
             name += "__data"
         return name
