@@ -13,28 +13,11 @@ class CombineBaseTask(
 ):
     # set general parameters available for all combine commands of the form
     # 'combine -M method -t -l'
-    combine_method = luigi.Parameter(
-        default=None,
-        significant=False,
-        description="Method to run with combine tool",
-    )
 
     asimov_data = luigi.BoolParameter(
         default=True,
         significant=False,
         description="Use Asimov data",
-    )
-
-    job_dir = luigi.Parameter(
-        default=None,
-        significant=False,
-        description="Path to directory containing job scripts and logs.",
-    )
-
-    merge = luigi.IntParameter(
-        default=1,
-        significant=False,
-        description="Number of jobs to run in a single script [only affects batch submission].",
     )
 
     # upstream requirements

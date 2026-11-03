@@ -83,6 +83,7 @@ class _Impacts(
         default="bkgonly",
         description="Impacts mode: background-only or sensitivity.",
     )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.impacts_mode == "bkgonly" and (self.rMin, self.rMax, self.expectSignal) != (0.0, 20.0, 0.0):
@@ -203,7 +204,6 @@ class Impacts(
         expect_signal, r_min, r_max = get_fit_settings(
             self.impacts_mode,
             limits,
-            default_settings=(self.expectSignal, self.rMin, self.rMax),
         )
         logger.info(
             f"Using expected signal strength r={expect_signal}, rMin={r_min}, rMax={r_max} "

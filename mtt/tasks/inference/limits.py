@@ -114,7 +114,7 @@ class AsymptoticLimits(
                     limits_dict["expected_97.5"] = float(line.split("<")[1].strip())
 
         if "expected_50" not in limits_dict or "expected_97.5" not in limits_dict:
-            raise RuntimeError("limits csv is missing expected_50 / expected_97.5, cannot derive the sens fit range")
+            raise RuntimeError("limits csv is missing expected_50 / expected_97.5.")
 
         # Write to CSV
         with open(csv_path, "w") as f:

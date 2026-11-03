@@ -387,7 +387,7 @@ setup_combine() {
                 fi
             done
             if ! ${found_sandbox}; then
-                >&2 echo "combine sandbox ${CF_COMBINE_ENV_NAME} not found in job configuration, stopping"
+                >&2 echo "combine sandbox ${CF_COMBINE_ENV_NAME} not found in job configuration, stopping. Run any Combine task locally first to create the sandbox and make it available for remote jobs."
                 return "22"
             fi
 

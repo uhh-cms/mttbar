@@ -17,8 +17,9 @@ action() {
     # export CF_COMBINE_HARVESTER_VERSION="${CF_COMBINE_HARVESTER_VERSION:-v3.0.0-pre1}"
     export CF_COMBINE_VERSION="${CF_COMBINE_VERSION:-v11.0.0}"  # from combine docu 03.09.26
     export CF_COMBINE_ENV_NAME="$( basename "${this_file%.sh}" )"
-    export CF_COMBINE_FLAG="1"  # increment when content changed# define custom install and setup functions
+    export CF_COMBINE_FLAG="1"  # increment when content changed
 
+    # define custom install and setup functions
     cf_cmssw_custom_install() {
         PYTHONPATH="" CF_VENV_BASE="${CMSSW_BASE}/venvs" cf_create_venv combine_cmssw &&
         source "${CMSSW_BASE}/venvs/combine_cmssw/bin/activate" "" &&

@@ -265,8 +265,7 @@ class PlotLimitsComparison(LimitsPlottingBaseTask):
         parts = super().store_parts()
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
-        plot_id = f"{masses_str}__w{self.width_percentage}__{self.impacts_mode}__{variants_str}"
-        plot_id += "" if self.impact_yscale == "linear" else f"__{self.impact_yscale}"
+        plot_id = f"{masses_str}__w{self.width_percentage}__{variants_str}"
         parts.insert_after("hist_producer", "limits_comparison", plot_id)
         return parts
 
