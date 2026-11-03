@@ -101,7 +101,8 @@ class InferenceBaseTask(
 
         # raise an exception when the call failed and optional is not True
         if p.returncode != 0 and not optional:
-            raise Exception(f"command failed with exit code {p.returncode}: {cmd}")
+            tail = "\n".join(output[-30:])
+            raise Exception(f"command failed with exit code {p.returncode}: {cmd}\n--- last output ---\n{tail}")
 
         return p, output_str
 

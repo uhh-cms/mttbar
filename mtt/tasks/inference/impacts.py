@@ -413,6 +413,7 @@ class Impacts(
             outputs["initial_impacts_log"].dump(outp, formatter="text")
         if "impacts_log" in outputs:
             logger.info("Running fits...")
+            # echo=False here because the fits are run in parallel and the output is not very readable, and too large
             p, outp = self.run_command(commands["fits"], echo=False, cwd=workdir)
             outputs["impacts_log"].dump(outp, formatter="text")
         if "impacts_json" in outputs:

@@ -177,3 +177,16 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         target.parent.touch()
         fig.savefig(target.path, dpi=150)
         plt.close(fig)
+
+    def _write_placeholder(self, param, plt):
+        fig, ax = plt.subplots(figsize=(6, 3))
+        ax.axis("off")
+        ax.text(
+            0.5, 0.5,
+            f"no data for parameter '{param}'\nin variants {', '.join(self.variants)}",
+            ha="center", va="center",
+        )
+        target = self.output()[param]
+        target.parent.touch()
+        fig.savefig(target.path)
+        plt.close(fig)

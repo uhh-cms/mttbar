@@ -112,7 +112,7 @@ class PlotLimits(LimitsPlottingBaseTask):
 
     def store_parts(self):
         parts = super().store_parts()
-        masses_str = f"m{min(self.masses)}-{max(self.masses)}_n{len(self.masses)}"
+        masses_str = self.masses_id
         plot_id = f"{masses_str}__w{self.width_percentage}__{self.variant}"
         parts.insert_after("hist_producer", "limits_plot", plot_id)
         return parts
