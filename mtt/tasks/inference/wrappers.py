@@ -6,8 +6,9 @@ Wrapper tasks that run an inference task for several inference models at once, e
 
 import law
 import luigi
+from columnflow.tasks.framework.base import AnalysisTask
 
-from mtt.tasks.base import MTTTask
+# from mtt.tasks.base import MTTTask
 from mtt.tasks.inference.datacards import CombineDatacards
 from mtt.tasks.inference.impacts import Impacts, PlotImpacts
 from mtt.tasks.inference.limits import AsymptoticLimits
@@ -19,7 +20,8 @@ def inference_models_wrapper(require_cls, cls_name=None):
     Creates a wrapper task that requires one *require_cls* instance per entry of ``--inference-models``. All other
     parameters of *require_cls* are ported to the wrapper and passed on unchanged.
     """
-    class Wrapper(MTTTask, law.WrapperTask):
+    # class Wrapper(MTTTask, law.WrapperTask):
+    class Wrapper(AnalysisTask, law.WrapperTask):
 
         inference_models = law.CSVParameter(
             default=(),

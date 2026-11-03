@@ -52,6 +52,9 @@ class InferenceBaseTask(
 
     run_command_in_tmp = False
 
+    # set to None to disable scheduler messages, temporarily fixing wrapper tasks polling issues
+    scheduler_messages = None
+
     # upstream requirements
     reqs = Requirements(
         RemoteWorkflow.reqs,
