@@ -4,7 +4,7 @@ from columnflow.tasks.framework.base import Requirements
 
 from mtt.tasks.inference.datacards import CombineDatacards
 from mtt.tasks.inference.inference_base import InferenceBaseTask
-from mtt.tasks.inference.mixins import COMBINE_OPTION_MIXINS, IMPLEMENTED_COMBINE_OPTIONS
+from mtt.tasks.inference.mixins import COMBINE_OPTION_MIXINS
 from mtt.tasks.inference.workspace import CreateWorkspace
 
 
@@ -37,18 +37,14 @@ class CombineBaseTask(
         description="Number of jobs to run in a single script [only affects batch submission].",
     )
 
-    dry_run = luigi.BoolParameter(
-        default=False,
-        significant=False,
-        description="Print commands to the screen but do not run them.",
-    )
-
     # upstream requirements
     reqs = Requirements(
-        InferenceBaseTask.reqs,      # carries CreateDatacards + MergeShiftedHistograms forward
+        InferenceBaseTask.reqs,
         CombineDatacards=CombineDatacards,
         CreateWorkspace=CreateWorkspace,
     )
+
+    implemented_options = frozenset()
 
     def requires(self):
         reqs = {
@@ -68,7 +64,7 @@ class CombineBaseTask(
             for name, param in vars(cls).items():
                 if (
                     isinstance(param, luigi.Parameter) and
-                    name not in IMPLEMENTED_COMBINE_OPTIONS and
+                    name not in self.implemented_options and
                     param._default is not luigi.parameter._no_value and
                     param.normalize(getattr(self, name)) != param.normalize(param._default)
                 ):
@@ -77,5 +73,5 @@ class CombineBaseTask(
             raise NotImplementedError(
                 f"{self.__class__.__name__} does not implement the combine option(s) "
                 f"{', '.join(f'{k}={v!r}' for k, v in sorted(unimplemented.items()))}; add them to the command "
-                "construction and to IMPLEMENTED_COMBINE_OPTIONS in mixins.py",
+                f"construction and to implemented_options of {self.__class__.__name__}",
             )

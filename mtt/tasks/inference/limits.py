@@ -47,6 +47,10 @@ class AsymptoticLimits(
     """
     Run combine tool with AsymptoticLimits method.
     """
+    implemented_options = frozenset({
+        "name", "mass", "saveWorkspace", "validateModel", "run_mode",
+        "rMin", "rMax", "expectSignal",
+    })
 
     def requires(self):
         reqs = {
@@ -109,8 +113,8 @@ class AsymptoticLimits(
                 elif "Expected 97.5%:" in line:
                     limits_dict["expected_97.5"] = float(line.split("<")[1].strip())
 
-        if "expected_50" not in limits_dict:
-            raise RuntimeError(f"no limits found in {log_path}")
+        if "expected_50" not in limits_dict or "expected_97.5" not in limits_dict:
+            raise RuntimeError("limits csv is missing expected_50 / expected_97.5, cannot derive the sens fit range")
 
         # Write to CSV
         with open(csv_path, "w") as f:
@@ -141,6 +145,8 @@ class AsymptoticLimits(
     @law.decorator.log
     @law.decorator.safe_output
     def run(self):
+        if not self.name:
+            raise ValueError("name must not be empty (combine would use 'Test' and the output lookup would fail)")
         output_root = self.output()["asymptotic_limits_root"].path
         output_dirname = os.path.dirname(output_root)
         # touch the output_dirname

@@ -605,9 +605,3 @@ COMBINE_OPTION_MIXINS = (
     AsymptoticLimitsMixin,
     FitterAlgoOptionsMixin,
 )
-IMPLEMENTED_COMBINE_OPTIONS = {
-    "rMin", "rMax", "expectSignal",
-    "saveWorkspace", "validateModel", "name", "mass",
-    "cminSingleNuisFit", "cminFallbackAlgo",
-    "run_mode", "robustFit",
-}

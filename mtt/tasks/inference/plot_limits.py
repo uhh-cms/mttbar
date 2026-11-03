@@ -105,9 +105,11 @@ class PlotLimits(LimitsPlottingBaseTask):
         }
 
     def output(self):
+        suffix = "" if self.include_run2 == "none" else f"__run2-{self.include_run2}"
+        suffix += "__theory" if self.include_theory else ""
         return {
-            "plot_pdf": self.target(f"limits_vs_mass__{self.variant}.pdf"),
-            "plot_png": self.target(f"limits_vs_mass__{self.variant}.png"),
+            "plot_pdf": self.target(f"limits_vs_mass__{self.variant}{suffix}.pdf"),
+            "plot_png": self.target(f"limits_vs_mass__{self.variant}{suffix}.png"),
         }
 
     def store_parts(self):
@@ -263,7 +265,8 @@ class PlotLimitsComparison(LimitsPlottingBaseTask):
         parts = super().store_parts()
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
-        plot_id = f"{masses_str}__w{self.width_percentage}__{variants_str}"
+        plot_id = f"{masses_str}__w{self.width_percentage}__{self.impacts_mode}__{variants_str}"
+        plot_id += "" if self.impact_yscale == "linear" else f"__{self.impact_yscale}"
         parts.insert_after("hist_producer", "limits_comparison", plot_id)
         return parts
 

@@ -30,7 +30,7 @@ class InferenceBaseTask(
     MLModelsMixin,
     HistProducerClassMixin,
     HistHookMixin,
-    InferenceModelUser,       # gives inference_model_inst / combined_config_data, no histogram deps
+    InferenceModelUser,
     law.LocalWorkflow,
     RemoteWorkflow,
     CommandTask,
@@ -61,7 +61,6 @@ class InferenceBaseTask(
         CreateDatacards=CreateDatacards,
     )
 
-    # inference_base.py — the ONLY workflow_requires() definition in the whole hierarchy
     def workflow_requires(self):
         reqs = super().workflow_requires()
         reqs.update(self.requires_from_branch())   # merge keys in, don't nest under a new one
