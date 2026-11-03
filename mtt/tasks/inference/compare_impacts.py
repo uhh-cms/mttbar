@@ -31,7 +31,11 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
     sandbox = dev_sandbox("bash::$CF_BASE/sandboxes/venv_columnar.sh")
 
     variants = law.CSVParameter(default=("v2",), description="inference-model variants to compare")
-    width_percentage = luigi.IntParameter(default=10, description="relative signal width (in percent of mass)")
+    width_percentages = law.CSVParameter(
+        cls=luigi.IntParameter,
+        default=(10,),
+        description="relative signal widths (in percent of mass) to compare, one figure per width",
+    )
     impacts_mode = luigi.Parameter(default="bkgonly", description="Impacts task mode to plot")
     params = law.CSVParameter(description="nuisance parameter name(s) to plot, one figure each")
     impact_yscale = luigi.ChoiceParameter(choices=("linear", "symlog"), default="linear")
@@ -48,7 +52,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
                 self,
                 masses=self.masses,
                 variants=self.variants,
-                width_percentages=(self.width_percentage,),
+                width_percentages=self.width_percentages,
                 impacts_modes=(self.impacts_mode,),
                 strict=self.strict,
             ),
@@ -56,7 +60,8 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
 
     def output(self):
         return {
-            param: self.target(f"impacts_compare__{param}.pdf")
+            f"{param}__w{width}": self.target(f"impacts_compare__{param}__w{width}.pdf")
+            for width in self.width_percentages
             for param in self.params
         }
 
@@ -64,7 +69,11 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         parts = super().store_parts()
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
-        plot_id = f"{masses_str}__w{self.width_percentage}__{self.impacts_mode}__{variants_str}"
+        widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
+
+        plot_id = f"{masses_str}__w{widths_str}__{self.impacts_mode}__{variants_str}"
+        plot_id += "" if self.impact_yscale == "linear" else f"__{self.impact_yscale}"
+
         parts.insert_after("hist_producer", "impacts_comparison", plot_id)
         return parts
 
@@ -72,30 +81,30 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         import matplotlib.pyplot as plt
 
         outputs = self.output()
-        pending = [param for param in self.params if not outputs[param].exists()]
-
+        pending = [key for key in outputs if not outputs[key].exists()]
         if not pending:
-            logger.info("all requested parameter plots already exist, nothing to do")
+            logger.info("all requested plots already exist, nothing to do")
             return
-
-        skipped = set(self.params) - set(pending)
-        if skipped:
-            logger.info(f"skipping {len(skipped)} already-existing plots: {sorted(skipped)}")
 
         df = pd.read_csv(self.input()["impacts"]["impacts_csv"].path)
 
-        for param in pending:
-            sub = df[(df["param_name"] == param) & (df["variant"].isin(self.variants))]
-            if sub.empty:
-                logger.warning(
-                    f"no impacts data found for parameter '{param}' in any requested variant "
-                    f"{list(self.variants)}; writing placeholder instead of skipping the whole task",
-                )
-                self._write_placeholder(param, plt)
-                continue
-            self._plot_param(sub, param, plt)
+        for width in self.width_percentages:
+            for param in self.params:
+                key = f"{param}__w{width}"
+                if key not in pending:
+                    continue
+                sub = df[
+                    (df["param_name"] == param) &
+                    (df["variant"].isin(self.variants)) &
+                    (df["width_pct"] == width)
+                ]
+                if sub.empty:
+                    logger.warning(f"no impacts data for '{param}' at width {width}% in variants {list(self.variants)}")
+                    self._write_placeholder(key, param, width, plt)
+                    continue
+                self._plot_param(sub, key, param, width, plt)
 
-    def _plot_param(self, sub, param, plt):
+    def _plot_param(self, sub, key, param, width, plt):
         found_variants = [v for v in self.variants if v in set(sub["variant"])]
         missing_variants = set(self.variants) - set(found_variants)
         if missing_variants:
@@ -160,7 +169,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         ax_pull.axhline(1, color="gray", lw=0.8, ls=":")
         ax_pull.set_ylim(-1.1, 1.1)
         ax_pull.set_ylabel(r"$(\hat\theta-\theta)/\sigma_{\rm prefit}$")
-        ax_pull.set_title(f"{param}: postfit value across mass points")
+        ax_pull.set_title(f"{param} (width {width}%): postfit value across mass points")
         ax_pull.legend(fontsize=8)
 
         ax_impact.axhline(0, color="gray", lw=0.8, ls="--")
@@ -173,20 +182,20 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         ax_impact.set_xticklabels([str(m) for m in masses_sorted], rotation=45, ha="right")
 
         fig.tight_layout()
-        target = self.output()[param]
+        target = self.output()[key]
         target.parent.touch()
         fig.savefig(target.path, dpi=150)
         plt.close(fig)
 
-    def _write_placeholder(self, param, plt):
+    def _write_placeholder(self, key, param, width, plt):
         fig, ax = plt.subplots(figsize=(6, 3))
         ax.axis("off")
         ax.text(
             0.5, 0.5,
-            f"no data for parameter '{param}'\nin variants {', '.join(self.variants)}",
+            f"no data for parameter '{param}' (width {width}%)\nin variants {', '.join(self.variants)}",
             ha="center", va="center",
         )
-        target = self.output()[param]
+        target = self.output()[key]
         target.parent.touch()
         fig.savefig(target.path)
         plt.close(fig)
