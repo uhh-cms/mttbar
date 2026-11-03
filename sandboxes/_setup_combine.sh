@@ -4,7 +4,7 @@
 # tool, a.k.a. `combine`. Distinctions are made depending on whether the installation is already present,
 # and whether the script is called as part of a remote (law) job (CF_REMOTE_ENV=true).
 #
-# Six environment variables are expected to be set before this script is called:
+# The following environment variables are expected to be set before this script is called:
 #   CF_SANDBOX_FILE
 #       The path of the file that contained the sandbox definition and that sourced _this_ script.
 #       It is used to derive a hash for defining the installation directory and to set the value of
