@@ -55,7 +55,12 @@ class AsymptoticLimits(
         return reqs
 
     def asymptotic_limits_name(self):
-        return f"asymptotic_limits__{self.run_mode}__{'asimov' if self.asimov_data else 'data'}"
+        name = f"asymptotic_limits__{self.run_mode}__{'asimov' if self.asimov_data else 'data'}"
+        if (self.rMin, self.rMax) != (0.0, 20.0):
+            name += f"__r{self.rMin}_{self.rMax}"
+        if self.expectSignal:
+            name += f"__s{self.expectSignal}"
+        return name
 
     def store_parts(self) -> law.util.InsertableDict:
         parts = super().store_parts()
@@ -129,6 +134,8 @@ class AsymptoticLimits(
         command_to_run += " --validateModel" if self.validateModel else ""
         command_to_run += f" --name .{self.name}" if self.name else ""
         command_to_run += " -t -1" if self.asimov_data else ""
+        command_to_run += f" --rMin {self.rMin} --rMax {self.rMax}"
+        command_to_run += f" --expectSignal {self.expectSignal}" if self.expectSignal else ""
         return command_to_run
 
     @law.decorator.log
