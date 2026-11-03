@@ -62,7 +62,7 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
 
     def store_parts(self):
         parts = super().store_parts()
-        masses_str = f"m{min(self.masses)}-{max(self.masses)}_n{len(self.masses)}"
+        masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
         plot_id = f"{masses_str}__w{self.width_percentage}__{self.impacts_mode}__{variants_str}"
         parts.insert_after("hist_producer", "impacts_comparison", plot_id)

@@ -47,6 +47,11 @@ class LimitsPlottingBaseTask(
         reqs.update(self.requires_from_branch())
         return reqs
 
+    @property
+    def masses_id(self):
+        masses = sorted(self.masses)
+        return f"m{masses[0]}-{masses[-1]}_n{len(masses)}_{law.util.create_hash(masses, 6)}"
+
 
 class CollectLimits(LimitsPlottingBaseTask):
     sandbox = dev_sandbox("bash::$CF_BASE/sandboxes/venv_columnar_dev.sh")
@@ -101,7 +106,7 @@ class CollectLimits(LimitsPlottingBaseTask):
 
     def store_parts(self):
         parts = super().store_parts()
-        masses_str = f"m{min(self.masses)}-{max(self.masses)}_n{len(self.masses)}"
+        masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
         scan_id = f"{masses_str}__w{widths_str}__{variants_str}"

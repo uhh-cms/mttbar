@@ -72,7 +72,7 @@ class CollectImpacts(LimitsPlottingBaseTask):
 
     def store_parts(self):
         parts = super().store_parts()
-        masses_str = f"m{min(self.masses)}-{max(self.masses)}_n{len(self.masses)}"
+        masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
         modes_str = "-".join(sorted(self.impacts_modes))
