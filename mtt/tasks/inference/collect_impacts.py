@@ -76,7 +76,7 @@ class CollectImpacts(LimitsPlottingBaseTask):
         variants_str = "-".join(sorted(self.variants))
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
         modes_str = "-".join(sorted(self.impacts_modes))
-        scan_id = f"{masses_str}__w{widths_str}__{variants_str}__{modes_str}__{self.range_id}"
+        scan_id = f"{masses_str}__w{widths_str}__{variants_str}__{modes_str}{self.range_id}"
         parts.insert_after("hist_producer", "impacts_scan", scan_id)
         return parts
 

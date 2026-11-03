@@ -115,7 +115,7 @@ class PlotLimits(LimitsPlottingBaseTask):
     def store_parts(self):
         parts = super().store_parts()
         masses_str = self.masses_id
-        plot_id = f"{masses_str}__w{self.width_percentage}__{self.variant}__{self.range_id}"
+        plot_id = f"{masses_str}__w{self.width_percentage}__{self.variant}{self.range_id}"
         parts.insert_after("hist_producer", "limits_plot", plot_id)
         return parts
 
@@ -270,7 +270,7 @@ class PlotLimitsComparison(LimitsPlottingBaseTask):
         parts = super().store_parts()
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
-        plot_id = f"{masses_str}__w{self.width_percentage}__{variants_str}__{self.range_id}"
+        plot_id = f"{masses_str}__w{self.width_percentage}__{variants_str}{self.range_id}"
         parts.insert_after("hist_producer", "limits_comparison", plot_id)
         return parts
 

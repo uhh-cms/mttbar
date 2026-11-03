@@ -90,7 +90,7 @@ class _Impacts(
         super().__init__(*args, **kwargs)
         if self.impacts_mode in FIXED_FIT_SETTINGS and (self.rMin, self.rMax, self.expectSignal) != (0.0, 20.0, 0.0):
             raise ValueError("rMin, rMax and expectSignal only apply in impacts_mode 'sens'")
-    
+
     def fit_settings_tag(self):
         s, lo, hi = FIXED_FIT_SETTINGS.get(self.impacts_mode, (self.expectSignal, self.rMin, self.rMax))
         return f"s{s}_r{lo}_{hi}"

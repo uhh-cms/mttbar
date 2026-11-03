@@ -63,7 +63,7 @@ class LimitsPlottingBaseTask(
     def masses_id(self):
         masses = sorted(self.masses)
         return f"m{masses[0]}-{masses[-1]}_n{len(masses)}_{law.util.create_hash(masses, 6)}"
-    
+
     @staticmethod
     def model_name(mass, width_pct):
         # same grid as in mtt/inference/an_2019_197.py (absolute width = (mass // 100) * width_pct)
@@ -123,7 +123,7 @@ class CollectLimits(LimitsPlottingBaseTask):
         masses_str = self.masses_id
         variants_str = "-".join(sorted(self.variants))
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
-        scan_id = f"{masses_str}__w{widths_str}__{variants_str}__{self.range_id}"
+        scan_id = f"{masses_str}__w{widths_str}__{variants_str}{self.range_id}"
         parts.insert_after("hist_producer", "limits_scan", scan_id)
         return parts
 

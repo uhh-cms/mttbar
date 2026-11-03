@@ -73,7 +73,8 @@ class PlotImpactsComparison(LimitsPlottingBaseTask):
         widths_str = "-".join(str(w) for w in sorted(self.width_percentages))
 
         plot_id = f"{masses_str}__w{widths_str}__{self.impacts_mode}__{variants_str}"
-        plot_id += "" if self.impact_yscale == "linear" else f"__{self.impact_yscale}__{self.range_id}"
+        plot_id += "" if self.impact_yscale == "linear" else f"__{self.impact_yscale}"
+        plot_id += self.range_id
 
         parts.insert_after("hist_producer", "impacts_comparison", plot_id)
         return parts

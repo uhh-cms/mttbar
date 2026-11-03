@@ -94,6 +94,7 @@ Wrappers: `CombineDatacardsWrapper`, `CreateWorkspaceWrapper`, `AsymptoticLimits
 
 ```shell
 # collect the limits of all mass points into one csv, then plot them
+# Collect* only aggregate limits/impacts that already exist; run the per-mass tasks first (e.g. mtt.AsymptoticLimitsWrapper) or add --strict. After computing more points, rerun with --remove-output, otherwise the old aggregate is reused.
 law run mtt.CollectLimits --masses 1000,2000,3000 --variants v2 --width-percentages 10 $COMMON
 law run mtt.PlotLimits --masses 1000,2000,3000 --variant v2 --width-percentage 10 --include-run2 lumi-scaled $COMMON
 
