@@ -47,6 +47,8 @@ law run cf.CreateDatacards \
 
 ### Statistical inference with Combine
 
+Full documentation of the tasks, the sandbox and the output layout: [docs/combine.md](docs/combine.md).
+
 The tasks in `mtt/tasks/inference/` wrap the CMS Combine fit workflow. They run in the `combine_cmssw` sandbox (a CMSSW area with Combine, set up on first use by `sandboxes/combine_cmssw.sh`). Remote jobs (HTCondor) use the same sandbox, so it must be listed in `ana.x.cmssw_sandboxes` of the analysis (already done for `analysis_mtt`).
 
 The chain is `CombineDatacards` -> `CreateWorkspace` -> `AsymptoticLimits` / `Impacts` -> plotting. Every task requires its predecessors, so it is enough to run the last one.
