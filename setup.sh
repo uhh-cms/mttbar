@@ -58,7 +58,7 @@ setup_mtt() {
     CF_SKIP_SETUP="1" source "${CF_BASE}/setup.sh" "" || return "$?"
 
     # interactive setup
-    if [ "${CF_REMOTE_JOB}" != "1" ]; then
+    if [ "${CF_REMOTE_ENV}" != "true" ]; then
         cf_setup_interactive_body() {
             # start querying for variables
             query CF_CERN_USER "CERN username" "$( whoami )"
@@ -98,6 +98,7 @@ setup_mtt() {
     export CF_CONDA_BASE="${CF_CONDA_BASE:-${CF_SOFTWARE_BASE}/conda}"
     export CF_VENV_BASE="${CF_VENV_BASE:-${CF_SOFTWARE_BASE}/venvs}"
     export CF_CMSSW_BASE="${CF_CMSSW_BASE:-${CF_SOFTWARE_BASE}/cmssw}"
+    export CF_COMBINE_BASE="${CF_COMBINE_BASE:-${CF_SOFTWARE_BASE}/combine}"
     export CF_CI_JOB="$( [ "${GITHUB_ACTIONS}" = "true" ] && echo 1 || echo 0 )"
     export CF_ORIG_PATH="${PATH}"
     export CF_ORIG_PYTHONPATH="${PYTHONPATH}"
@@ -138,7 +139,7 @@ setup_mtt() {
     # initialze submodules
     if [ -d "${MTT_BASE}/.git" ]; then
         for m in $( ls -1q "${MTT_BASE}/modules" ); do
-            cf_init_submodule "${MTT_BASE}/modules/${m}"
+            cf_init_submodule "${MTT_BASE}" "modules/${m}"
         done
     fi
 
