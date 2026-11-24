@@ -543,11 +543,6 @@ def add_new_config(
     # top tagger working points dict
     cfg.x.toptag_wp = toptag_params(cfg)
 
-    # lepton selection parameters
-    logger.warning(
-        "Update cfg.x.lepton_selection['e']['id_addveto']['min_value'] to 4"
-        "when rerunning selection to match Run 2 analysis.",
-    )
     cfg.x.lepton_selection = DotDict.wrap({
         "mu": {
             "column": "Muon",
@@ -594,7 +589,7 @@ def add_new_config(
             "min_pt_addveto": 25,
             "id_addveto": {
                 "column": "cutBased",
-                "min_value": 3,  # 0 = fail, 1 = veto, 2 = loose, 3 = medium, 4 = tight
+                "min_value": 4,  # 0 = fail, 1 = veto, 2 = loose, 3 = medium, 4 = tight
             },
             "max_abseta_addveto": 2.5,
         },
@@ -1448,6 +1443,9 @@ def add_new_config(
     # electron energy correction and smearing
     add_external("electron_ss", (cat_info.get_file("egm", "electronSS_EtDependent.json.gz"), "v1"))  # FIXME correct for us? # noqa: E501
 
+    if year in [2024, 2025]:
+        add_external("regjet_jerc", (f"/data/dust/user/matthiej/mttbar/mtt/config/run3/data/regJet_jerc_{year}.json.gz", "v1"))
+
     # # top-tagging scale factors (TODO)
     # "toptag_sf": (f"{sources['jet']}/JMAR/???/???.json", "v1"),
 
@@ -1505,7 +1503,7 @@ def add_new_config(
             # AK8 jets
             "{FatJet,FatJetTopTag,FatJetTopTagDeltaRLepton}.{pt,eta,phi,mass,rawFactor}",
             "{FatJet,FatJetTopTag}.{msoftdrop,particleNetWithMass_TvsQCD,deepTagMD_TvsQCD}",
-            "FatJet.globalParT3.{TopbWqq,TopbWq,QCD}",
+            "FatJet.globalParT3*",
             "{FatJet,FatJetTopTag,FatJetTopTagDeltaRLepton}.{tau1,tau2,tau3}",
             "FatJetTopTagDeltaRLepton.msoftdrop",
             "FatJetTopTagDeltaRLepton.deepTagDeltaRLeptonMD_TvsQCD",

@@ -17,7 +17,7 @@ from columnflow.production.cms.mc_weight import mc_weight
 from columnflow.production.cms.seeds import deterministic_seeds
 from columnflow.util import maybe_import
 
-from mtt.calibration.jets import jet_energy, jet_energy_nominal, jet_lepton_cleaner
+from mtt.calibration.jets import jet_energy, jet_energy_nominal, jet_lepton_cleaner, dnn_regressed_mass
 from mtt.util import has_tag, record_calls
 
 ak = maybe_import("awkward")
@@ -34,6 +34,7 @@ logger = law.logger.get_logger(__name__)
         deterministic_seeds,
         jet_lepton_cleaner,
         msoftdrop,
+        dnn_regressed_mass,
         "Muon.pt",
         "Muon.tunepRelPt",
     },
@@ -42,6 +43,7 @@ logger = law.logger.get_logger(__name__)
         deterministic_seeds,
         jet_lepton_cleaner,
         msoftdrop,
+        dnn_regressed_mass,
         "Muon.pt",
         "Muon.rawPt",
     },
@@ -84,6 +86,8 @@ def default(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
             logger.info("Recalulating (fat)jet IDs.")
             events = self[jet_id](events, **kwargs)
             events = self[fatjet_id](events, **kwargs)
+        
+        events = self[dnn_regressed_mass](events, **kwargs)
 
     logger.info_once(
         "Finished default calibration steps:\n" +
