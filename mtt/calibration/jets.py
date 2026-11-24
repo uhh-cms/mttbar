@@ -23,6 +23,7 @@ ak = maybe_import("awkward")
 np = maybe_import("numpy")
 
 get_jerc_file_default.map_jet_name_file_key["SubJet"] = "jet_jerc"
+get_jerc_file_default.map_jet_name_file_key["Jet"] = "regjet_jerc"
 jer_subjets = jer_ak8.derive("jer_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
 jec_subjets = jec_ak8.derive("jec_subjets", cls_dict={"jet_name": "SubJet", "gen_jet_name": "SubGenJetAK8"})
 jec_subjets_nominal = jec_subjets.derive("jec_subjets_nominal", cls_dict={"uncertainty_sources": []})
@@ -373,5 +374,30 @@ def jet_lepton_cleaner(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array
         # ensure no missing values
         value = ak.fill_none(ak.nan_to_none(getattr(jet_lv, var)), 0.0)
         events = set_ak_column(events, f"Jet.{var}", value)
+
+    return events
+
+
+@calibrator(
+    uses={
+        "FatJet.globalParT3_massCorrGeneric", "FatJet.mass", "FatJet.rawFactor",
+    },
+    produces={
+        "FatJet.globalParT3_regmass",
+    },
+)
+def dnn_regressed_mass(self: Calibrator, events: ak.Array, **kwargs) -> ak.Array:
+    """
+    Calibrator to apply DNN regression for AK8 jet mass
+    """
+    # load coffea behaviors for simplified arithmetic with vectors
+    events["FatJet"] = ak.with_name(events.FatJet, "PtEtaPhiMLorentzVector")
+
+    # store regressed mass in new column
+    events = set_ak_column(
+        events,
+        "FatJet.globalParT3_regmass",
+        events.FatJet.globalParT3_massCorrGeneric * events.FatJet.mass * (1 - events.FatJet.rawFactor)
+    )
 
     return events

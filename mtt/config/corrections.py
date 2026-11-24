@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import law
 import order as od
+from columnflow.calibration.cms.jets import BJECConfig
 from columnflow.production.cms.btag import BTagSFConfig, BTagWPSFConfig
 from columnflow.selection.cms.btag import BTagWPCountConfig
 from columnflow.util import DotDict
@@ -49,7 +50,7 @@ def jerc_cfg(
         jec_campaign = f"Summer23{jerc_postfix}Prompt23"
     elif year == 2024:
         jec_campaign = "Summer24Prompt24"
-        jer_campaign = "Summer24Prompt24"  # no 2024 JER yet, use 2023 BPix: https://cms-jerc.web.cern.ch/Recommendations/#2024_1
+        jer_campaign = "Summer24Prompt24"
     elif year == 2025:
         jec_campaign = "Summer24Prompt25"
         jer_campaign = "Summer24Prompt25"
@@ -264,6 +265,16 @@ def jerc_cfg(
             "data_per_era": False if year in [2023, 2024, 2025, 2026] else True,  # 2022 JEC has the era in the correction set name  # noqa
         },
     }
+
+    if year in [2024, 2025, 2026]:
+        jec_params["Jet"]["external_file_key"] = "regjet_jerc"
+        jec_params["Jet"]["bjec_config"] = BJECConfig(
+            jet_types=("AK4PFPuppiUParTRegressionPlusNeutrino", "AK4PFPuppiUParTRegression"),
+            regr_factors=("UParTAK4RegPtRawCorrNeutrino", "UParTAK4RegPtRawCorr"),
+            bjet_selection=lambda events: events.Jet.btagUParTAK4B > 0.1272,
+            bjet_selection_columns=["btagUParTAK4B"],
+        )
+        logger.warning_once("UParT medium WP value hardcoded in bjet mass regression config for 2024/2025/2026.")
 
     # JER
     # https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution?rev=107
